@@ -146,3 +146,14 @@ jobs:
       #          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n99.outputs.id }} published to lane [${{ steps.publish-n99.outputs.tag }}]"
+      - name: "Publish create-rainbow-o23-app"
+        id: publish-create-rainbow-o23-app
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./create-rainbow-o23-app
+      #          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-create-rainbow-o23-app.outputs.id }} published to lane [${{ steps.publish-create-rainbow-o23-app.outputs.tag }}]"

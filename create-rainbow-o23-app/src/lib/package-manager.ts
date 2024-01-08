@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import {execSync} from 'child_process';
+import prompts from 'prompts';
 
 export enum PackageManager {
 	NPM = 'npm', PNPM = 'pnpm', YARN = 'yarn'
@@ -28,6 +29,17 @@ export const checkVersions = () => {
 	checkNpmVersion();
 };
 
+export const getPackageManagerOption = async () => {
+	return await prompts([
+		{
+			name: 'packageManager',
+			type: 'select',
+			choices: [PackageManager.YARN, PackageManager.NPM, PackageManager.PNPM].map((i) => ({title: i, value: i})),
+			message: 'Please choose a package manager:'
+		}
+	]);
+};
+
 export const checkYarnVersion = () => {
 	const version = execSync('yarn -v').toString().trim();
 	const [major, minor, patch] = version.split('.').map(Number);
@@ -35,11 +47,6 @@ export const checkYarnVersion = () => {
 		console.error(chalk.red(`✖ Yarn version must >= 1.22.10, current is ${version} please upgrade your yarn.`));
 		process.exit(1);
 	}
-};
-
-export const installTemplate = (manager: PackageManager, directory: string): void => {
-	console.log(directory);
-	// execSync(`${manager} add @rainbow-o23/n99@latest -D`, {stdio: 'inherit', cwd: directory});
 };
 
 export const install = (manager: PackageManager, directory: string): void => {

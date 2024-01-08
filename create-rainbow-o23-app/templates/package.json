@@ -18,7 +18,11 @@
 	"dependencies": {
 		"@rainbow-o23/n90": "0.1.2-alpha",
 		"@rainbow-o23/n91": "0.1.2-alpha",
-		"mysql2": "^3.6.2"
+		"mssql": "^10.0.1",
+		"mysql2": "^3.6.2",
+		"oracledb": "^6.2.0",
+		"pg": "^8.11.3",
+		"pg-query-stream": "^4.5.3"
 	},
 	"devDependencies": {
 		"@nestjs/cli": "^9.0.0",

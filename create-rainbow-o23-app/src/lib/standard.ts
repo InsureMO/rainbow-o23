@@ -1,7 +1,9 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
+import prompts from 'prompts';
 import validate from 'validate-npm-package-name';
+import {PackageJSON} from './types';
 
 const printValidationResults = (results: Array<string>) => {
 	if (typeof results !== 'undefined') {
@@ -44,6 +46,41 @@ export const createPackageDirectory = (packageName: string): string => {
 		}
 	} else {
 		fs.mkdirpSync(dir);
+		fs.mkdirpSync(path.resolve(dir, 'src'));
 	}
 	return dir;
+};
+
+export const getStandardOption = async (packageName: string) => {
+	return await prompts([
+		{
+			name: 'name',
+			type: 'text',
+			message: 'Package name:',
+			initial: packageName
+		},
+		{
+			name: 'description',
+			type: 'text',
+			message: 'Package description:',
+			initial: 'An application created based on Rainbow-O23, powered by InsureMO.'
+		}
+	]);
+};
+
+export const createPackageJson = (
+	options: Awaited<ReturnType<typeof getStandardOption>>,
+	directory: string
+): PackageJSON => {
+	const {name, description} = options;
+	fs.copySync(path.resolve(path.dirname(''), './templates'), directory);
+
+	// create README.md
+	fs.writeFileSync(path.resolve(directory, 'README.md'), `# ${name}\n\n${description}\n`);
+	const packageFile = path.resolve(directory, 'package.json');
+	// parse and modify package.json
+	const json = JSON.parse(fs.readFileSync(packageFile).toString()) as PackageJSON;
+	json.name = name;
+	json.description = description;
+	return json;
 };
