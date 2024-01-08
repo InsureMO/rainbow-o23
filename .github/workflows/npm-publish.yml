@@ -135,3 +135,14 @@ jobs:
 #          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n91.outputs.id }} published to lane [${{ steps.publish-n92.outputs.tag }}]"
+      - name: "Publish @o23/n99"
+        id: publish-n99
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n99
+      #          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n99.outputs.id }} published to lane [${{ steps.publish-n99.outputs.tag }}]"
