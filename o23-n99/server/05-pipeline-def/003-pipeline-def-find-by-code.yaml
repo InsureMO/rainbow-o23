@@ -1,0 +1,46 @@
+code: PipelineDefFindByCode
+type: pipeline
+route: /pipeline/def/by-code
+method: post
+
+steps:
+  - name: Wrap Request Data
+    use: snippet
+    snippet: "{defCode: $factor.code}"
+  - name: Check Request Data
+    use: snippet
+    from-input: $factor.defCode
+    snippet: |-
+      if ($factor == null || `${$factor}`.trim().length === 0) {
+        $.$error({status: 400, code: 'O99-10308', reason: 'Pipeline definition code is required.'});
+      }
+      return `${$factor}`.trim();
+    merge: defCode
+  - name: Load Definition
+    use: typeorm-load-one
+    from-input: "{params: $factor}"
+    sql: |-
+      SELECT 
+        DEF_ID AS "defId",
+        DEF_CODE AS "defCode",
+        ENABLED AS "enabled.@bool",
+        EXPOSE_API AS "exposeApi.@bool",
+        EXPOSE_ROUTE AS "exposeRoute",
+        CONFIG AS "config",
+        TENANT_CODE AS "tenantCode",
+        VERSION AS "version",
+        CREATED_AT AS "createdAt.@ts",
+        CREATED_BY AS "createdBy",
+        LAST_MODIFIED_AT AS "lastModifiedAt.@ts",
+        LAST_MODIFIED_BY AS "lastModifiedBy" 
+      FROM T_O23_PIPELINE_DEFS WHERE DEF_CODE = $defCode
+    merge: found
+  - name: Check Existing
+    use: snippet
+    snippet: |-
+      if ($factor.found == null) {
+        $.$error({status: 404, code: 'O99-10309', reason: 'Given pipeline definition code cannot match any record.'});
+      }
+  - name: Return to Client
+    use: get-property
+    property: found

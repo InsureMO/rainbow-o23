@@ -1,0 +1,48 @@
+code: D9ConfigFindByCode
+type: pipeline
+route: /d9/config/by-code
+method: post
+
+steps:
+  - name: Wrap Request Data
+    use: snippet
+    snippet: "{configCode: $factor.code}"
+  - name: Check Request Data
+    use: snippet
+    from-input: $factor.configCode
+    snippet: |-
+      if ($factor == null || `${$factor}`.trim().length === 0) {
+        $.$error({status: 400, code: 'O99-10210', reason: 'D9 configuration code is required.'});
+      }
+      return `${$factor}`.trim();
+    merge: configCode
+  - name: Load Configuration
+    use: typeorm-load-one
+    from-input: "{params: $factor}"
+    sql: |-
+      SELECT 
+        CONFIG_ID AS "configId",
+        CONFIG_CODE AS "configCode",
+        CONFIG_NAME AS "configName",
+        CONFIG_TYPE AS "configType",
+        LANGUAGE AS "language",
+        ENABLED AS "enabled.@bool",
+        CONFIG AS "config.@json",
+        DATA_PIPELINE AS "dataPipeline.@json",
+        TENANT_CODE AS "tenantCode",
+        VERSION AS "version",
+        CREATED_AT AS "createdAt.@ts",
+        CREATED_BY AS "createdBy",
+        LAST_MODIFIED_AT AS "lastModifiedAt.@ts",
+        LAST_MODIFIED_BY AS "lastModifiedBy" 
+      FROM T_O23_D9_CONFIG WHERE CONFIG_CODE = $configCode
+    merge: found
+  - name: Check Existing
+    use: snippet
+    snippet: |-
+      if ($factor.found == null) {
+        $.$error({status: 404, code: 'O99-10211', reason: 'Given d9 configuration code cannot match any record.'});
+      }
+  - name: Return to Client
+    use: get-property
+    property: found

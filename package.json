@@ -1,0 +1,48 @@
+{
+	"private": true,
+	"workspaces": [
+		"o23-n1",
+		"o23-n2",
+		"o23-n3",
+		"o23-n4",
+		"o23-n5",
+		"o23-n6",
+		"o23-n90",
+		"o23-n91",
+		"o23-n99",
+		"o23-scaffold"
+	],
+	"scripts": {
+		"n1:build": "cd ./o23-n1 && yarn build",
+		"n2:build": "cd ./o23-n2 && yarn build",
+		"n3:build": "cd ./o23-n3 && yarn build",
+		"n3:test": "cd ./o23-n3 && yarn test",
+		"n4:build": "cd ./o23-n4 && yarn build",
+		"n5:build": "cd ./o23-n5 && yarn build",
+		"n6:build": "cd ./o23-n6 && yarn build",
+		"n90:build": "cd ./o23-n90 && yarn build",
+		"n91:build": "cd ./o23-n91 && yarn build",
+		"base:build": "yarn n1:build && yarn n2:build && yarn n3:build && yarn n4:build && yarn n5:build && yarn n6:build",
+		"server:build": "yarn n90:build && yarn n91:build",
+		"all:build": "yarn base:build && yarn server:build",
+		"n1:build:ci": "cd ./o23-n1 && yarn build:ci",
+		"n2:build:ci": "cd ./o23-n2 && yarn build:ci",
+		"n3:build:ci": "cd ./o23-n3 && yarn build:ci",
+		"n4:build:ci": "cd ./o23-n4 && yarn build:ci",
+		"n5:build:ci": "cd ./o23-n5 && yarn build:ci",
+		"n6:build:ci": "cd ./o23-n6 && yarn build:ci",
+		"n90:build:ci": "cd ./o23-n90 && yarn build:ci",
+		"n91:build:ci": "cd ./o23-n91 && yarn build:ci",
+		"base:build:ci": "yarn n1:build:ci && yarn n2:build:ci && yarn n3:build:ci && yarn n4:build:ci && yarn n5:build:ci && yarn n6:build:ci",
+		"server:build:ci": "yarn n90:build:ci && yarn n91:build:ci",
+		"all:build:ci": "yarn base:build:ci && yarn server:build:ci",
+		"scaffold:start": "cd ./o23-scaffold && yarn start",
+		"scaffold:dev:build:launch": "yarn all:build && cd ./o23-scaffold && yarn dev:start",
+		"scaffold:dev:launch": "cd ./o23-scaffold && yarn dev:start",
+		"scaffold:standalone": "cd ./o23-scaffold && yarn prod:build:start"
+	},
+	"volta": {
+		"node": "18.19.0",
+		"yarn": "1.22.21"
+	}
+}

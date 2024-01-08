@@ -1,0 +1,20 @@
+code: SimplePipeline
+type: pipeline
+route: /examples/simple
+method: post
+
+steps:
+  - name: add100
+    use: snippet
+    fromInput: $factor.value
+    snippet: $factor + 100
+  - name: multiply2
+    use: snippet
+    snippet: $factor * 2
+    toOutput: '{ result: $result }'
+  - name: subtract100
+    use: snippet
+    fromInput: $factor.result
+    snippet: $factor - 100
+    merge: true
+    toOutput: '{ result2: $result}'

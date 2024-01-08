@@ -1,0 +1,20 @@
+import dayjs from 'dayjs';
+import ArraySupport from 'dayjs/plugin/arraySupport.js';
+import CustomParseFormat from 'dayjs/plugin/customParseFormat.js';
+import Duration from 'dayjs/plugin/duration.js';
+import IsToday from 'dayjs/plugin/isToday.js';
+import ObjectSupport from 'dayjs/plugin/objectSupport.js';
+import QuarterOfYear from 'dayjs/plugin/quarterOfYear.js';
+import RelativeTime from 'dayjs/plugin/relativeTime.js';
+import UTC from 'dayjs/plugin/utc.js';
+import WeekOfYear from 'dayjs/plugin/weekOfYear.js';
+
+dayjs.extend(WeekOfYear);
+dayjs.extend(QuarterOfYear);
+dayjs.extend(Duration);
+dayjs.extend(IsToday);
+dayjs.extend(RelativeTime);
+dayjs.extend(ArraySupport);
+dayjs.extend(ObjectSupport);
+dayjs.extend(CustomParseFormat);
+dayjs.extend(UTC);

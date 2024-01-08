@@ -1,0 +1,12 @@
+code: ApiTestMultiplePathParam
+type: pipeline
+route: /api/test/multi-path-params/:id/:name
+method: get
+path-params:
+  - id
+  - name
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: "`Received [id=${$factor.id}, name=${$factor.name}]`"

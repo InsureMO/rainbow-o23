@@ -1,0 +1,6 @@
+# database scripts folder
+CFG_APP_DB_SCRIPTS_DIR=db-scripts
+# init pipelines
+CFG_APP_INIT_PIPELINES_DIR=scripts
+# mysql
+CFG_TYPEORM_O23_MULTIPLE_STATEMENTS=true

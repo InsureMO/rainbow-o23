@@ -1,0 +1,29 @@
+code: PrintAsync
+type: pipeline
+route: /print/async
+method: post
+
+steps:
+  - name: Find Print Template
+    use: ref-step
+    code: PrintTemplateFindByIdOrCode
+  - name: Prepare Print
+    use: ref-step
+    code: PrintTaskCreate
+  - name: Prepare Print Data
+    use: ref-step
+    code: PrintDataPrepare
+  - name: Async Perform Print
+    use: async-sets
+    steps:
+      - name: Perform Print
+        use: ref-step
+        code: PrintTaskExecute
+  - name: Return to Client
+    use: snippet
+    snippet: |-
+      return {
+        taskKey: $factor.task.taskKey,
+        status: $factor.task.status,
+        triggeredAt: $factor.task.triggeredAt
+      };

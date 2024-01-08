@@ -1,0 +1,29 @@
+code: ApiTestMixed
+type: pipeline
+route: /api/test/mixed/:id/:name
+method: post
+path-params: true
+query-params: true
+# receive all headers by true
+#headers: true
+# header name is case-insensitive. But it also will be used as in-memory property name, which is case-sensitive.
+headers:
+  - Connection
+  - hoSt
+files: test
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      const file = ['fieldname', 'originalname', 'encoding', 'mimetype', 'size'].reduce((file, key) => {
+        file[key] = $factor.test[key];
+        return file;
+      }, {});
+      const {pathParams, queryParams, headers, body, test, ...rest} = $factor;
+      const received = {...rest, pathParams, queryParams, headers, body, file};
+      const str = Object.keys(received).reduce((parts, key) => {
+        parts.push(`${key}=${JSON.stringify(received[key])}`);
+        return parts;
+      }, []).join(', ');
+      return `Received [${str}].`;

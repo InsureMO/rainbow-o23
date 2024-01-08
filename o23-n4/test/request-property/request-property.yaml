@@ -1,0 +1,24 @@
+code: RequestPropertyPipeline
+type: pipeline
+route: /examples/request-property
+method: post
+
+steps:
+  - name: get-name
+    use: get-property
+    property: person.name
+    merge: name
+  - name: delete-age
+    use: del-property
+    from-input: $factor.person
+    property: age
+  - name: delete-gender-and-birth
+    use: del-properties
+    from-input: $factor.person
+    property:
+      - gender
+      - birth
+  - name: delete-height-and-weight
+    use: del-properties
+    from-input: $factor.person
+    property: height, weight

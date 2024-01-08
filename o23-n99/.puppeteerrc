@@ -1,0 +1,2 @@
+# can not use puppeteer.config.cjs, cannot be detected in standalone mode.
+cacheDirectory: puppeteer

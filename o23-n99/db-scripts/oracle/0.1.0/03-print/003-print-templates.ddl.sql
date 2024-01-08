@@ -1,0 +1,4 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE INDEX I_O23_PRINT_TEMPLATES_2 ON T_O23_PRINT_TEMPLATES (TENANT_CODE)

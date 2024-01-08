@@ -1,0 +1,36 @@
+code: PrintSync
+type: pipeline
+route: /print/sync
+method: post
+expose-file: true
+
+steps:
+  - name: Find Print Template
+    use: ref-step
+    code: PrintTemplateFindByIdOrCode
+  - name: Prepare Print
+    use: ref-step
+    code: PrintTaskCreate
+  - name: Prepare Print Data
+    use: ref-step
+    code: PrintDataPrepare
+  - name: Perform Print
+    use: ref-step
+    code: PrintTaskExecute
+  - name: Return to Client
+    use: conditional
+    check: $factor.task.status === 'SUCCESS'
+    steps:
+      - name: Expose File
+        use: snippet
+        snippet: |-
+          return $.$file({
+            name: $factor.task.printedFileName,
+            type: $factor.task.contentType,
+            content: $factor.printed.file
+          });
+    otherwise:
+      - name: Throw Error
+        use: snippet
+        snippet: |-
+          $.$error({status: 500, code: 'O99-10122', reason: 'Unpredicted error occurred.'});

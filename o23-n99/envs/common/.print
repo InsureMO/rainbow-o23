@@ -1,0 +1,23 @@
+# pdf
+# according to puppeteer doc,
+# it could be specified by .puppeteerrc
+# and could be specified by PUPPETEER_EXECUTABLE_PATH.
+#CFG_PUPPETEER_EXECUTABLE_PATH=
+CFG_PUPPETEER_BROWSER_ARGS=--disable-gpu,--disable-dev-shm-usage,--disable-setuid-sandbox,--no-first-run,--no-sandbox,--no-zygote
+CFG_PUPPETEER_BROWSER_CACHE=true
+CFG_PUPPETEER_DEVTOOLS_ENABLED=false
+CFG_PUPPETEER_HEADLESS_ENABLED=true
+CFG_PUPPETEER_MAX_PAGES=50
+CFG_PUPPETEER_VIEWPORT_WIDTH=1920
+CFG_PUPPETEER_VIEWPORT_HEIGHT=1080
+CFG_PUPPETEER_PDF_HEADER_AND_FOOTER_DISPLAY=false
+CFG_PUPPETEER_PDF_BACKGROUND=false
+CFG_PUPPETEER_PDF_FORMAT=a4
+# in seconds
+CFG_PUPPETEER_PDF_TIMEOUT=30
+# enabled page keep when do unit test, will disable headless if enable page keep
+CFG_PUPPETEER_PAGE_KEEP=false
+# excel
+CFG_PRINT_EXCEL_TEMPORARY_FILE_KEEP=false
+# absolute path also supported
+CFG_PRINT_EXCEL_TEMPORARY_DIR=.excel-temporary-files

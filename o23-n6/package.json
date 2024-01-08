@@ -1,0 +1,69 @@
+{
+	"name": "@rainbow-o23/n6",
+	"version": "0.1.0",
+	"description": "o23 excel+csv print",
+	"main": "index.cjs",
+	"module": "index.js",
+	"types": "index.d.ts",
+	"type": "module",
+	"scripts": {
+		"build": "rollup -c",
+		"build:ci": "rollup -c rollup.config.ci.js",
+		"test": "jest"
+	},
+	"license": "UNLICENSED",
+	"author": "Rainbow Team",
+	"dependencies": {
+		"@rainbow-o23/n3": "0.1.0",
+		"@rainbow-o23/n4": "0.1.0",
+		"csv-parse": "^5.5.2",
+		"csv-stringify": "^6.4.4",
+		"exceljs": "^4.4.0",
+		"nanoid": "3.3.6"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.20.5",
+		"@babel/preset-env": "^7.20.2",
+		"@babel/preset-typescript": "^7.18.6",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-eslint": "^9.0.3",
+		"@types/events": "^3.0.1",
+		"@types/node": "18.16.12",
+		"@typescript-eslint/eslint-plugin": "^5.46.0",
+		"@typescript-eslint/parser": "^5.46.0",
+		"eslint": "^8.29.0",
+		"rollup": "^3.7.0",
+		"rollup-plugin-tslint": "^0.2.2",
+		"rollup-plugin-typescript2": "^0.34.1",
+		"tslib": "^2.4.1",
+		"typescript": "5.1.6"
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"json",
+			"ts",
+			"yaml",
+			"yml"
+		],
+		"testRegex": "(/test/.*\\.(test|spec))\\.[tj]sx?$",
+		"testPathIgnorePatterns": [
+			"/node_modules/"
+		],
+		"transform": {
+			"^.+\\.(t|j)s$": "ts-jest"
+		},
+		"collectCoverageFrom": [
+			"src/**/*.(t|j)s"
+		],
+		"coverageDirectory": "./coverage",
+		"coverageReporters": [
+			"html"
+		],
+		"testEnvironment": "node"
+	},
+	"volta": {
+		"node": "18.19.0",
+		"yarn": "1.22.21"
+	}
+}

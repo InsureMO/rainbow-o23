@@ -1,0 +1,10 @@
+code: ApiTestPathParams
+type: pipeline
+route: /api/test/path-params/:id/:name
+method: get
+path-params: true
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: "`Received [${JSON.stringify($factor)}]`"

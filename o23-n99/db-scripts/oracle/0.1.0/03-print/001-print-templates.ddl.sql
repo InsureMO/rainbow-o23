@@ -1,0 +1,20 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE TABLE T_O23_PRINT_TEMPLATES
+(
+    TEMPLATE_ID        NUMBER(19) PRIMARY KEY NOT NULL,
+    TEMPLATE_CODE      VARCHAR2(32)           NOT NULL,
+    TEMPLATE_NAME      VARCHAR2(32)           NULL,
+    TEMPLATE_TYPE      VARCHAR2(16)           NOT NULL CHECK (TEMPLATE_TYPE IN ('PDF', 'EXCEL', 'CSV')),
+    ENABLED            SMALLINT   DEFAULT 1   NOT NULL,
+    DATA_PIPELINE      CLOB                   NULL,
+    TEMPLATE_FILE_NAME VARCHAR2(128)          NULL,
+    TEMPLATE_FILE      BLOB                   NULL,
+    TENANT_CODE        VARCHAR2(64)           NULL,
+    VERSION            NUMBER(10) DEFAULT 1   NOT NULL,
+    CREATED_AT         TIMESTAMP              NOT NULL,
+    CREATED_BY         VARCHAR2(64)           NOT NULL,
+    LAST_MODIFIED_AT   TIMESTAMP              NOT NULL,
+    LAST_MODIFIED_BY   VARCHAR2(64)           NOT NULL
+)

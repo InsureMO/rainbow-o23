@@ -1,0 +1,137 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: Node.js Package
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        description: NPM token
+        required: true
+    inputs:
+      branch:
+        description: Pre-release branch
+        required: true
+        type: string
+      version:
+        description: Target version
+        required: true
+        type: string
+      lane:
+        description: Tag Lane of NPM
+        required: false
+        type: string
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo inputs
+        run: |
+          echo "Pre-release branch: [${{ inputs.branch }}]"
+          echo "Target version: [${{ inputs.version }}]"
+          echo "Tag lane of NPM: [${{ inputs.lane }}]"
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+      - run: npm install -g yarn@1.22.21
+      - run: yarn install
+      - run: yarn build-all-ci
+      #      - name: "check NPM_TOKEN exists"
+      #        env:
+      #          npm_token: ${{ secrets.NPM_TOKEN }}
+      #        if: ${{ env.npm_token != '' }}
+      #        run: echo "echo the secret \"NPM_TOKEN\" has been created."
+      - name: "Publish @o23/n1"
+        id: publish-n1
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n1
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n1.outputs.id }} published to lane [${{ steps.publish-n1.outputs.tag }}]"
+      - name: "Publish @o23/n2"
+        id: publish-n2
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n2
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n2.outputs.id }} published to lane [${{ steps.publish-n2.outputs.tag }}]"
+      - name: "Publish @o23/n3"
+        id: publish-n3
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n3
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n3.outputs.id }} published to lane [${{ steps.publish-n3.outputs.tag }}]"
+      - name: "Publish @o23/n4"
+        id: publish-n4
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n4
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n4.outputs.id }} published to lane [${{ steps.publish-n4.outputs.tag }}]"
+      - name: "Publish @o23/n5"
+        id: publish-n5
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n5
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n5.outputs.id }} published to lane [${{ steps.publish-n5.outputs.tag }}]"
+      - name: "Publish @o23/n6"
+        id: publish-n6
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n6
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n6.outputs.id }} published to lane [${{ steps.publish-n6.outputs.tag }}]"
+      - name: "Publish @o23/n90"
+        id: publish-n90
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n90
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n90.outputs.id }} published to lane [${{ steps.publish-n90.outputs.tag }}]"
+      - name: "Publish @o23/n91"
+        id: publish-n91
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n91
+          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n91.outputs.id }} published to lane [${{ steps.publish-n92.outputs.tag }}]"
