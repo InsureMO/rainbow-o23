@@ -61,6 +61,8 @@ Based on the various scenarios described above, `o23` has been designed as multi
 - [o23/n5](o23-n5/README.md): Provides a pipeline step to generate PDFs based on HTML templates,
 - [o23/n6](o23-n6/README.md): Provides pipeline steps to generate Excel reports based on Excel templates and CSV reports based on CSV
   templates,
+- [o23/n90](o23-n90/README.md): Application basic package, which includes all the fundamental settings for building O23 applications,
+- [o23/n91](o23-n91/README.md): O23 Application printing plugin package,
 - [o23/n99](o23-n99/README.md): A complete pre-application built on all the above modules, which is a complete web service itself and can
   also be used as an engineering template,
 - [o23/scaffold](o23-scaffold/README.md): A simple, basic o23 application scaffold that can be used as an engineering template.
