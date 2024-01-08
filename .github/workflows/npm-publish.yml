@@ -55,7 +55,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n1
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n1.outputs.id }} published to lane [${{ steps.publish-n1.outputs.tag }}]"
       - name: "Publish @o23/n2"
@@ -66,7 +66,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n2
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n2.outputs.id }} published to lane [${{ steps.publish-n2.outputs.tag }}]"
       - name: "Publish @o23/n3"
@@ -77,7 +77,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n3
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n3.outputs.id }} published to lane [${{ steps.publish-n3.outputs.tag }}]"
       - name: "Publish @o23/n4"
@@ -88,7 +88,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n4
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n4.outputs.id }} published to lane [${{ steps.publish-n4.outputs.tag }}]"
       - name: "Publish @o23/n5"
@@ -99,7 +99,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n5
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n5.outputs.id }} published to lane [${{ steps.publish-n5.outputs.tag }}]"
       - name: "Publish @o23/n6"
@@ -110,7 +110,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n6
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n6.outputs.id }} published to lane [${{ steps.publish-n6.outputs.tag }}]"
       - name: "Publish @o23/n90"
@@ -121,7 +121,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n90
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n90.outputs.id }} published to lane [${{ steps.publish-n90.outputs.tag }}]"
       - name: "Publish @o23/n91"
@@ -132,6 +132,6 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n91
-          dry-run: true
+#          dry-run: true
       - run: |
           echo "Package ${{ steps.publish-n91.outputs.id }} published to lane [${{ steps.publish-n92.outputs.tag }}]"
