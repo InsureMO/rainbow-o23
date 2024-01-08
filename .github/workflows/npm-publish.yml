@@ -41,7 +41,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm install -g yarn@1.22.21
       - run: yarn install
-      - run: yarn build-all-ci
+      - run: yarn all:build:ci
       #      - name: "check NPM_TOKEN exists"
       #        env:
       #          npm_token: ${{ secrets.NPM_TOKEN }}
