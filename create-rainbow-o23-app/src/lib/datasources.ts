@@ -55,19 +55,18 @@ export const getDatasourceOptions2 = async (options: Awaited<ReturnType<typeof g
 
 export const writeDatasourceOptions = (json: PackageJSON, options: Awaited<ReturnType<typeof getDatasourceOptions>>) => {
 	const {dataSourceTypes} = options;
-	if (!dataSourceTypes.includes(DatasourceTypes.Oracle)) {
-		delete json.dependencies['oracledb'];
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.PgSQL)) {
-		delete json.dependencies['pg'];
-		delete json.dependencies['pg-query-stream'];
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.MSSQL)) {
-		delete json.dependencies['mssql'];
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.MySQL)) {
-		delete json.dependencies['mysql2'];
-	}
+	([
+		[DatasourceTypes.Oracle, ['oracledb']],
+		[DatasourceTypes.PgSQL, ['pg', 'pg-query-stream']],
+		[DatasourceTypes.MSSQL, ['mssql']],
+		[DatasourceTypes.MySQL, ['mysql2']]
+	] as Array<[DatasourceTypes, Array<string>]>).forEach(([type, dependencies]) => {
+		if (!dataSourceTypes.includes(type)) {
+			dependencies.forEach(dependency => {
+				delete json.dependencies[dependency];
+			});
+		}
+	});
 	[
 		'start:mssql', 'start:pgsql', 'start:oracle',
 		'dev:standalone:start:mssql', 'dev:standalone:start:pgsql', 'dev:standalone:start:oracle',
@@ -91,32 +90,17 @@ export const writeDatasourceFiles = (
 	const {configDataSourceType} = options2;
 	const {plugins} = pluginOptions;
 
-	if (!dataSourceTypes.includes(DatasourceTypes.Oracle)) {
-		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.oracle.basic'));
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.PgSQL)) {
-		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.pgsql.basic'));
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.MSSQL)) {
-		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.mssql.basic'));
-	}
-	if (!dataSourceTypes.includes(DatasourceTypes.MySQL)) {
-		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.mysql.basic'));
-	}
-
-	// remove scripts
-	if (configDataSourceType !== DatasourceTypes.Oracle) {
-		fs.rmSync(path.resolve(directory, 'db-scripts', 'oracle'), {recursive: true, force: true});
-	}
-	if (configDataSourceType !== DatasourceTypes.PgSQL) {
-		fs.rmSync(path.resolve(directory, 'db-scripts', 'pgsql'), {recursive: true, force: true});
-	}
-	if (configDataSourceType !== DatasourceTypes.MSSQL) {
-		fs.rmSync(path.resolve(directory, 'db-scripts', 'mssql'), {recursive: true, force: true});
-	}
-	if (configDataSourceType !== DatasourceTypes.MySQL) {
-		fs.rmSync(path.resolve(directory, 'db-scripts', 'mysql'), {recursive: true, force: true});
-	}
+	Object.values(DatasourceTypes).forEach(type => {
+		// remove env file
+		if (!dataSourceTypes.includes(type)) {
+			fs.rmSync(path.resolve(directory, 'envs', 'dev', `.${type}.basic`));
+		}
+		// remove scripts
+		if (configDataSourceType !== type) {
+			fs.rmSync(path.resolve(directory, 'db-scripts', type), {recursive: true, force: true});
+		}
+	});
+	// remove print scripts
 	if (!plugins.includes(Plugins.PRINT)) {
 		fs.rmSync(path.resolve(directory, 'db-scripts', configDataSourceType, '0.1.0', '03-print'), {
 			recursive: true, force: true

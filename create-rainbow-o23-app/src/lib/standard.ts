@@ -81,6 +81,7 @@ export const createPackageJson = (
 	// parse and modify package.json
 	const json = JSON.parse(fs.readFileSync(packageFile).toString()) as PackageJSON;
 	json.name = name;
+	json.version = '0.1.0';
 	json.description = description;
 	delete json.jest;
 	return json;

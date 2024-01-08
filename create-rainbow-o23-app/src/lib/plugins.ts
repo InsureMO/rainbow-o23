@@ -39,5 +39,6 @@ export const writePluginFiles = (options: Awaited<ReturnType<typeof getPluginOpt
 		fs.writeFileSync(serverTsFile, content);
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
+		fs.rmSync(path.resolve(directory, '.puppeteerrc'));
 	}
 };

@@ -1,5 +1,6 @@
 export interface PackageJSON {
 	name: string;
+	version: string;
 	description: string;
 	scripts: Record<string, string>;
 	dependencies: Record<string, string>;
