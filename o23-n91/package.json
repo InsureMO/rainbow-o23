@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n91",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "o23 print server base",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -14,9 +14,9 @@
 	"license": "UNLICENSED",
 	"author": "Rainbow Team",
 	"dependencies": {
-		"@rainbow-o23/n5": "0.1.0",
-		"@rainbow-o23/n6": "0.1.0",
-		"@rainbow-o23/n90": "0.1.0"
+		"@rainbow-o23/n5": "0.1.1",
+		"@rainbow-o23/n6": "0.1.1",
+		"@rainbow-o23/n90": "0.1.1"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.20.5",
