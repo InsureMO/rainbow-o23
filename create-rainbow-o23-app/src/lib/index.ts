@@ -2,8 +2,10 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import prompts from 'prompts';
+import {DatasourceTypes} from './datasources';
 import {createPackageDirectory, validateName} from './name';
-import {checkVersions, checkYarnVersion, PackageManager} from './package-manager';
+import {checkVersions, checkYarnVersion, installTemplate, PackageManager} from './package-manager';
+import {Plugins} from './plugins';
 
 interface PackageJSON {
 	name: string;
@@ -34,20 +36,41 @@ const getModuleOption = async (packageName: string) => {
 			type: 'text',
 			message: 'Package description:',
 			initial: 'An application created based on Rainbow-O23, powered by InsureMO.'
+		},
+		{
+			name: 'dataSourceTypes',
+			type: 'multiselect',
+			message: 'Datasource types:',
+			choices: [
+				DatasourceTypes.MySQL, DatasourceTypes.PgSQL, DatasourceTypes.MSSQL, DatasourceTypes.Oracle
+			].map((i) => ({title: i, value: i}))
+		},
+		{
+			name: 'configDataSourceName',
+			type: 'text',
+			message: 'Configuration datasource name:',
+			initial: 'o23'
+		},
+		{
+			name: 'plugins',
+			type: 'multiselect',
+			message: 'Plugins:',
+			choices: [
+				Plugins.PRINT
+			].map((i) => ({title: i, value: i}))
 		}
 	]);
 };
 
 const generate = async (options: Awaited<ReturnType<typeof getModuleOption>>, directory: string) => {
 	const {name, description} = options;
-	// fs.copySync(path.resolve(__dirname, './template/common'), dir);
-	// fs.copySync(path.resolve(__dirname, './template/js'), dir);
+	fs.copySync(path.resolve(path.dirname(''), './templates'), directory);
 
 	// create README.md
 	fs.writeFileSync(path.resolve(directory, 'README.md'), `# ${name}\n\n${description}\n`);
-	const packageFile = path.resolve(directory, 'node_modules', '@rainbow-o23/n99', 'package.json');
+	const packageFile = path.resolve(directory, 'package.json');
 	// parse and modify package.json
-	const json = fs.readFileSync(packageFile).toJSON() as unknown as PackageJSON;
+	const json = JSON.parse(fs.readFileSync(packageFile).toString()) as PackageJSON;
 	json.name = name;
 	json.description = description;
 	fs.writeFileSync(packageFile, JSON.stringify(json, null, 2) + '\n');
@@ -64,10 +87,10 @@ export const createApp = async () => {
 
 	const directory = createPackageDirectory(packageName);
 	const options = await getModuleOption(packageName);
-	// install template
-	// installTemplate(packageManager, directory);
 
-	// await generate(options, directory);
+	await generate(options, directory);
+	// install template
+	installTemplate(packageManager, directory);
 	// install dependencies
 	// install(options.packageManager, directory);
 
