@@ -17,7 +17,9 @@ export const getDatasourceOptions = async () => {
 			message: 'Datasource types:',
 			choices: [
 				DatasourceTypes.MySQL, DatasourceTypes.PgSQL, DatasourceTypes.MSSQL, DatasourceTypes.Oracle
-			].map((i) => ({title: i, value: i})),
+			].map((i) => {
+				return {title: i, value: i, selected: i === DatasourceTypes.MySQL};
+			}),
 			min: 1
 		},
 		{
@@ -49,6 +51,30 @@ export const getDatasourceOptions2 = async (options: Awaited<ReturnType<typeof g
 				DatasourceTypes.MySQL, DatasourceTypes.PgSQL, DatasourceTypes.MSSQL, DatasourceTypes.Oracle
 			].filter(i => dataSourceTypes.includes(i))
 				.map((i) => ({title: i, value: i}))
+		},
+		{
+			name: 'mysqlDataSourceNames',
+			type: dataSourceTypes.includes(DatasourceTypes.MySQL) ? 'list' : null,
+			message: 'MySQL datasource names, separated by ",":',
+			initial: ''
+		},
+		{
+			name: 'pgsqlDataSourceNames',
+			type: dataSourceTypes.includes(DatasourceTypes.PgSQL) ? 'list' : null,
+			message: 'PostgreSQL datasource names, separated by ",":',
+			initial: ''
+		},
+		{
+			name: 'oracleDataSourceNames',
+			type: dataSourceTypes.includes(DatasourceTypes.Oracle) ? 'list' : null,
+			message: 'Oracle datasource names, separated by ",":',
+			initial: ''
+		},
+		{
+			name: 'mssqlDataSourceNames',
+			type: dataSourceTypes.includes(DatasourceTypes.MSSQL) ? 'list' : null,
+			message: 'SQL Server datasource names, separated by ",":',
+			initial: ''
 		}
 	]);
 };
@@ -100,6 +126,8 @@ export const writeDatasourceFiles = (
 			fs.rmSync(path.resolve(directory, 'db-scripts', type), {recursive: true, force: true});
 		}
 	});
+	// TODO READ THE remained envs and build a .datasources file
+
 	// remove print scripts
 	if (!plugins.includes(Plugins.PRINT)) {
 		fs.rmSync(path.resolve(directory, 'db-scripts', configDataSourceType, '0.1.0', '03-print'), {
