@@ -12,7 +12,7 @@ try {
 	['dependencies', 'devDependencies'].forEach(key => {
 		if (packageJson[key] != null) {
 			Object.keys(packageJson[key]).forEach(name => {
-				if (name.startsWith('@rainbow-d9/')) {
+				if (name.startsWith('@rainbow-o23/')) {
 					packageJson[key][name] = version;
 				}
 			});
