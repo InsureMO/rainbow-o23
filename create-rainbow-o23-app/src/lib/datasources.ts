@@ -68,6 +68,18 @@ export const writeDatasourceOptions = (json: PackageJSON, options: Awaited<Retur
 	if (!dataSourceTypes.includes(DatasourceTypes.MySQL)) {
 		delete json.dependencies['mysql2'];
 	}
+	[
+		'start:mssql', 'start:pgsql', 'start:oracle',
+		'dev:standalone:start:mssql', 'dev:standalone:start:pgsql', 'dev:standalone:start:oracle',
+		'scripts:mssql', 'scripts:pgsql', 'scripts:oracle'
+	].forEach(key => delete json.scripts[key]);
+	Object.keys(json.scripts).forEach(key => {
+		if (key.endsWith(':mysql')) {
+			const newKey = key.replace(/:mysql$/, '');
+			json.scripts[newKey] = json.scripts[key].replace('envs/dev/.mysql.basic', 'envs/dev/.datasources');
+			delete json.scripts[key];
+		}
+	});
 };
 
 export const writeDatasourceFiles = (
@@ -78,6 +90,19 @@ export const writeDatasourceFiles = (
 	const {dataSourceTypes, configDataSourceName} = options;
 	const {configDataSourceType} = options2;
 	const {plugins} = pluginOptions;
+
+	if (!dataSourceTypes.includes(DatasourceTypes.Oracle)) {
+		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.oracle.basic'));
+	}
+	if (!dataSourceTypes.includes(DatasourceTypes.PgSQL)) {
+		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.pgsql.basic'));
+	}
+	if (!dataSourceTypes.includes(DatasourceTypes.MSSQL)) {
+		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.mssql.basic'));
+	}
+	if (!dataSourceTypes.includes(DatasourceTypes.MySQL)) {
+		fs.rmSync(path.resolve(directory, 'envs', 'dev', '.mysql.basic'));
+	}
 
 	// remove scripts
 	if (configDataSourceType !== DatasourceTypes.Oracle) {

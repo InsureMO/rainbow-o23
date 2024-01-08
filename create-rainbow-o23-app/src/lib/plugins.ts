@@ -34,8 +34,8 @@ export const writePluginFiles = (options: Awaited<ReturnType<typeof getPluginOpt
 	const {plugins} = options;
 	if (!plugins.includes(Plugins.PRINT)) {
 		const serverTsFile = path.resolve(directory, 'src', 'server.ts');
-		const content = fs.readFileSync(serverTsFile).toString();
-		content.replace('import \'@rainbow-o23/n91\';\n', '');
+		let content = fs.readFileSync(serverTsFile).toString();
+		content = content.replace('import \'@rainbow-o23/n91\';\n', '');
 		fs.writeFileSync(serverTsFile, content);
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
