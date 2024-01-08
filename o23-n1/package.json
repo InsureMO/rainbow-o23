@@ -11,8 +11,14 @@
 		"build:ci": "rollup -c rollup.config.ci.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"license": "UNLICENSED",
-	"author": "Rainbow Team",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/InsureMO/rainbow-o23/issues"
+	},
 	"dependencies": {
 		"dayjs": "^1.11.8",
 		"nanoid": "3.3.6"

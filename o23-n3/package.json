@@ -11,8 +11,14 @@
 		"build:ci": "rollup -c rollup.config.ci.js",
 		"test": "jest"
 	},
-	"license": "UNLICENSED",
-	"author": "Rainbow Team",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/InsureMO/rainbow-o23/issues"
+	},
 	"dependencies": {
 		"@rainbow-o23/n1": "0.1.1",
 		"@theinternetfolks/snowflake": "^1.3.0",

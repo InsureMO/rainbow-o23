@@ -24,8 +24,15 @@
 		"lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix",
 		"test": "jest"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/InsureMO/rainbow-o23/issues"
+	},
 	"author": "Rainbow Team",
-	"license": "UNLICENSED",
 	"dependencies": {
 		"@rainbow-o23/n90": "0.1.1",
 		"@rainbow-o23/n91": "0.1.1",
