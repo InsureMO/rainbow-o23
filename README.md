@@ -65,8 +65,6 @@ Based on the various scenarios described above, `o23` has been designed as multi
 - [o23/n91](o23-n91/README.md): O23 Application printing plugin package,
 - [o23/n99](o23-n99/README.md): A complete pre-application built on all the above modules, which is a complete web service itself and can
   also be used as an engineering template,
-- [o23/scaffold](o23-scaffold/README.md): A simple, basic o23 application scaffold that can be used as an engineering template.
+- [create-rainbow-o23-app](create-rainbow-o23-app/README.md): `npx` module for create customized awesome `o23` application.
 
-In the following chapters, we will introduce these modules one by one. However, if you are more interested in how to use `o23` to build an
-application, we suggest that you only focus on these three key chapters: `o23/n3`, `o23/n4`, and `o3/n99`. Other chapters can be read when
-there is a need.
+In the following chapters, we will introduce these modules one by one.
