@@ -1,0 +1,43 @@
+code: ApiTestErrorHanding
+type: pipeline
+route: /api/test/error/:type
+method: get
+path-params:
+  - type
+
+steps:
+  - name: Throw Exception
+    use: routes
+    routes:
+      - check: $factor === 'catchable'
+        steps:
+          - name: Throw Catchable
+            use: snippet
+            snippet: |
+              $.$errors.catchable({code: 'O99-00002', reason: `Manually throw catchable exception.`});
+      - check: $factor === 'exposed'
+        steps:
+          - name: Throw Exposed
+            use: snippet
+            snippet: |
+              $.$error({status: 400, code: 'O99-00003', reason: `Manually throw exposed uncatchable exception.`});
+      - check: $factor === 'uncatchable'
+        steps:
+          - name: Throw Uncatchable
+            use: snippet
+            snippet: |
+              $.$errors.uncatchable({code: 'O99-00004', reason: `Manually throw uncatchable exception.`});
+    otherwise:
+      - name: Throw Error
+        use: snippet
+        snippet: |
+          throw new Error(`Manually throw error, caused by [${$factor}] received.`);
+    error-handles:
+      catchable: |-
+        `Caught catchable error[code=${$options.$code}, message=${$options.$error.message}].`;
+      exposed: |-
+        `Caught exposed uncatchable error[code=${$options.$code}, message=${$options.$error.message}].`;
+      uncatchable: |-
+        `Caught uncatchable error[code=${$options.$code}, message=${$options.$error.message}].`;
+      any: |-
+        `Caught error[code=${$options.$code}, message=${$options.$error.message}].`;

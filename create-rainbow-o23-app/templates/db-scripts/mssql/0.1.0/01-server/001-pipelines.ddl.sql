@@ -1,0 +1,29 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE TABLE T_O23_PIPELINE_DEFS
+(
+    DEF_ID           BIGINT PRIMARY KEY NOT NULL,
+    DEF_CODE         NVARCHAR(32)       NOT NULL,
+    ENABLED          TINYINT            NOT NULL DEFAULT 1,
+    EXPOSE_API       TINYINT            NOT NULL DEFAULT 1,
+    EXPOSE_ROUTE     NVARCHAR(128)      NULL,
+    CONFIG           NVARCHAR(MAX)      NOT NULL,
+    TENANT_CODE      NVARCHAR(64)       NULL,
+    VERSION          INT                NOT NULL DEFAULT 1,
+    CREATED_AT       DATETIME           NOT NULL,
+    CREATED_BY       NVARCHAR(64)       NOT NULL,
+    LAST_MODIFIED_AT DATETIME           NOT NULL,
+    LAST_MODIFIED_BY NVARCHAR(64)       NOT NULL
+);
+CREATE UNIQUE INDEX I_O23_PIPELINE_DEFS_1 ON T_O23_PIPELINE_DEFS (DEF_CODE, TENANT_CODE);
+CREATE UNIQUE INDEX I_O23_PIPELINE_DEFS_2 ON T_O23_PIPELINE_DEFS (EXPOSE_ROUTE, TENANT_CODE);
+CREATE INDEX I_O23_PIPELINE_DEFS_3 ON T_O23_PIPELINE_DEFS (TENANT_CODE);
+EXEC SP_ADDEXTENDEDPROPERTY 'MS_Description', 'Must be same as code in config.',
+     'SCHEMA', 'dbo', 'TABLE', 'T_O23_PIPELINE_DEFS', 'COLUMN', 'DEF_CODE';
+EXEC SP_ADDEXTENDEDPROPERTY 'MS_Description', 'Expose as rest api when true, only works when def is pipeline and must be as it in config.',
+     'SCHEMA', 'dbo', 'TABLE', 'T_O23_PIPELINE_DEFS', 'COLUMN', 'EXPOSE_API';
+EXEC SP_ADDEXTENDEDPROPERTY 'MS_Description', 'Rest api route when it exposes.',
+     'SCHEMA', 'dbo', 'TABLE', 'T_O23_PIPELINE_DEFS', 'COLUMN', 'EXPOSE_ROUTE';
+EXEC SP_ADDEXTENDEDPROPERTY 'MS_Description', 'Optimistic lock',
+     'SCHEMA', 'dbo', 'TABLE', 'T_O23_PIPELINE_DEFS', 'COLUMN', 'VERSION';

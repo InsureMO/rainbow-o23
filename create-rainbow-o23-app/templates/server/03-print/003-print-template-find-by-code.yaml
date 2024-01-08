@@ -1,0 +1,47 @@
+# template file is ignored
+code: PrintTemplateFindByCode
+type: pipeline
+route: /print/template/by-code
+method: post
+
+steps:
+  - name: Wrap Request Data
+    use: snippet
+    snippet: "{templateCode: $factor.code}"
+  - name: Check Request Data
+    use: snippet
+    from-input: $factor.templateCode
+    snippet: |-
+      if ($factor == null || `${$factor}`.trim().length === 0) {
+        $.$error({status: 400, code: 'O99-10110', reason: 'Template code is required.'});
+      }
+      return `${$factor}`.trim();
+    merge: templateCode
+  - name: Load Template
+    use: typeorm-load-one
+    from-input: "{params: $factor}"
+    sql: |-
+      SELECT 
+        TEMPLATE_ID AS "templateId",
+        TEMPLATE_CODE AS "templateCode",
+        TEMPLATE_NAME AS "templateName",
+        TEMPLATE_TYPE AS "templateType",
+        ENABLED AS "enabled.@bool",
+        DATA_PIPELINE AS "dataPipeline.@json",
+        TENANT_CODE AS "tenantCode",
+        VERSION AS "version",
+        CREATED_AT AS "createdAt.@ts",
+        CREATED_BY AS "createdBy",
+        LAST_MODIFIED_AT AS "lastModifiedAt.@ts",
+        LAST_MODIFIED_BY AS "lastModifiedBy" 
+      FROM T_O23_PRINT_TEMPLATES WHERE TEMPLATE_CODE = $templateCode
+    merge: found
+  - name: Check Existing
+    use: snippet
+    snippet: |-
+      if ($factor.found == null) {
+        $.$error({status: 404, code: 'O99-10111', reason: 'Given template code cannot match any record.'});
+      }
+  - name: Return to Client
+    use: get-property
+    property: found

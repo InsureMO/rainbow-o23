@@ -1,0 +1,46 @@
+code: D9LoadConfig
+type: pipeline
+route: /d9/config
+method: post
+
+steps:
+  - name: Find Configuration
+    use: ref-step
+    code: D9ConfigFindByCodeAndLang
+  - name: Prepare Configuration
+    use: ref-step
+    code: D9ConfigPrepare
+  - name: Prepare Rendering Data
+    use: ref-step
+    code: D9DataPrepare
+  - name: Return to Client
+    use: snippet
+    snippet: |-
+      const liftConfig = (configuration) => {
+        const config = configuration.config ?? {};
+        const {md, dependencies, ...rest} = config;
+        configuration.md = md;
+        configuration.dependencies = dependencies;
+        delete configuration.config;
+        delete configuration.tenantCode;
+        Object.keys(rest ?? {}).forEach(key => {
+          configuration[key] = rest[key];
+        });
+        const keys = Object.keys(configuration.dependencies ?? {});
+        if (keys.length === 0) {
+          delete configuration.dependencies;
+        } else {
+          keys.forEach(key => {
+            const dependencies = configuration.dependencies[key];
+            if (dependencies != null && dependencies.length !== 0) {
+              configuration.dependencies[key] = dependencies.map(d => liftConfig(d));
+            }
+          });
+        }
+        return configuration;
+      }
+      delete $factor.configuration.dataPipeline;
+      return {
+        config: liftConfig($factor.configuration),
+        data: $factor.preparedData,
+      };

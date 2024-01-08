@@ -1,0 +1,102 @@
+code: D9ConfigPrepare
+name: Prepare D9 Configuration
+type: step-sets
+use: sets
+
+# consume: given configurations
+# produce: dependencies attached into given configurations, recursively
+
+steps:
+  - name: Load Dependencies
+    use: snippet
+    from-input: $factor.configurations
+    snippet: |-
+      const codes = ($factor ?? [])
+        .filter(configOrCode => typeof configOrCode !== 'string')
+        .reduce((codes, {config}) => {
+          Object.keys(config.dependencies ?? {}).forEach(key => {
+            codes.push(...(config.dependencies[key] ?? []));
+          });
+          return codes;
+        }, []);
+      return [...new Set(codes)];
+    merge: codes
+  - name: Find Dependencies
+    use: conditional
+    check: $factor.codes.length !== 0
+    steps:
+      - name: Find Dependencies
+        use: typeorm-load-many
+        from-input: "{params: $factor}"
+        sql: |-
+          SELECT
+            CONFIG_ID AS "configId",
+            CONFIG_CODE AS "configCode",
+            CONFIG_NAME AS "configName",
+            CONFIG_TYPE AS "configType",
+            LANGUAGE AS "language",
+            CONFIG AS "config.@json",
+            TENANT_CODE AS "tenantCode"
+          FROM T_O23_D9_CONFIG WHERE ENABLED = 1 AND CONFIG_CODE IN ($...codes) AND LANGUAGE IN ($...languages)
+          ORDER BY CONFIG_CODE
+        merge: dependencies
+      - name: Transform Dependencies as Map
+        use: snippet
+        snippet: |-
+          const groupedDependencies = ($factor.dependencies ?? []).reduce((map, config) => {
+            if (map[config.configCode] == null) {
+              map[config.configCode] = [config];
+            } else {
+              map[config.configCode].push(config);
+            }
+            return map;
+          }, {});
+          Object.keys(groupedDependencies).forEach(key => {
+            const configs = groupedDependencies[key];
+            configs.sort((a, b) => {
+              if (a.language === 'en') {
+                return 1;
+              } else if (b.language === 'en') {
+                return -1;
+              } else {
+                return a.language.localCompare(b.language);
+              }
+            });
+            groupedDependencies[key] = configs[0];
+          });
+          return groupedDependencies;
+        merge: dependencies
+      - name: Replace Dependencies
+        use: snippet
+        snippet: |-
+          ($factor.configurations || []).forEach(({config}) => {
+            Object.keys(config.dependencies ?? {}).forEach((key) => {
+              config.dependencies[key] = config.dependencies[key].map(code => {
+                const config = $factor.dependencies[code];
+                if (config == null) {
+                  return code;
+                } else {
+                  return config;
+                }
+              });
+            });
+          });
+  - name: Collect Dependencies Recursive
+    use: snippet
+    snippet: |-
+      return ($factor.configurations ?? [])
+        .filter(configOrCode => typeof configOrCode !== 'string')
+        .reduce((dependencies, {config}) => {
+          Object.keys(config.dependencies ?? {}).forEach(key => {
+            dependencies.push(...(config.dependencies[key] ?? []));
+          });
+          return dependencies;
+        }, []);
+    merge: configurations
+  - name: Check Dependencies Recursive
+    use: conditional
+    check: $factor.configurations.length !== 0
+    steps:
+      - name: Load Dependencies Recursive
+        use: ref-step
+        code: D9ConfigPrepare

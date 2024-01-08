@@ -1,0 +1,21 @@
+code: ApiTestMultiNamedFilesNoCheck
+type: pipeline
+route: /api/test/multi-named-files/no-check
+method: post
+files:
+  - name: test1
+    max-count: 1
+  - test2
+body: false
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      const file1 = ['fieldname', 'originalname', 'encoding', 'mimetype', 'size'].map(key => {
+        return `${key}=${$factor.test1[0][key]}`;
+      }).join(', ');
+      const file2 = ['fieldname', 'originalname', 'encoding', 'mimetype', 'size'].map(key => {
+        return `${key}=${$factor.test2[0][key]}`;
+      }).join(', ');
+      return `Received [{${file1}}, {${file2}}].`;

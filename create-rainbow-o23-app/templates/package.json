@@ -1,20 +1,38 @@
 {
-	"name": "template",
-	"version": "0.1.0",
-	"description": "template",
+	"name": "@rainbow-o23/n99",
+	"version": "0.1.2-alpha",
+	"description": "o23 server",
 	"scripts": {
 		"build": "nest build",
 		"build:standalone": "nest build --webpack",
-		"start": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server nest start",
-		"dev:standalone:start": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server node dist/server",
-		"dev:build:start": "yarn build:standalone && yarn dev:standalone:start",
+		"start:mssql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mssql.basic,envs/common/.print,envs/dev/.server nest start",
+		"start:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server nest start",
+		"start:pgsql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.pgsql.basic,envs/common/.print,envs/dev/.server nest start",
+		"start:oracle": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.oracle.basic,envs/common/.print,envs/dev/.server nest start",
+		"dev:start:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server nest start --watch",
+		"dev:standalone:start:mssql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mssql.basic,envs/common/.print,envs/dev/.server node dist/server",
+		"dev:standalone:start:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server node dist/server",
+		"dev:standalone:start:pgsql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.pgsql.basic,envs/common/.print,envs/dev/.server node dist/server",
+		"dev:standalone:start:oracle": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.oracle.basic,envs/common/.print,envs/dev/.server node dist/server",
+		"dev:build:start:mysql": "yarn build:standalone && yarn dev:standalone:start",
 		"debug:start": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server nest start --debug --watch",
-		"scripts": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/dev/.scripts node dist/scripts",
+		"scripts:mssql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mssql.basic,envs/dev/.scripts node dist/scripts",
+		"scripts:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/dev/.scripts node dist/scripts",
+		"scripts:pgsql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.pgsql.basic,envs/dev/.scripts node dist/scripts",
+		"scripts:oracle": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.oracle.basic,envs/dev/.scripts node dist/scripts",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix",
 		"test": "jest"
 	},
-	"license": "UNLICENSED",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/InsureMO/rainbow-o23/issues"
+	},
+	"author": "Rainbow Team",
 	"dependencies": {
 		"@rainbow-o23/n90": "0.1.2-alpha",
 		"@rainbow-o23/n91": "0.1.2-alpha",
@@ -54,6 +72,23 @@
 		"typescript": "5.1.6",
 		"webpack": "^5.87.0",
 		"yargs": "^17.7.2"
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"json",
+			"ts"
+		],
+		"rootDir": "./",
+		"testRegex": "(/test/.*\\.(test|spec))\\.[tj]sx?$",
+		"transform": {
+			"^.+\\.(t|j)s$": "ts-jest"
+		},
+		"collectCoverageFrom": [
+			"**/*.(t|j)s"
+		],
+		"coverageDirectory": "../coverage",
+		"testEnvironment": "node"
 	},
 	"volta": {
 		"node": "18.19.0",

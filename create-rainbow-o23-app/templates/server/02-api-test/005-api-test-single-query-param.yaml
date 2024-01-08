@@ -1,0 +1,11 @@
+code: ApiTestSingleQueryParam
+type: pipeline
+route: /api/test/single-query-param
+method: get
+query-params:
+  - id
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: "`Received [${$factor}]`"

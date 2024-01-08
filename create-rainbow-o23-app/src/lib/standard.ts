@@ -82,5 +82,6 @@ export const createPackageJson = (
 	const json = JSON.parse(fs.readFileSync(packageFile).toString()) as PackageJSON;
 	json.name = name;
 	json.description = description;
+	delete json.jest;
 	return json;
 };

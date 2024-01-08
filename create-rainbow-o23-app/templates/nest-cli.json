@@ -1,0 +1,15 @@
+{
+	"$schema": "https://json.schemastore.org/nest-cli",
+	"collection": "@nestjs/schematics",
+	"sourceRoot": "src",
+	"entryFile": "server.js",
+	"compilerOptions": {
+		"deleteOutDir": true,
+		"assets": [
+			{
+				"include": "**/*.{yml,yaml,json,json5,htm,html,xlsx,xls,csv}",
+				"watchAssets": true
+			}
+		]
+	}
+}

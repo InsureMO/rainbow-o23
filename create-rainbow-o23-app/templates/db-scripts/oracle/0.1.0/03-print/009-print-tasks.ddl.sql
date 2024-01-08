@@ -1,0 +1,4 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE INDEX I_O23_PRINT_TASKS_4 ON T_O23_PRINT_TASKS (TRIGGERED_AT)

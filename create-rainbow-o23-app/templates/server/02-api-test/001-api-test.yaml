@@ -1,0 +1,10 @@
+code: ApiTest
+type: pipeline
+route: /api/test
+method: get
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return 'Test OK!';

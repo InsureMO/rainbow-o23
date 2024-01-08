@@ -1,0 +1,38 @@
+# environment
+# default true, disable all env automatic guess
+CFG_APP_ENV_STRICT=false
+# default true, set type orm step datasource by default, see CFG_APP_DATASOURCE_DEFAULT
+#CFG_APP_ENV_REDRESS_TYPEORM_DATASOURCE=true
+# default true, fix type orm step transaction if possible
+#CFG_APP_ENV_REDRESS_TYPEORM_TRANSACTION=true
+# application
+CFG_APP_NAME=O23-N99
+CFG_APP_PROVIDER=Rainbow Team
+# should be changed during packaging
+CFG_APP_VERSION=0.1.0
+# should be changed during packaging
+CFG_APP_BUILT_AT=2023-10-23
+CFG_APP_PORT=3100
+CFG_APP_CONTEXT=/o23
+CFG_APP_BODY_JSON_MAX_SIZE=50mb
+CFG_APP_BODY_URLENCODED_MAX_SIZE=50mb
+# logger
+# error logger
+CFG_LOGGER_ERROR_FILE=logs/error-%DATE%.log
+CFG_LOGGER_ERROR_LEVEL=error
+CFG_LOGGER_ERROR_DATE_PATTERN=YYYY-MM-DD
+CFG_LOGGER_ERROR_ZIPPED_ARCHIVE=false
+CFG_LOGGER_ERROR_MAX_FILES=30d
+CFG_LOGGER_ERROR_MAX_SIZE=10m
+# combined logger
+CFG_LOGGER_COMBINED_FILE=logs/combined-%DATE%.log
+CFG_LOGGER_COMBINED_LEVEL=log
+CFG_LOGGER_COMBINED_DATE_PATTERN=YYYY-MM-DD
+CFG_LOGGER_COMBINED_ZIPPED_ARCHIVE=false
+CFG_LOGGER_COMBINED_MAX_FILES=7d
+CFG_LOGGER_COMBINED_MAX_SIZE=10m
+# console logger
+CFG_LOGGER_CONSOLE_ENABLED=false
+CFG_LOGGER_CONSOLE_LEVEL=debug
+# pipeline logger, if enable pipeline debug log, need to enable one of error/combined/console log.
+CFG_PIPELINE_DEBUG_LOG_ENABLED=false

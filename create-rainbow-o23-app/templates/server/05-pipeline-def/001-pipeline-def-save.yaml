@@ -1,0 +1,119 @@
+code: PipelineDefSave
+type: pipeline
+route: /pipeline/def/save
+method: post
+
+steps:
+  - name: Wrap Request Data
+    use: snippet
+    snippet: "{data: $factor}"
+  - name: Check Request Data
+    use: snippet
+    from-input: $factor.data
+    snippet: |-
+      if ($.isBlank($factor.config)) {
+        $.$error({status: 400, code: 'O99-10300', reason: 'Pipeline definition is required.'});
+      }
+  - name: Parse Request Data
+    use: parse-pipeline-def
+    from-input: $factor.data
+  - name: Check Parsed Data
+    use: snippet
+    from-input: $factor.data
+    snippet: |-
+      if ($.isBlank($factor.defCode)) {
+        $.$error({status: 400, code: 'O99-10301', reason: 'Pipeline definition code is required.'});
+      }
+  - name: Check Def Id Existing
+    use: snippet
+    from-input: $factor.data.defId
+    snippet: $factor == null || `${$factor}`.trim().length === 0
+    merge: notExists
+  - name: Save Definition
+    use: conditional
+    check: $factor.notExists
+    steps:
+      - name: Create Snowflake Id
+        use: snowflake
+        merge: snowflakeId
+      - name: Set Id to Definition
+        use: snippet
+        snippet: |
+          $factor.data.defId = $factor.snowflakeId
+      - name: Delete Snowflake from Context
+        use: del-property
+        property: snowflakeId
+      - name: Complete Data
+        use: snippet
+        from-input: $factor.data
+        snippet: |-
+          $factor.enabled = $factor.enabled ?? true;
+          $factor.version = 1;
+          const currentUser = 'Anonymous'; // TODO get user from authentication
+          const currentTime = $.$date.now();
+          $factor.createdBy = currentUser;
+          $factor.createdAt = currentTime;
+          $factor.lastModifiedBy = currentUser;
+          $factor.lastModifiedAt = currentTime;
+      - name: Create Definition
+        use: typeorm-save
+        from-input: "{values: $factor.data}"
+        sql: |-
+          INSERT INTO T_O23_PIPELINE_DEFS
+          (DEF_ID, DEF_CODE, ENABLED, EXPOSE_API, EXPOSE_ROUTE, CONFIG, TENANT_CODE, VERSION, CREATED_AT, CREATED_BY, LAST_MODIFIED_AT, LAST_MODIFIED_BY)
+          VALUES ($defId, $defCode, $enabled.@bool, $exposeApi.@bool, $exposeRoute, $config, $tenantCode, $version, $createdAt.@ts, $createdBy, $lastModifiedAt.@ts, $lastModifiedBy)
+        to-output: "null"
+    otherwise:
+      - name: Find Existing Definition
+        use: typeorm-load-one
+        from-input: "{params: $factor.data}"
+        sql: SELECT DEF_CODE AS "DEF_CODE", TENANT_CODE AS "TENANT_CODE" FROM T_O23_PIPELINE_DEFS WHERE DEF_ID = $defId
+        merge: existing
+      - name: Check Existing
+        use: snippet
+        snippet: |-
+          if ($factor.existing == null) {
+            $.$error({status: 404, code: 'O99-10302', reason: 'Given pipeline definition cannot match any record.'});
+          }
+          if ($factor.existing.DEF_CODE !== $factor.data.defCode) {
+            $.$error({status: 404, code: 'O99-10303', reason: 'Given pipeline definition cannot match any record.'});
+          }
+          // tenant code might be null
+          if ($factor.existing.TENANT_CODE != $factor.data.tenantCode) {
+            $.$error({status: 404, code: 'O99-10304', reason: 'Given pipeline definition cannot match any record.'});
+          }
+      - name: Complete Data
+        use: snippet
+        from-input: $factor.data
+        snippet: |-
+          $factor.enabled = $factor.enabled ?? true;
+          const currentUser = 'Anonymous'; // TODO get user from authentication
+          const currentTime = $.$date.now();
+          $factor.lastModifiedBy = currentUser;
+          $factor.lastModifiedAt = currentTime;
+      - name: Update Definition
+        use: typeorm-save
+        from-input: "{values: $factor.data}"
+        sql: |-
+          UPDATE T_O23_PIPELINE_DEFS SET
+          ENABLED = $enabled.@bool, EXPOSE_API = $exposeApi.@bool, EXPOSE_ROUTE = $exposeRoute,
+          CONFIG = $config, VERSION = VERSION + 1, LAST_MODIFIED_AT = $lastModifiedAt.@ts, LAST_MODIFIED_BY = $lastModifiedBy
+          WHERE DEF_ID = $defId AND VERSION = $version
+        merge: affectedRows
+      - name: Check Result
+        use: conditional
+        check: $factor.affectedRows === 1
+        steps:
+          - name: Increase Version
+            use: snippet
+            from-input: $factor.data
+            snippet: |
+              $factor.version = Number($factor.version) + 1
+        otherwise:
+          - name: Raise Exception
+            use: snippet
+            snippet: |-
+              $.$error({status: 500, code: 'O99-10305', reason: 'Failed to update given pipeline definition caused by unpredicted error occurred.'});
+  - name: Return to Client
+    use: get-property
+    property: data

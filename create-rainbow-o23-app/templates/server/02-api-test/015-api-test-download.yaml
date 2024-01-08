@@ -1,0 +1,15 @@
+code: ApiTestDownload
+type: pipeline
+route: /api/test/download
+method: get
+expose-file: true
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return $.$file({
+        name: 'hello.txt',
+        type: 'text/plain',
+        content: 'World!'
+      });

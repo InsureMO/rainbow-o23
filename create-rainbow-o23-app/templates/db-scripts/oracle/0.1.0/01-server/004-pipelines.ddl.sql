@@ -1,0 +1,4 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE INDEX I_O23_PIPELINE_DEFS_3 ON T_O23_PIPELINE_DEFS (TENANT_CODE)

@@ -1,0 +1,25 @@
+-- author: brad.wu
+-- tags: system
+
+CREATE TABLE T_O23_PIPELINE_DEFS
+(
+    DEF_ID           DECIMAL(20) PRIMARY KEY NOT NULL,
+    DEF_CODE         VARCHAR(32)             NOT NULL,
+    ENABLED          SMALLINT                NOT NULL DEFAULT 1,
+    EXPOSE_API       DECIMAL(1)              NOT NULL DEFAULT 1,
+    EXPOSE_ROUTE     VARCHAR(128)            NULL,
+    CONFIG           TEXT                    NOT NULL,
+    TENANT_CODE      VARCHAR(64)             NULL,
+    VERSION          INT                     NOT NULL DEFAULT 1,
+    CREATED_AT       TIMESTAMP               NOT NULL,
+    CREATED_BY       VARCHAR(64)             NOT NULL,
+    LAST_MODIFIED_AT TIMESTAMP               NOT NULL,
+    LAST_MODIFIED_BY VARCHAR(64)             NOT NULL
+);
+CREATE UNIQUE INDEX I_O23_PIPELINE_DEFS_1 ON T_O23_PIPELINE_DEFS (DEF_CODE, TENANT_CODE);
+CREATE UNIQUE INDEX I_O23_PIPELINE_DEFS_2 ON T_O23_PIPELINE_DEFS (EXPOSE_ROUTE, TENANT_CODE);
+CREATE INDEX I_O23_PIPELINE_DEFS_3 ON T_O23_PIPELINE_DEFS (TENANT_CODE);
+COMMENT ON COLUMN T_O23_PIPELINE_DEFS.DEF_CODE IS 'Must be same as code in config.';
+COMMENT ON COLUMN T_O23_PIPELINE_DEFS.EXPOSE_API IS 'Expose as rest api when true, only works when def is pipeline and must be as it in config.';
+COMMENT ON COLUMN T_O23_PIPELINE_DEFS.EXPOSE_ROUTE IS 'Rest api route when it exposes.';
+COMMENT ON COLUMN T_O23_PIPELINE_DEFS.VERSION IS 'Optimistic lock';
