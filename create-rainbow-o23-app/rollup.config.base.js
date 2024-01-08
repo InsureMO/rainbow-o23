@@ -13,7 +13,7 @@ export const buildConfig = (lint) => {
 	return {
 		input: './src/index.ts',
 		output: [
-			{format: 'es', dir: '.'}
+			{format: 'es', file: './create-app.js'}
 		],
 		plugins: [
 			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
@@ -22,7 +22,10 @@ export const buildConfig = (lint) => {
 			babel({babelHelpers: 'bundled'})
 		].filter(x => x != null),
 		external(id) {
-			return ['fs', 'path', 'chalk', 'fs-extra', 'prompts', 'validate-npm-package-name'].includes(id);
+			return [
+				'fs', 'path', 'child_process',
+				'chalk', 'fs-extra', 'prompts', 'validate-npm-package-name'
+			].includes(id);
 		}
 	};
 };
