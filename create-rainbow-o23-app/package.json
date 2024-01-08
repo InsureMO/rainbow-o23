@@ -1,6 +1,6 @@
 {
 	"name": "create-rainbow-o23-app",
-	"version": "0.1.2-alpha.3",
+	"version": "0.1.2",
 	"description": "Create rainbow o23 application.",
 	"module": "index.js",
 	"types": "index.d.ts",
