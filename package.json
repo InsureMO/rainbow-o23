@@ -9,7 +9,8 @@
 		"o23-n6",
 		"o23-n90",
 		"o23-n91",
-		"o23-n99"
+		"o23-n99",
+		"create-rainbow-o23-app"
 	],
 	"scripts": {
 		"n1:build": "cd ./o23-n1 && yarn build",
