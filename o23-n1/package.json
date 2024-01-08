@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n1",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "o23 interfaces",
 	"main": "index.cjs",
 	"module": "index.js",
