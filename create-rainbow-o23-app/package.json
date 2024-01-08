@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"build": "rollup -c",
-		"build:ci": "rollup -c rollup.config.ci.js",
+		"build:ci": "rollup -c rollup.config.ci.cjs",
 		"test": "node index.js test"
 	},
 	"keywords": [
