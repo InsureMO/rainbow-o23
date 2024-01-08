@@ -83,6 +83,10 @@ export const createPackageJson = (
 	json.name = name;
 	json.version = '0.1.0';
 	json.description = description;
+	json.license = 'UNLICENSED';
 	delete json.jest;
+	delete json.repository;
+	delete json.bugs;
+	delete json.author;
 	return json;
 };
