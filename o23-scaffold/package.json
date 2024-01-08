@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/scaffold",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "o23 scaffold",
 	"scripts": {
 		"build": "nest build",
@@ -17,8 +17,8 @@
 	"author": "Rainbow Team",
 	"license": "UNLICENSED",
 	"dependencies": {
-		"@rainbow-o23/n2": "0.1.0",
-		"@rainbow-o23/n3": "0.1.0",
+		"@rainbow-o23/n2": "0.1.1",
+		"@rainbow-o23/n3": "0.1.1",
 		"better-sqlite3": "^9.0.0"
 	},
 	"devDependencies": {
