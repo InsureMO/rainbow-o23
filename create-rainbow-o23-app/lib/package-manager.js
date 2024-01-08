@@ -62,6 +62,8 @@ exports.install = async (manager, directory) => {
 			inactive: 'no'
 		}
 	]);
-	const cmd = manager === 'yarn' ? 'yarn' : manager + ' i';
-	execSync(cmd, {stdio: 'inherit', cwd: directory});
+	if (should) {
+		const cmd = manager === 'yarn' ? 'yarn' : manager + ' i';
+		execSync(cmd, {stdio: 'inherit', cwd: directory});
+	}
 };

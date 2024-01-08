@@ -8,7 +8,6 @@ let DatasourceTypes = {
 };
 exports.DatasourceTypes = DatasourceTypes;
 
-
 exports.getDatasourceOptions = async () => {
 	return prompts([
 		{
@@ -59,7 +58,11 @@ const computeDatasourceTypes = (options) => {
 		[pgsqlDataSourceNames, DatasourceTypes.PgSQL],
 		[oracleDataSourceNames, DatasourceTypes.Oracle],
 		[mssqlDataSourceNames, DatasourceTypes.MSSQL]
-	].forEach(([names, type]) => {
+	].map(([names, type]) => {
+		return [(names ?? []).filter(name => name != null && name.trim().length !== 0), type];
+	}).filter(([names]) => {
+		return names.length !== 0;
+	}).forEach(([names, type]) => {
 		if (names != null && names.length !== 0) {
 			dataSourceTypes.push(type);
 		}
@@ -161,18 +164,18 @@ CFG_APP_DATASOURCE_CONFIG=${configDataSourceName}
 		[DatasourceTypes.MySQL, Array.isArray(mysqlDataSourceNames) ? mysqlDataSourceNames : [mysqlDataSourceNames]],
 		[DatasourceTypes.PgSQL, Array.isArray(pgsqlDataSourceNames) ? pgsqlDataSourceNames : [pgsqlDataSourceNames]],
 		[DatasourceTypes.Oracle, Array.isArray(oracleDataSourceNames) ? oracleDataSourceNames : [oracleDataSourceNames]],
-		[DatasourceTypes.MySQL, Array.isArray(mssqlDataSourceNames) ? mssqlDataSourceNames : [mssqlDataSourceNames]]
-	].map(([dataSourceType, dataSourceNames]) => {
-		return [dataSourceType, (dataSourceNames ?? []).filter(name => name != null && name.trim().length !== 0)];
-	}).filter(([, dataSourceNames]) => {
-		return dataSourceNames.length !== 0;
-	}).map(([dataSourceType, dataSourceNames]) => {
+		[DatasourceTypes.MSSQL, Array.isArray(mssqlDataSourceNames) ? mssqlDataSourceNames : [mssqlDataSourceNames]]
+	].map(([type, names]) => {
+		return [type, (names ?? []).filter(name => name != null && name.trim().length !== 0)];
+	}).filter(([, names]) => {
+		return names.length !== 0;
+	}).map(([type, names]) => {
 		// console.log(dataSourceNames);
-		return (dataSourceNames)
+		return (names)
 			.filter(name => name != null && name.trim().length !== 0)
-			.map(dataSourceName => {
-				return `# Datasource ${dataSourceName}
-${createDatasourceProperties(envs[dataSourceType], dataSourceName)}`;
+			.map(name => {
+				return `# Datasource ${name}
+${createDatasourceProperties(envs[type], name)}`;
 			}).join('\n');
 	}).join('\n');
 	content = content + properties;
