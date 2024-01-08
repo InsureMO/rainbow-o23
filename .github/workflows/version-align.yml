@@ -78,16 +78,12 @@ jobs:
         with:
           module-name: o23-n91
           target-version: ${{ inputs.version }}
-      - name: Create pre release branch
-        run: git checkout -b ${{ inputs.branch }}
       - name: Change Version of o23-n99
         uses: ./.github/actions/change-node-version/
         id: change-node-version-o23-n99
         with:
           module-name: o23-n99
           target-version: ${{ inputs.version }}
-      - name: Create pre release branch
-        run: git checkout -b ${{ inputs.branch }}
       - name: Change Version of o23-scaffold
         uses: ./.github/actions/change-node-version/
         id: change-node-version-o23-scaffold
