@@ -1,10 +1,12 @@
-import chalk from 'chalk';
-import {execSync} from 'child_process';
-import prompts from 'prompts';
+const chalk = require('chalk');
+const {execSync} = require('child_process');
+const prompts = require('prompts');
 
-export enum PackageManager {
-	NPM = 'npm', PNPM = 'pnpm', YARN = 'yarn'
-}
+let PackageManager = {
+	NPM: 'npm', PNPM: 'pnpm', YARN: 'yarn'
+};
+
+exports.PackageManager = PackageManager;
 
 const checkNodeVersion = () => {
 	const version = process.versions.node;
@@ -24,13 +26,13 @@ const checkNpmVersion = () => {
 	}
 };
 
-export const checkVersions = () => {
+exports.checkVersions = () => {
 	checkNodeVersion();
 	checkNpmVersion();
 };
 
-export const getPackageManagerOption = async () => {
-	return await prompts([
+exports.getPackageManagerOption = async () => {
+	return prompts([
 		{
 			name: 'packageManager',
 			type: 'select',
@@ -40,7 +42,7 @@ export const getPackageManagerOption = async () => {
 	]);
 };
 
-export const checkYarnVersion = () => {
+exports.checkYarnVersion = () => {
 	const version = execSync('yarn -v').toString().trim();
 	const [major, minor, patch] = version.split('.').map(Number);
 	if (major < 1 || (major === 1 && minor < 22) || (major === 1 && minor === 22 && patch < 10)) {
@@ -49,7 +51,17 @@ export const checkYarnVersion = () => {
 	}
 };
 
-export const install = (manager: PackageManager, directory: string): void => {
+exports.install = async (manager, directory) => {
+	const {should} = await prompts([
+		{
+			name: 'should',
+			type: 'toggle',
+			message: 'Do you want to install all the dependencies directly?',
+			initial: false,
+			active: 'yes',
+			inactive: 'no'
+		}
+	]);
 	const cmd = manager === 'yarn' ? 'yarn' : manager + ' i';
 	execSync(cmd, {stdio: 'inherit', cwd: directory});
 };

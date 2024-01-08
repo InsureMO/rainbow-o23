@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-import {createApp} from './create-app.js';
+const {createApp} = require('./lib');
 
 // noinspection JSIgnoredPromiseFromCall
 createApp();

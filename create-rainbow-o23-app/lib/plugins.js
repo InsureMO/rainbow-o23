@@ -1,14 +1,14 @@
-import fs from 'fs-extra';
-import path from 'path';
-import prompts from 'prompts';
-import {PackageJSON} from './types';
+const fs = require('fs-extra');
+const path = require('path');
+const prompts = require('prompts');
 
-export enum Plugins {
-	PRINT = 'print'
+let Plugins = {
+	PRINT: 'print'
 }
+exports.Plugins = Plugins;
 
-export const getPluginOptions = async () => {
-	return await prompts([
+exports.getPluginOptions = async () => {
+	return prompts([
 		{
 			name: 'plugins',
 			type: 'multiselect',
@@ -20,7 +20,7 @@ export const getPluginOptions = async () => {
 	]);
 };
 
-export const writePluginOptions = (json: PackageJSON, options: Awaited<ReturnType<typeof getPluginOptions>>) => {
+exports.writePluginOptions = (json, options) => {
 	const {plugins} = options;
 	if (!plugins.includes(Plugins.PRINT)) {
 		delete json.dependencies['@rainbow-o23/n91'];
@@ -30,7 +30,7 @@ export const writePluginOptions = (json: PackageJSON, options: Awaited<ReturnTyp
 	}
 };
 
-export const writePluginFiles = (options: Awaited<ReturnType<typeof getPluginOptions>>, directory: string) => {
+exports.writePluginFiles = (options, directory) => {
 	const {plugins} = options;
 	if (!plugins.includes(Plugins.PRINT)) {
 		const serverTsFile = path.resolve(directory, 'src', 'server.ts');

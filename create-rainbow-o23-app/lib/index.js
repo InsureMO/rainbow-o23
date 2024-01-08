@@ -1,17 +1,18 @@
-import chalk from 'chalk';
-import fs from 'fs-extra';
-import path from 'path';
-import {getDatasourceOptions, writeDatasourceFiles, writeDatasourceOptions} from './datasources';
-import {checkVersions, checkYarnVersion, getPackageManagerOption, PackageManager} from './package-manager';
-import {getPluginOptions, writePluginFiles, writePluginOptions} from './plugins';
-import {createPackageDirectory, createPackageJson, getStandardOption, validateName} from './standard';
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const path = require('path');
+const {getDatasourceOptions, writeDatasourceFiles, writeDatasourceOptions} = require('./datasources');
+const {
+	checkVersions,
+	checkYarnVersion,
+	getPackageManagerOption,
+	PackageManager,
+	install
+} = require('./package-manager');
+const {getPluginOptions, writePluginFiles, writePluginOptions} = require('./plugins');
+const {createPackageDirectory, createPackageJson, getStandardOption, validateName} = require('./standard');
 
-const generatePackageJson = async (
-	stdOptions: Awaited<ReturnType<typeof getStandardOption>>,
-	datasourceOptions: Awaited<ReturnType<typeof getDatasourceOptions>>,
-	pluginOptions: Awaited<ReturnType<typeof getPluginOptions>>,
-	directory: string
-) => {
+const generatePackageJson = async (stdOptions, datasourceOptions, pluginOptions, directory) => {
 	const json = createPackageJson(stdOptions, directory);
 	writeDatasourceOptions(json, datasourceOptions);
 	writePluginOptions(json, pluginOptions);
@@ -19,14 +20,12 @@ const generatePackageJson = async (
 	fs.writeFileSync(packageFile, JSON.stringify(json, null, 2) + '\n');
 };
 
-const generateFiles = async (
-	datasourceOptions: Awaited<ReturnType<typeof getDatasourceOptions>>,
-	pluginOptions: Awaited<ReturnType<typeof getPluginOptions>>, directory: string) => {
+const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
 	writeDatasourceFiles(datasourceOptions, pluginOptions, directory);
 	writePluginFiles(pluginOptions, directory);
 };
 
-export const createApp = async () => {
+exports.createApp = async () => {
 	const packageName = process.argv[2];
 	validateName(packageName);
 	checkVersions();
@@ -42,10 +41,11 @@ export const createApp = async () => {
 	await generatePackageJson(stdOptions, dataSourceOptions, pluginOptions, directory);
 	await generateFiles(dataSourceOptions, pluginOptions, directory);
 	// install dependencies
-	// install(options.packageManager, directory);
+	await install(packageManager, directory);
 
 	console.log();
 	console.log(`${chalk.green('✔')} Success! Created ${chalk.cyan.underline(packageName)}.`);
+	console.log(`${chalk.green('✔')} Check /envs/dev/.datasources to setup datasources.`);
 	console.log();
 	process.exit(0);
 };

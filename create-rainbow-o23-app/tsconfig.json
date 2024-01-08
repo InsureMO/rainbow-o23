@@ -3,7 +3,7 @@
 		"baseUrl": ".",
 		"outDir": "./dist",
 		"declarationDir": "./lib",
-		"module": "ES2015",
+		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "node",
 		"sourceMap": true,

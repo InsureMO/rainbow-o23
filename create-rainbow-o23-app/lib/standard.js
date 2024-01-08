@@ -1,16 +1,15 @@
-import chalk from 'chalk';
-import fs from 'fs-extra';
-import path from 'path';
-import prompts from 'prompts';
-import validate from 'validate-npm-package-name';
-import {PackageJSON} from './types';
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const path = require('path');
+const prompts = require('prompts');
+const validate = require('validate-npm-package-name');
 
-const printValidationResults = (results: Array<string>) => {
+const printValidationResults = (results) => {
 	if (typeof results !== 'undefined') {
 		results.forEach((error) => console.error(chalk.red(`  - ${error}`)));
 	}
 };
-export const validateName = (name: string) => {
+exports.validateName = (name) => {
 	if (name == null || name.trim().length === 0) {
 		console.error(chalk.red('✖ Could not create a project with empty or blank name.'));
 		process.exit(1);
@@ -27,16 +26,16 @@ export const validateName = (name: string) => {
 	}
 };
 
-const getPackageDirectory = (packageName: string) => {
+const getPackageDirectory = (packageName) => {
 	return path.resolve(packageName.startsWith('@') ? packageName.split('/')[1] : packageName);
 };
 
-const isDirectoryEmpty = (directory: string) => {
+const isDirectoryEmpty = (directory) => {
 	const files = fs.readdirSync(directory);
 	return files == null || files.length === 0;
 };
 
-export const createPackageDirectory = (packageName: string): string => {
+exports.createPackageDirectory = (packageName) => {
 	const dir = getPackageDirectory(packageName);
 	if (fs.existsSync(dir)) {
 		if (!isDirectoryEmpty(dir)) {
@@ -45,14 +44,16 @@ export const createPackageDirectory = (packageName: string): string => {
 			process.exit(1);
 		}
 	} else {
+		// noinspection JSCheckFunctionSignatures
 		fs.mkdirpSync(dir);
+		// noinspection JSCheckFunctionSignatures
 		fs.mkdirpSync(path.resolve(dir, 'src'));
 	}
 	return dir;
 };
 
-export const getStandardOption = async (packageName: string) => {
-	return await prompts([
+exports.getStandardOption = async (packageName) => {
+	return prompts([
 		{
 			name: 'name',
 			type: 'text',
@@ -68,24 +69,23 @@ export const getStandardOption = async (packageName: string) => {
 	]);
 };
 
-export const createPackageJson = (
-	options: Awaited<ReturnType<typeof getStandardOption>>,
-	directory: string
-): PackageJSON => {
+exports.createPackageJson = (options, directory) => {
 	const {name, description} = options;
-	fs.copySync(path.resolve(path.dirname(''), './templates'), directory);
+	fs.copySync(path.resolve(__dirname, '../templates'), directory);
 
 	// create README.md
 	fs.writeFileSync(path.resolve(directory, 'README.md'), `# ${name}\n\n${description}\n`);
 	const packageFile = path.resolve(directory, 'package.json');
 	// parse and modify package.json
-	const json = JSON.parse(fs.readFileSync(packageFile).toString()) as PackageJSON;
+	const json = JSON.parse(fs.readFileSync(packageFile).toString())
 	json.name = name;
 	json.version = '0.1.0';
 	json.description = description;
 	json.license = 'UNLICENSED';
 	delete json.jest;
+	// noinspection JSUnresolvedReference
 	delete json.repository;
+	// noinspection JSUnresolvedReference
 	delete json.bugs;
 	delete json.author;
 	return json;

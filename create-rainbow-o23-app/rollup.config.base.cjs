@@ -1,28 +1,13 @@
-import {babel} from '@rollup/plugin-babel';
-import eslint from '@rollup/plugin-eslint';
-import copy from 'rollup-plugin-copy';
-import del from 'rollup-plugin-delete';
-import typescript from 'rollup-plugin-typescript2';
+const copy = require('rollup-plugin-copy');
+const del = require('rollup-plugin-delete');
 
-export const buildConfig = (lint) => {
-	// ['./index.d.ts', './index.js', './index.cjs', './lib'].forEach(f => {
-	// 	const cwd = path.resolve(process.cwd(), f);
-	// 	if (fs.existsSync(cwd)) {
-	// 		fs.rmSync(cwd, {recursive: true, force: true});
-	// 	}
-	// });
-
+exports.buildConfig = (lint) => {
 	return {
-		input: './src/index.ts',
-		output: [
-			{format: 'es', file: './create-app.js'}
-		],
+		input: './lib/index.js',
+		output: {file: './create-app.js', format: 'cjs'},
 		plugins: [
-			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
-			// lint ? tslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
-			typescript({clean: true}),
-			babel({babelHelpers: 'bundled'}),
 			del({targets: 'templates/*', hook: 'buildEnd'}),
+			del({targets: './create-app.js', hook: 'writeBundle'}),
 			copy({
 				targets: [
 					{src: '../o23-n99/db-scripts/*', dest: 'templates/db-scripts'},
