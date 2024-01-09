@@ -1,5 +1,5 @@
 import {DynamicModule, ForwardReference, Type} from '@nestjs/common';
-import {Config, createConfig} from '@rainbow-o23/n1';
+import {Config, createConfig, Undefinable} from '@rainbow-o23/n1';
 import {WinstonModule} from 'nest-winston';
 import {format, Logform, transports} from 'winston';
 import 'winston-daily-rotate-file';
@@ -53,12 +53,16 @@ export class BootstrapOptions {
 		return this._config.getBoolean(name, defaultValue);
 	}
 
+	public getEnvAsJson<R>(name: string, defaultValue?: R): Undefinable<R> {
+		return this._config.getJson(name, defaultValue);
+	}
+
 	/**
 	 * override this method to provide your own logging format, following nest.js + winston standard
 	 */
 	public getLoggerFormat() {
 		return format.printf((info) => {
-			const {level, message, timestamp, context, stack} = info;
+			const {level, message, '@timestamp': timestamp, context, stack} = info;
 			return `${timestamp} [${context || 'O23'}] [${level.toUpperCase()}] ${stack == null ? message : `${message} ${stack}`}`;
 		});
 	}
@@ -98,7 +102,7 @@ export class BootstrapOptions {
 						new transports.DailyRotateFile({
 							filename: this.getEnvAsString('logger.error.file', 'logs/error-%DATE%.log'),
 							level: this.getEnvAsString('logger.error.level', 'error'),
-							format: format.combine(customized, format.json()),
+							format: format.combine(customized, this.getEnvAsBoolean('logger.error.json', true) ? format.json() : this.getLoggerFormat()),
 							datePattern: this.getEnvAsString('logger.error.date.pattern', 'YYYY-MM-DD'),
 							zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
 							maxFiles: this.getEnvAsString('logger.error.max.files', '30d'),
@@ -108,7 +112,7 @@ export class BootstrapOptions {
 						new transports.DailyRotateFile({
 							filename: this.getEnvAsString('logger.combined.file', 'logs/combined-%DATE%.log'),
 							level: this.getEnvAsString('logger.combined.level', 'log'),
-							format: format.combine(customized, format.json()),
+							format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
 							datePattern: this.getEnvAsString('logger.combined.date.pattern', 'YYYY-MM-DD'),
 							zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),
 							maxFiles: this.getEnvAsString('logger.combined.max.files', '7d'),

@@ -47,6 +47,15 @@ export class Bootstrap {
 		app.useGlobalFilters(new ErrorFilter(app.get(HttpAdapterHost)));
 		app.use(json({limit: options.getEnvAsString('app.body.json.max.size', '50mb')}));
 		app.use(urlencoded({extended: true, limit: options.getEnvAsString('app.body.urlencoded.max.size', '50mb')}));
+		const corsEnabled = options.getEnvAsString('app.cors.enabled', 'false');
+		const corsOptions = options.getEnvAsJson('app.cors.options');
+		if (corsEnabled) {
+			if (corsOptions == null) {
+				app.enableCors();
+			} else {
+				app.enableCors(corsOptions);
+			}
+		}
 		// replace logger
 		options.getConfig().setLogger(new Logger());
 		const [port, context] = [options.getPort(), options.getContext()];

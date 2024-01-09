@@ -86,8 +86,7 @@ export class Config {
 		}, defaultValue);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public getJson(name: string, defaultValue?: any): Undefinable<any> {
+	public getJson<R>(name: string, defaultValue?: R): Undefinable<R> {
 		return this.getFromCache(name, () => {
 			// noinspection JSUnresolvedReference
 			const value = process.env[this.generateKey(name)];

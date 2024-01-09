@@ -82,14 +82,18 @@ Support response outputs as following:
 | `app.built.at`                   | string  | UNDOCUMENTED             | Application build time.                         |
 | `app.body.json.max.size`         | string  | 50mb                     | Request maximum body size, for json body.       |
 | `app.body.urlencoded.max.size`   | string  | 50mb                     | Request maximum body size, for urlencoded body. |
+| `app.cors.enabled`               | boolean | false                    | Enable cors.                                    |
+| `app.cors.options`               | json    |                          | `CorsOptions` of `@nestjs/common`.              |
 | `logger.error.file`              | string  | logs/error-%DATE%.log    | Error log file.                                 |
 | `logger.error.level`             | string  | error                    | Logger level for error log file.                |
+| `logger.error.json`              | boolean | true                     | Use json format.                                |
 | `logger.error.date.pattern`      | string  | YYYY-MM-DD               | Error log file date pattern.                    |
 | `logger.error.zipped.archive`    | boolean | false                    | Enabled zip for error log file.                 |
 | `logger.error.max.files`         | string  | 30d                      | Error log file keeping time.                    |
 | `logger.error.max.size`          | string  | 10m                      | Error log file maximum size.                    |
 | `logger.combined.file`           | string  | logs/combined-%DATE%.log | Standard log file.                              |
 | `logger.combined.level`          | string  | log                      | Logger level for standard log file.             |
+| `logger.combined.json`           | boolean | true                     | Use json format.                                |
 | `logger.combined.date.pattern`   | string  | YYYY-MM-DD               | Standard log file date pattern.                 |
 | `logger.combined.zipped.archive` | boolean | false                    | Enabled zip for standard log file.              |
 | `logger.combined.max.files`      | string  | 7d                       | Standard log file keeping time.                 |
