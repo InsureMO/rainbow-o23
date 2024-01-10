@@ -2,6 +2,7 @@
 /node_modules/
 /.idea/
 /test-docker/
+/test-docker-node-modules/
 
 .DS_Store
 

@@ -20,6 +20,7 @@ exports.buildConfig = (lint) => {
 					{src: '../o23-n99/.eslintrc.js', dest: 'templates'},
 					{src: '../o23-n99/.prettierrc', dest: 'templates'},
 					{src: '../o23-n99/.puppeteerrc', dest: 'templates'},
+					{src: '../o23-n99/dockerfile', dest: 'templates'},
 					{src: '../o23-n99/nest-cli.json', dest: 'templates'},
 					{src: '../o23-n99/package.json', dest: 'templates'},
 					{src: '../o23-n99/tsconfig.build.json', dest: 'templates'},
