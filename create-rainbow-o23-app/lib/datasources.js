@@ -92,7 +92,9 @@ exports.writeDatasourceOptions = (json, options) => {
 	Object.keys(json.scripts).forEach(key => {
 		if (key.endsWith(':mysql')) {
 			const newKey = key.replace(/:mysql$/, '');
-			json.scripts[newKey] = json.scripts[key].replace('envs/dev/.mysql.basic', 'envs/dev/.datasources');
+			json.scripts[newKey] = json.scripts[key]
+				.replace(':mysql', '')
+				.replace('envs/dev/.mysql.basic', 'envs/dev/.datasources');
 			delete json.scripts[key];
 		}
 	});
