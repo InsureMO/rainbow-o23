@@ -60,11 +60,17 @@ steps:
       any:
         - name: Update Memory Task Status to Fail
           use: snippet
+          # structure of error handling steps is {$code: errorCode, $error: error, $factor: fragment, $request: request}
+          from-input: $factor.$factor
           snippet: |-
             $factor.task.status = 'FAIL'
             $factor.task.printFinishedAt = $.$date.now();
         - name: Update Task Status To Fail
           use: typeorm-save
-          from-input: "{values: $factor.task}"
+          from-input: "{values: $factor.$factor.task}"
           sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'FAIL', PRINT_FINISHED_AT = $printFinishedAt WHERE TASK_ID = $taskId
           to-output: "null"
+        - name: Unwrap Data
+          use: snippet
+          from-input: $factor.$factor
+          snippet: $factor
