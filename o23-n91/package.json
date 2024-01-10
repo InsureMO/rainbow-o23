@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n91",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "o23 print server base",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -20,9 +20,9 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n5": "0.1.7",
-		"@rainbow-o23/n6": "0.1.7",
-		"@rainbow-o23/n90": "0.1.7"
+		"@rainbow-o23/n5": "0.1.8",
+		"@rainbow-o23/n6": "0.1.8",
+		"@rainbow-o23/n90": "0.1.8"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.20.5",
