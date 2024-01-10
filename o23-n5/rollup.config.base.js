@@ -23,7 +23,7 @@ export const buildConfig = (lint) => {
 			babel({babelHelpers: 'bundled'})
 		].filter(x => x != null),
 		external(id) {
-			return ["@rainbow-o23/"].some(scope => id.startsWith(scope))
+			return ["@rainbow-o23/", "puppeteer/"].some(scope => id.startsWith(scope))
 				|| ["puppeteer"].includes(id);
 		},
 		onLog(level, log, handler) {

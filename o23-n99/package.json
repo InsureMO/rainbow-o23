@@ -14,7 +14,7 @@
 		"dev:standalone:start:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server node dist/server",
 		"dev:standalone:start:pgsql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.pgsql.basic,envs/common/.print,envs/dev/.server node dist/server",
 		"dev:standalone:start:oracle": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.oracle.basic,envs/common/.print,envs/dev/.server node dist/server",
-		"dev:build:start:mysql": "yarn build:standalone && yarn dev:standalone:start",
+		"dev:build:start:mysql": "yarn build:standalone && yarn dev:standalone:start:mysql",
 		"debug:start": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/common/.print,envs/dev/.server nest start --debug --watch",
 		"scripts:mssql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mssql.basic,envs/dev/.scripts node dist/scripts",
 		"scripts:mysql": "CFG_ENV_FILE=envs/common/.basic,envs/dev/.mysql.basic,envs/dev/.scripts node dist/scripts",

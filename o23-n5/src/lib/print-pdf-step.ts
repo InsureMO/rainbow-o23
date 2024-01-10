@@ -1,11 +1,9 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError} from '@rainbow-o23/n1';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
 import {Browser, PaperFormat, PDFOptions, Viewport} from 'puppeteer';
-import {ERR_PDF_TEMPLATE_NOT_EMPTY} from './error-codes';
 // for o23-n99, use webpack to build standalone version, force use cjs.
-// then for built cjs/esm n5 version, both use require to get puppeteer instance.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer/lib/cjs/puppeteer/puppeteer.js';
+import {ERR_PDF_TEMPLATE_NOT_EMPTY} from './error-codes';
 
 export interface PrintPdfPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
