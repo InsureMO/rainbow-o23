@@ -133,13 +133,15 @@ Both headers and footers are supported simultaneously, and you only need to use 
 Additionally, thanks to the support provided by Puppeteer itself, the following fixed usage patterns can be used to obtain the specified
 information:
 
-| HTML                               | Description                 |
-|------------------------------------|-----------------------------|
-| `<span class=”date”></span>`       | Current date                |
-| `<span class=”title”></span>`      | Document title              |
-| `<span class=””url></span>`        | Document URL                |
-| `<span class=”pageNumber”></span>` | Current page number         |
-| `<span class=”totalPages”></span>` | Total pages in the document |
+| HTML                               | Description                        |
+|------------------------------------|------------------------------------|
+| `<header id="header"></header>`    | Page header, can include anything. |
+| `<footer id="footer"></footer>`    | Page footer, can include anything. |
+| `<span class=”date”></span>`       | Current date                       |
+| `<span class=”title”></span>`      | Document title                     |
+| `<span class=””url></span>`        | Document URL                       |
+| `<span class=”pageNumber”></span>` | Current page number                |
+| `<span class=”totalPages”></span>` | Total pages in the document        |
 
 #### PDF Options
 
