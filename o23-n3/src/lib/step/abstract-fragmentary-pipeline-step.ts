@@ -286,7 +286,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 		const steps = await Promise.all(builders.map(async builder => await builder.create(options)));
 		const response = await steps.reduce(async (promise, step) => {
 			const request = await promise;
-			return await this.measurePerformance(traceId, 'STEP')
+			return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 				.execute(async () => {
 					this.traceStepIn(traceId, step, request);
 					const response = await step.perform({...request, $context: {...errorContext, traceId}});

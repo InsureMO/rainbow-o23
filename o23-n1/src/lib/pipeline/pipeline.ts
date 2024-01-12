@@ -107,7 +107,7 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 				const steps = await this.createSteps();
 				const data = await steps.reduce(async (promise, step) => {
 					const request = await promise;
-					return await this.measurePerformance(traceId, 'STEP')
+					return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({

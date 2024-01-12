@@ -83,7 +83,7 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 				const steps = await this.createSteps();
 				const response = await steps.reduce(async (promise, step) => {
 					const request = await promise;
-					return await this.measurePerformance(traceId, 'STEP')
+					return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 						.execute(async () => {
 							this.traceStepOut(traceId, step, request);
 							const response = await step.perform({...request, $context: {...context, traceId}});

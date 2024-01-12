@@ -106,16 +106,17 @@ export class AbstractPipelineExecution {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected debugPerformance(message: () => any): void {
+	protected debugPerformance(message: () => any, context?: string): void {
 		if (this.isPerformanceLogEnabled()) {
-			this.getLogger().debug(message(), this.constructor.name);
+			this.getLogger().debug(message(), context || this.constructor.name);
 		}
 	}
 
-	protected measurePerformance(traceId: string, exec: 'PIPELINE' | 'STEP'): PerformanceExecution {
+	protected measurePerformance(traceId: string, exec: 'PIPELINE' | 'STEP', context?: string): PerformanceExecution {
 		return new PerformanceExecution({
+			exec, traceId, start: process.hrtime.bigint(),
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			exec, traceId, start: process.hrtime.bigint(), print: (message: () => any) => this.debugPerformance(message)
+			print: (message: () => any) => this.debugPerformance(message, context)
 		});
 	}
 
