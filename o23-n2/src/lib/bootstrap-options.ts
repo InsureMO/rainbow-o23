@@ -1,4 +1,4 @@
-import {DynamicModule, ForwardReference, Type} from '@nestjs/common';
+import {DynamicModule, ForwardReference, INestApplication, Type} from '@nestjs/common';
 import {Config, createConfig, Undefinable} from '@rainbow-o23/n1';
 import {WinstonModule} from 'nest-winston';
 import {format, Logform, transports} from 'winston';
@@ -29,6 +29,22 @@ export class BootstrapOptions {
 
 	public getContext(): string {
 		return this._context;
+	}
+
+	/**
+	 * override this function to set nest application.
+	 * default set cors by given environment variables.
+	 */
+	public assistApplication(app: INestApplication) {
+		const corsEnabled = this.getEnvAsString('app.cors.enabled', 'false');
+		const corsOptions = this.getEnvAsJson('app.cors.options');
+		if (corsEnabled) {
+			if (corsOptions == null) {
+				app.enableCors();
+			} else {
+				app.enableCors(corsOptions);
+			}
+		}
 	}
 
 	// noinspection JSUnusedGlobalSymbols
