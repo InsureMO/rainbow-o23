@@ -92,6 +92,13 @@ export class BootstrapOptions {
 	}
 
 	/**
+	 * use prebuilt pipeline controller or not, default false
+	 */
+	public usePrebuiltPipelineController(): boolean {
+		return false;
+	}
+
+	/**
 	 * winston is for logging
 	 * override this method to provide your logging patterns, following nest.js + winston standard
 	 */

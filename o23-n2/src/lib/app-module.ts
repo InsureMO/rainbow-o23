@@ -1,5 +1,6 @@
-import {Injectable, Logger, MiddlewareConsumer, Module, NestMiddleware} from '@nestjs/common';
+import {Injectable, Logger, MiddlewareConsumer, Module, NestMiddleware, Type} from '@nestjs/common';
 import {NextFunction, Request, Response} from 'express';
+import {AbstractController} from './abstract-controller';
 import {AppController} from './app-controller';
 import {BootstrapOptions} from './bootstrap-options';
 import {PipelineController} from './pipeline-controller';
@@ -31,9 +32,13 @@ export const createAppModule = (options: BootstrapOptions) => {
 			consumer.apply(RequestLoggerMiddleware).forRoutes('*');
 		}
 	};
+	const controllers: Array<Type<AbstractController>> = [AppController];
+	if (options.usePrebuiltPipelineController()) {
+		controllers.push(PipelineController);
+	}
 	return Reflect.decorate([Module({
 		imports: [options.createWinstonModule()],
-		controllers: [AppController, PipelineController],
+		controllers: controllers,
 		providers: [Logger]
 	})], AppModuleClass, (void 0), (void 0));
 };
