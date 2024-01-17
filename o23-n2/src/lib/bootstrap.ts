@@ -12,7 +12,7 @@ import UTC from 'dayjs/plugin/utc.js';
 import WeekOfYear from 'dayjs/plugin/weekOfYear.js';
 import {json, urlencoded} from 'express';
 import {WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston';
-import {AppModule} from './app-module';
+import {createAppModule} from './app-module';
 import {BootstrapOptions, createBoostrapOptions} from './bootstrap-options';
 import {ErrorFilter} from './exception-handling';
 
@@ -37,8 +37,8 @@ export class Bootstrap {
 	public static async launch(options?: BootstrapOptions): Promise<INestApplication> {
 		options = createBoostrapOptions(options);
 		const modules = options.getModules();
+		const AppModule = createAppModule(options);
 		if (modules.length !== 0) {
-			//
 			const imports = Reflect.getMetadata('imports', AppModule);
 			Reflect.defineMetadata('imports', [...imports, ...modules], AppModule);
 		}
