@@ -40,7 +40,7 @@ exports.writePluginFiles = (options, directory) => {
 		fs.writeFileSync(serverTsFile, content);
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
-		fs.rmSync(path.resolve(directory, 'plugins', 'print.ts'))
+		fs.rmSync(path.resolve(directory, 'plugins', 'src', 'print.ts'))
 		fs.rmSync(path.resolve(directory, '.puppeteerrc'));
 	}
 };
