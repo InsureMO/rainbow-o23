@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n99",
-	"version": "0.1.10",
+	"version": "0.1.11",
 	"description": "o23 server",
 	"scripts": {
 		"build": "nest build",
@@ -34,8 +34,8 @@
 	},
 	"author": "Rainbow Team",
 	"dependencies": {
-		"@rainbow-o23/n90": "0.1.10",
-		"@rainbow-o23/n91": "0.1.10",
+		"@rainbow-o23/n90": "0.1.11",
+		"@rainbow-o23/n91": "0.1.11",
 		"mssql": "^10.0.1",
 		"mysql2": "^3.6.2",
 		"oracledb": "^6.2.0",
