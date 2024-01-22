@@ -214,6 +214,13 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 			};
 			await replaceFields(document, data);
 			await replaceLoops(document, data);
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			if (window.postDataPrepare != null) {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				window.postDataPrepare(data);
+			}
 
 			const headerTemplate = document.getElementById('header')?.innerHTML;
 			const footerTemplate = document.getElementById('footer')?.innerHTML;

@@ -127,6 +127,14 @@ const data = {
 - All properties are relative paths, calculated relative to their parent node. Therefore, within a loop, only the values of each element
   can be accessed.
 
+#### Post Data Prepare
+
+After the data preparation phase is completed, but before obtaining the header, footer, and printing parameters, the system will
+automatically detect and invoke the `postDataPrepare` function in order to incorporate additional custom logic. This function receives a
+parameter of the current printing data, and custom logic can be written based on the data.
+
+> Please note that this function is executed synchronously, so it is not recommended to perform time-consuming operations.
+
 #### Page Header and Footer
 
 Both headers and footers are supported simultaneously, and you only need to use standard HTML node definitions with specified IDs.
