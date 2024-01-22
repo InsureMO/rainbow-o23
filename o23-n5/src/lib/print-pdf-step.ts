@@ -1,15 +1,24 @@
-import {PipelineStepData, PipelineStepPayload, UncatchableError} from '@rainbow-o23/n1';
-import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
+import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
+import {
+	AbstractFragmentaryPipelineStep,
+	FragmentaryPipelineStepOptions,
+	ScriptFuncOrBody,
+	Utils
+} from '@rainbow-o23/n3';
 import {Browser, PaperFormat, PDFOptions, Viewport} from 'puppeteer';
 // for o23-n99, use webpack to build standalone version, force use cjs.
 import puppeteer from 'puppeteer/lib/cjs/puppeteer/puppeteer.js';
 import {ERR_PDF_TEMPLATE_NOT_EMPTY} from './error-codes';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type FindSubTemplate = (data: any, templateCode: string) => Promise<Undefinable<string>>;
 
 export interface PrintPdfPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
 	browserArgs?: string | Array<string>;
 	viewport?: Viewport;
 	pdfOptions?: PDFOptions;
+	findSubTemplate?: ScriptFuncOrBody<FindSubTemplate>;
 }
 
 export interface PrintPdfPipelineStepInFragment {
@@ -38,6 +47,8 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	private readonly _viewport: Viewport;
 	private readonly _pdfOptions?: PDFOptions;
 	private readonly _keepPage?: boolean;
+	private readonly _findSubTemplateSnippet?: ScriptFuncOrBody<FindSubTemplate>;
+	private readonly _findSubTemplateFunc?: FindSubTemplate;
 
 	public constructor(options: PrintPdfPipelineStepOptions<In, Out, PrintPdfPipelineStepInFragment, PrintPdfPipelineStepOutFragment>) {
 		super(options);
@@ -68,6 +79,16 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		this._pdfOptions.format = this._pdfOptions.format ?? config.getString('puppeteer.pdf.format', 'a4') as PaperFormat;
 		this._pdfOptions.timeout = this._pdfOptions.timeout ?? config.getNumber('puppeteer.pdf.timeout', 30) * 1000;
 		this._keepPage = config.getBoolean('puppeteer.page.keep', false);
+		this._findSubTemplateSnippet = options.findSubTemplate;
+		this._findSubTemplateFunc = Utils.createAsyncFunction(this.getFindSubTemplateSnippet(), {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			createDefault: () => async (_$data, _$templateCode): Promise<Undefinable<string>> => (void 0),
+			getVariableNames: () => ['$data', '$templateCode'],
+			error: (e: Error) => {
+				this.getLogger().error(`Failed on create function for get template, snippet is [${this.getFindSubTemplateSnippet()}].`);
+				throw e;
+			}
+		});
 	}
 
 	protected getExecutablePath(): string {
@@ -157,9 +178,33 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		}
 	}
 
+	public getFindSubTemplateSnippet(): ScriptFuncOrBody<FindSubTemplate> {
+		return this._findSubTemplateSnippet;
+	}
+
 	protected createPageEvalFunction() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return async (data: any): Promise<PDFOptions> => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const replaceTemplates = async (root: Document, data: any): Promise<void> => {
+				const elements = root.querySelectorAll('data-print-template');
+				if (elements.length !== 0) {
+					for (let index = 0, count = elements.length; index < count; index++) {
+						const element = elements.item(index);
+						const templateCode = ((element as HTMLElement).dataset.code || '').trim();
+						if (templateCode.length === 0) {
+							// no template code found, remote itself
+							element.remove();
+						} else {
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							element.outerHTML = await window.findSubTemplate(data, templateCode);
+						}
+					}
+					// template may introduce new templates, replace again
+					await replaceTemplates(root, data);
+				}
+			};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const replaceFields = async (root: HTMLElement | Document, data: any): Promise<void> => {
 				// only scan the fields, inside loop ignored
@@ -212,6 +257,7 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 					return Promise.resolve();
 				}, Promise.resolve());
 			};
+			await replaceTemplates(document, data);
 			await replaceFields(document, data);
 			await replaceLoops(document, data);
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -278,6 +324,10 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 			const page = await browser.newPage();
 			await page.setViewport(this.getViewport());
 			await page.setContent(templateHtml.toString());
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			await page.exposeFunction('findSubTemplate', async (data: any, templateCode: string) => {
+				return this._findSubTemplateFunc(data, templateCode)
+			});
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await page.exposeFunction('getValue', (data: any, property: string) => Utils.getValue(data, property));
 			const definePdfOptions = this.getPdfOptions();

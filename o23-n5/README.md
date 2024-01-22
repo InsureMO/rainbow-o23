@@ -127,6 +127,13 @@ const data = {
 - All properties are relative paths, calculated relative to their parent node. Therefore, within a loop, only the values of each element
   can be accessed.
 
+#### Use Sub-templates
+
+Use `<data-print-template data-code="YOUR-TEMPLATE-CODE"></data-print-template>` to use sub-template. Sub-templates replacement are executed
+before data replacement, accessed through the `findSubTemplate` function provided pipeline step constructor.
+
+> Sub-templates also use the data from the page, so sub-templates do not need to prepare data separately.
+
 #### Post Data Prepare
 
 After the data preparation phase is completed, but before obtaining the header, footer, and printing parameters, the system will
