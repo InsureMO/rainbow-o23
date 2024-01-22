@@ -16,7 +16,7 @@ CFG_PUPPETEER_PDF_FORMAT=a4
 # in seconds
 CFG_PUPPETEER_PDF_TIMEOUT=30
 # enabled page keep when do unit test, will disable headless if enable page keep
-CFG_PUPPETEER_PAGE_KEEP=true
+CFG_PUPPETEER_PAGE_KEEP=false
 # excel
 CFG_PRINT_EXCEL_TEMPORARY_FILE_KEEP=false
 # absolute path also supported
