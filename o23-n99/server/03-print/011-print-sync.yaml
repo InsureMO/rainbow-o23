@@ -11,9 +11,6 @@ steps:
   - name: Prepare Print
     use: ref-step
     code: PrintTaskCreate
-  - name: Prepare Print Data
-    use: ref-step
-    code: PrintDataPrepare
   - name: Perform Print
     use: ref-step
     code: PrintTaskExecute
