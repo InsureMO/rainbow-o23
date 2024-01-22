@@ -7,55 +7,61 @@ use: sets
 # produce: printed file
 
 steps:
-  - name: Update Memory Task Status to Success
-    use: snippet
-    snippet: |-
-      $factor.task.status = 'PROCESSING';
-      $factor.task.printFinishedAt = $.$date.now();
-  - name: Update Task Status To Processing
-    use: typeorm-save
-    from-input: "{values: $factor.task}"
-    sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'PROCESSING', PRINT_STARTED_AT = $printFinishedAt WHERE TASK_ID = $taskId
-    to-output: "null"
-  - name: Perform Print Task
+  - name: Prepare Print Data
+    use: ref-step
+    code: PrintDataPrepare
+  - name: Do Perform Print
     use: sets
     steps:
-      - name: Do Print
-        use: routes
-        routes:
-          - check: $factor.template.templateType === 'PDF'
-            steps:
-              - name: Print Pdf
-                use: print-pdf
-                from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
-                merge: printed
-          - check: $factor.template.templateType === 'EXCEL'
-            steps:
-              - name: Print Excel
-                use: print-excel
-                from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
-                merge: printed
-          - check: $factor.template.templateType === 'CSV'
-            steps:
-              - name: Print Csv
-                use: print-csv
-                from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
-                merge: printed
-        otherwise:
-          - name: Throw Error
-            use: snippet
-            snippet: |
-              throw new Error(`Print type[${$factor.template.templateType}] not supported.`);
       - name: Update Memory Task Status to Success
         use: snippet
         snippet: |-
-          $factor.task.status = 'SUCCESS';
+          $factor.task.status = 'PROCESSING';
           $factor.task.printFinishedAt = $.$date.now();
-      - name: Update Task Status To Success
+      - name: Update Task Status To Processing
         use: typeorm-save
-        from-input: "{values: {task: $factor.task, printed: $factor.printed}}"
-        sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'SUCCESS', PRINTED_FILE=$printed.file, PRINT_FINISHED_AT = $task.printFinishedAt WHERE TASK_ID = $task.taskId
+        from-input: "{values: $factor.task}"
+        sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'PROCESSING', PRINT_STARTED_AT = $printFinishedAt WHERE TASK_ID = $taskId
         to-output: "null"
+      - name: Perform Print Task
+        use: sets
+        steps:
+          - name: Do Print
+            use: routes
+            routes:
+              - check: $factor.template.templateType === 'PDF'
+                steps:
+                  - name: Print Pdf
+                    use: print-pdf
+                    from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+                    merge: printed
+              - check: $factor.template.templateType === 'EXCEL'
+                steps:
+                  - name: Print Excel
+                    use: print-excel
+                    from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+                    merge: printed
+              - check: $factor.template.templateType === 'CSV'
+                steps:
+                  - name: Print Csv
+                    use: print-csv
+                    from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+                    merge: printed
+            otherwise:
+              - name: Throw Error
+                use: snippet
+                snippet: |
+                  throw new Error(`Print type[${$factor.template.templateType}] not supported.`);
+          - name: Update Memory Task Status to Success
+            use: snippet
+            snippet: |-
+              $factor.task.status = 'SUCCESS';
+              $factor.task.printFinishedAt = $.$date.now();
+          - name: Update Task Status To Success
+            use: typeorm-save
+            from-input: "{values: {task: $factor.task, printed: $factor.printed}}"
+            sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'SUCCESS', PRINTED_FILE=$printed.file, PRINT_FINISHED_AT = $task.printFinishedAt WHERE TASK_ID = $task.taskId
+            to-output: "null"
     error-handles:
       any:
         - name: Update Memory Task Status to Fail
@@ -67,10 +73,52 @@ steps:
             $factor.task.printFinishedAt = $.$date.now();
         - name: Update Task Status To Fail
           use: typeorm-save
-          from-input: "{values: $factor.$factor.task}"
-          sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'FAIL', PRINT_FINISHED_AT = $printFinishedAt WHERE TASK_ID = $taskId
+          from-input: |-
+            const {$factor: {task, preparedData}, $error, $code} = $factor;
+            return {
+              values: {
+                taskId: task.taskId,
+                printFinishedAt: task.printFinishedAt,
+                error: JSON.stringify({
+                  code: $code,
+                  stack: $error?.stack || 'Unpredicted error occurred, and failed to capture stack trace, find more details in server logs.',
+                  data: preparedData
+                })
+              }
+            };
+          sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'FAIL', PRINT_FINISHED_AT = $printFinishedAt, FAIL_CAUSED_BY = $error WHERE TASK_ID = $taskId
           to-output: "null"
         - name: Unwrap Data
           use: snippet
           from-input: $factor.$factor
           snippet: $factor
+error-handles:
+  any:
+    - name: Update Memory Task Status to Fail
+      use: snippet
+      # structure of error handling steps is {$code: errorCode, $error: error, $factor: fragment, $request: request}
+      from-input: $factor.$factor
+      snippet: |-
+        $factor.task.status = 'FAIL'
+        $factor.task.printFinishedAt = $.$date.now();
+    - name: Update Task Status To Fail
+      use: typeorm-save
+      from-input: |-
+        const {$factor: {task, data}, $error, $code} = $factor;
+        return {
+          values: {
+            taskId: task.taskId,
+            printFinishedAt: task.printFinishedAt,
+            error: JSON.stringify({
+              code: $code,
+              stack: $error?.stack || 'Unpredicted error occurred, and failed to capture stack trace, find more details in server logs.',
+              data
+            })
+          }
+        };
+      sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'FAIL', PRINT_FINISHED_AT = $printFinishedAt, FAIL_CAUSED_BY = $error WHERE TASK_ID = $taskId
+      to-output: "null"
+    - name: Unwrap Data
+      use: snippet
+      from-input: $factor.$factor
+      snippet: $factor

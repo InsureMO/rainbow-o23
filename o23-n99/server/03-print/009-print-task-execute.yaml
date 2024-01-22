@@ -10,9 +10,6 @@ steps:
   - name: Prepare Print Data
     use: ref-step
     code: PrintDataPrepare
-  - name: Throw Test Error
-    use: snippet
-    snippet: throw new Error('Test error');
   - name: Do Perform Print
     use: sets
     steps:
