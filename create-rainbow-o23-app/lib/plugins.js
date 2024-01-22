@@ -35,10 +35,12 @@ exports.writePluginFiles = (options, directory) => {
 	if (!plugins.includes(Plugins.PRINT)) {
 		const serverTsFile = path.resolve(directory, 'src', 'server.ts');
 		let content = fs.readFileSync(serverTsFile).toString();
-		content = content.replace('import \'@rainbow-o23/n91\';\n', '');
+		content = content.replace('import {usePdfSubTemplates} from \'./plugins/print\';\n', '')
+			.replace('\t\tusePdfSubTemplates(options);\n', '');
 		fs.writeFileSync(serverTsFile, content);
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
+		fs.rmSync(path.resolve(directory, 'plugins', 'print.ts'))
 		fs.rmSync(path.resolve(directory, '.puppeteerrc'));
 	}
 };

@@ -25,6 +25,13 @@ const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
 	writePluginFiles(pluginOptions, directory);
 };
 
+const cleanPluginSrcFolder = async (directory) => {
+	const files = fs.readdirSync(path.resolve(directory, 'src', 'plugins'));
+	if (files.length === 0) {
+		fs.rmdirSync(path.resolve(directory, 'src', 'plugins'));
+	}
+}
+
 exports.createApp = async () => {
 	const packageName = process.argv[2];
 	validateName(packageName);
@@ -40,6 +47,7 @@ exports.createApp = async () => {
 	const pluginOptions = await getPluginOptions();
 	await generatePackageJson(stdOptions, dataSourceOptions, pluginOptions, directory);
 	await generateFiles(dataSourceOptions, pluginOptions, directory);
+	await cleanPluginSrcFolder(directory);
 	// install dependencies
 	await install(packageManager, directory);
 
