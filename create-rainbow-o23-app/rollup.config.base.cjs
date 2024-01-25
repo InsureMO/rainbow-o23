@@ -25,7 +25,8 @@ exports.buildConfig = (lint) => {
 					{src: '../o23-n99/package.json', dest: 'templates'},
 					{src: '../o23-n99/tsconfig.build.json', dest: 'templates'},
 					{src: '../o23-n99/tsconfig.json', dest: 'templates'},
-					{src: '../o23-n99/webpack.config.js', dest: 'templates'}
+					{src: '../o23-n99/webpack.config.js', dest: 'templates'},
+					{src: '../o23-n99/README.md', dest: 'templates'},
 				], hook: 'buildEnd'
 			})
 		].filter(x => x != null),

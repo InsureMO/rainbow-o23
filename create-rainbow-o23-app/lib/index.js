@@ -20,6 +20,13 @@ const generatePackageJson = async (stdOptions, datasourceOptions, pluginOptions,
 	fs.writeFileSync(packageFile, JSON.stringify(json, null, 2) + '\n');
 };
 
+const generateReadme = async (packageName, directory) => {
+	const readmeFile = path.resolve(directory, 'README.md');
+	let content = fs.readFileSync(readmeFile).toString();
+	content.replace(/o23\/n99/, packageName);
+	fs.writeFileSync(readmeFile, content);
+}
+
 const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
 	writeDatasourceFiles(datasourceOptions, pluginOptions, directory);
 	writePluginFiles(pluginOptions, directory);
@@ -46,6 +53,7 @@ exports.createApp = async () => {
 	const dataSourceOptions = await getDatasourceOptions();
 	const pluginOptions = await getPluginOptions();
 	await generatePackageJson(stdOptions, dataSourceOptions, pluginOptions, directory);
+	await generateReadme(packageName, directory);
 	await generateFiles(dataSourceOptions, pluginOptions, directory);
 	await cleanPluginSrcFolder(directory);
 	// install dependencies
