@@ -64,7 +64,7 @@ export class ParsePipelineDefPipelineStep
 }
 
 export const createParsePipelineDefStepBuilder = (options: BootstrapOptions): PipelineStepBuilderType => {
-	return class TriggerPipelinePipelineStepBuilder
+	return class ParsePipelineDefPipelineStepBuilder
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		extends AbstractFragmentaryPipelineStepBuilder<FragmentaryPipelineStepBuilderOptions, ParsePipelineDefPipelineStepOptions, ParsePipelineDefPipelineStep> {

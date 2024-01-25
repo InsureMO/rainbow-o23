@@ -245,3 +245,146 @@ promotion due to the absence of other parameters):
 The file object structure is [`Express.Multer.File`](https://www.npmjs.com/package/@types/multer?activeTab=code).
 
 # Pipeline Step Configuration
+
+A pipeline step is a unit of execution logic. It can be a script fragment, a function, or a pipeline. The following table lists the steps:
+
+| Step Type                              | Extends From                           | Module    | Usage           | Description                                                                 |
+|----------------------------------------|----------------------------------------|-----------|-----------------|-----------------------------------------------------------------------------|
+| `AbstractFragmentaryPipelineStep`      |                                        | `o23/n3`  | Abstract        | Provide in, out, error handlers.                                            |
+| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Get a property from the request payload.                                    |
+| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Delete a property from the request payload.                                 |
+| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a script snippet.                                                   |
+| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Generate a snowflake number.                                                |
+| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Fetch data from a remote server.                                            |
+| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a pipeline.                                                         |
+| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a step.                                                             |
+| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a set of steps for each route, semantically equivalent to a switch. |
+| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a set of steps.                                                     |
+| `AsyncPipelineStepSets`                | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps asynchronously.                                      |
+| `ConditionalPipelineStepSets`          | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps conditionally.                                       |
+| `EachPipelineStepSets`                 | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps for each item in an array.                           |
+| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Abstract        | Provide TypeORM connection and transaction.                                 |
+| `TypeOrmLoadEntityByIdPipelineStep`    | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Not Recommended | Load TypeORM entity by id.                                                  |
+| `TypeOrmSaveEntityPipelineStep`        | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Not Recommended | Save TypeORM entity.                                                        |
+| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Standard        | Execute a snippet based on TypeORM connection.                              |
+| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Abstract        | Execute SQL statement.                                                      |
+| `AbstractTypeOrmLoadBySQLPipelineStep` | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Abstract        | Execute SQL statement for loading data.                                     |
+| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard        | Execute SQL statement for loading one data, single record.                  |
+| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard        | Execute SQL statement for loading many data, multiple records.              |
+| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard        | Execute SQL statement for saving data.                                      |
+| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard        | Execute SQL statement for bulk saving data.                                 |
+| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps in a transaction.                                    |
+| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n5`  | Print           | Print PDF file.                                                             |
+| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print           | Print CSV file.                                                             |
+| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print           | Print Excel file.                                                           |
+| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System          | Load database scripts files.                                                |
+| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System          | Parse pipeline definition                                                   |
+| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`                  | `o23/n90` | System          | Server initialization snippet                                               |
+| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n90` | Standard        | Trigger a pipeline by code, a pipeline or step by given content.            |
+
+Pipeline steps are divided into several categories:
+
+- `Abstract`: provides basic definitions and logic, cannot be used directly,
+- `System`: used to define system logic, not necessary for users to use,
+- `Standard`: can be used to define user logic,
+- `Print`: a printing plugin, can be used to define user logic,
+- `Not Recommended`: not recommended to use.
+
+## AbstractFragmentaryPipelineStep
+
+| Attribute                   | Type                     | Mandatory | Description                                                               |
+|-----------------------------|--------------------------|-----------|---------------------------------------------------------------------------|
+| `from-input`                | `snippet`                | No        | Convert the given input data into the format required for this step.      |
+| `to-output`                 | `snippet`                | No        | Convert the output data of this step into the format required for output. |
+| `merge`                     | `string`, `boolean`      | No        | Merge return data to output data.                                         |
+| `errorHandles`              | `map`                    | No        | Error handlers.                                                           |
+| `errorHandlers.catchable`   | `snippet`, `steps array` | No        | Catchable error handler.                                                  |
+| `errorHandlers.uncatchable` | `snippet`, `steps array` | No        | Uncatchable error handler.                                                |
+| `errorHandlers.exposed`     | `snippet`, `steps array` | No        | Exposed uncatchable error handler.                                        |
+| `errorHandlers.any`         | `snippet`, `steps array` | No        | Any error handler.                                                        |
+
+### `from-input`
+
+Signature as `($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => InFragment`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The data returned by `from-input` will serve as the input of this step.
+
+> If `from-input` is not defined, the pipeline will directly pass the input data to this step.
+
+### `to-output`
+
+Signature as `($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Out`:
+
+- `$result`: result data after step execution,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The data returned by `to-output` will serve as the output of this step and be used as the input for the next step. However, in many
+scenarios, the returned data from a step is just a fragment that will be added to the context data of the entire pipeline for later use. In
+such scenarios, the `merge` attribute should be used in conjunction.
+
+> If `to-output` is not defined, the pipeline will directly pass the result data to the next step.
+
+### `merge`
+
+Signature as `boolean | string`, after receiving the returned data from this step, it may have undergone processing through `to-output` and
+will be merged into the input data according to the definition of `merge`. If `merge` is not defined, the returned data will be directly
+used as the input data for the next step.
+
+- `true`: merge the returned data into the input data, ensure that the returned data is an object. It will be automatically unboxed and
+  merged with the input data.
+- `false`: replace the input data with the returned data. It's default behavior, actually, there is no need to explicitly declare it
+  as `false`.
+- A name: merge the returned data as a property into the input data, using the specified string as the property name,
+
+> We strongly recommend keeping the input and output data as JSON object whenever possible, as it helps avoid unnecessary complications,
+> especially when using `merge` where both automatic unboxing and boxing require JSON object support.
+
+## Helper Functions
+
+```typescript
+// o23/n1
+interface PipelineStepHelpers {
+	$config?: Config;
+	$logger?: Logger;
+	$date: PipelineStepDateHelper;
+	$nano: (size?: number) => string;
+	$ascii: (size?: number) => string;
+	/** create an exposed uncatchable error*/
+	$error: (options: PipelineStepErrorOptions) => never;
+	$errors: {
+		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		exposed: (options: PipelineStepErrorOptions) => never;
+		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+	};
+	/** create a file */
+	$file: (options: PipelineStepFileOptions) => PipelineStepFile;
+	$clearContextData: () => typeof PIPELINE_STEP_RETURN_NULL;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isEmpty: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotEmpty: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isBlank: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotBlank: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	trim: (value: any) => string;
+}
+```
+
+`$clearContextData` should be particularly noted. Usually, when a step does not return anything or returns null or undefined, it means the
+pipeline will continue to execute the next step using the request data received by the current step. This implies that regardless of
+whether the input data has been modified in this step, the number and names of the attributes of the input data for the next step will not
+change. If `$.$clearContextData()` is returned, it means that the input data is cleared, and the data returned by `$.$clearContextData()` is
+used as the input data for the next Step. This data is a Symbol and does not have any meaningful value. When this return serves as the exit
+of the entire pipeline, and the pipeline itself is exposed as a Rest API, the response body given to the caller is empty.
+
+> Helper functions may vary depending on customization, and an existing example can be found in the implementation
+> of `ServerInitSnippetPipelineStep` in `o23/n90`.
