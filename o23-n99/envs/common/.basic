@@ -38,5 +38,3 @@ CFG_LOGGER_COMBINED_MAX_SIZE=10m
 # console logger
 CFG_LOGGER_CONSOLE_ENABLED=false
 CFG_LOGGER_CONSOLE_LEVEL=debug
-# pipeline logger, if enable pipeline debug log, need to enable one of error/combined/console log.
-CFG_PIPELINE_DEBUG_LOG_ENABLED=false
