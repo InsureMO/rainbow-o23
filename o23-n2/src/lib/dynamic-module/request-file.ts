@@ -120,6 +120,7 @@ export class MultiFilesFileTypeValidator extends FileValidator<FileTypeValidator
 }
 
 export class DynamicModuleRequestFile {
+	// noinspection JSUnusedLocalSymbols
 	private constructor() {
 		// avoid extend
 	}
@@ -143,7 +144,7 @@ export class DynamicModuleRequestFile {
 		}
 	}
 
-	public static createMethodDecoratorOfNamedFiles(def: DynamicModulePipeline) {
+	public static createMethodDecoratorOfNamedFile(def: DynamicModulePipeline) {
 		if (typeof def.files === 'string') {
 			// single or multiple files with single name
 			return UseInterceptors(FileInterceptor(def.files));
@@ -202,7 +203,7 @@ export class DynamicModuleRequestFile {
 	public static createMethodDecorator(def: DynamicModulePipeline): Undefinable<MethodDecorator> {
 		const creates = [
 			DynamicModuleRequestFile.createMethodDecoratorOfAnyFiles,
-			DynamicModuleRequestFile.createMethodDecoratorOfNamedFiles,
+			DynamicModuleRequestFile.createMethodDecoratorOfNamedFile,
 			DynamicModuleRequestFile.createMethodDecoratorOfMultiNamedFiles,
 			DynamicModuleRequestFile.createMethodDecoratorOfNonameOrNamedFiles,
 			DynamicModuleRequestFile.createMethodDecoratorOfMultiNamedFilesWithCheck
@@ -226,7 +227,7 @@ export class DynamicModuleRequestFile {
 		}
 	}
 
-	public static createParameterDecoratorOfNamedFiles(def: DynamicModulePipeline, index: number) {
+	public static createParameterDecoratorOfNamedFile(def: DynamicModulePipeline, index: number) {
 		if (typeof def.files === 'string') {
 			// single or multiple files with single name
 			return DynamicModuleParameter.createParameterDecoratorDelegateDef({
@@ -324,7 +325,7 @@ export class DynamicModuleRequestFile {
 	public static createParameterDecorator(def: DynamicModulePipeline, index: number): Undefinable<ParameterDecoratorDelegateDef> {
 		const creates = [
 			DynamicModuleRequestFile.createParameterDecoratorOfAnyFiles,
-			DynamicModuleRequestFile.createParameterDecoratorOfNamedFiles,
+			DynamicModuleRequestFile.createParameterDecoratorOfNamedFile,
 			DynamicModuleRequestFile.createParameterDecoratorOfMultiNamedFiles,
 			DynamicModuleRequestFile.createParameterDecoratorOfNonameOrNamedFiles,
 			DynamicModuleRequestFile.createParameterDecoratorOfMultiNamedFilesWithCheck
