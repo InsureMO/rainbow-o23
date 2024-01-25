@@ -1,3 +1,9 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![Nest](https://img.shields.io/badge/nest-white.svg?logo=nestjs&logoColor=E0234E&style=social)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n2
 
 In simple terms, `o23/n2` is a tool that publishes a given pipeline as a web application using [NestJS](https://nestjs.com/). In this

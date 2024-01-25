@@ -1,3 +1,13 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![TypeORM](https://img.shields.io/badge/TypeORM-E83524.svg)
+![MySQL](https://img.shields.io/badge/MySQL-white.svg?logo=mysql&logoColor=4479A1&style=social)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-white.svg?logo=postgresql&logoColor=4169E1&style=social)
+![MSSQL](https://img.shields.io/badge/MSSQL-white.svg?logo=microsoftsqlserver&logoColor=CC2927&style=social)
+![Oracle](https://img.shields.io/badge/Oracle-white.svg?logo=oracle&logoColor=F80000&style=social)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n3
 
 `o23/n3` provides the most basic pipeline steps.

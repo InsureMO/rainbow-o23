@@ -1,3 +1,12 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![Nest](https://img.shields.io/badge/nest-white.svg?logo=nestjs&logoColor=E0234E&style=social)
+![Puppeteer](https://img.shields.io/badge/Puppeteer-white.svg?logo=puppeteer&logoColor=40B5A4&style=social)
+![ExcelJS](https://img.shields.io/badge/ExcelJS-white.svg?logo=microsoftexcel&logoColor=217346&style=social)
+![CSV for Node.js](https://img.shields.io/badge/CSV%20for%20Node.js-548694.svg)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n91
 
 `o23/n91` is a web application that provides printing services for `o23/n90`.

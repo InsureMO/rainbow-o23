@@ -1,3 +1,7 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n1
 
 The `o23/n1` module provides two parts of implementation:

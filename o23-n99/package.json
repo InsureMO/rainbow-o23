@@ -28,11 +28,11 @@
 		"type": "git",
 		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
 	},
+	"author": "Rainbow Team",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
-	"author": "Rainbow Team",
 	"dependencies": {
 		"@rainbow-o23/n90": "0.1.14",
 		"@rainbow-o23/n91": "0.1.14",

@@ -1,3 +1,9 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![Puppeteer](https://img.shields.io/badge/Puppeteer-white.svg?logo=puppeteer&logoColor=40B5A4&style=social)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n5
 
 `o23/n5` provides a pipeline step that converts HTML templates to PDF, implemented based on [Puppeteer](https://pptr.dev/).

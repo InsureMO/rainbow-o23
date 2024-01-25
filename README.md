@@ -14,7 +14,6 @@
 
 ![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
 
-
 # Idea of `o23`
 
 The inspiration for `o23` comes from the increasing complexity of backend systems, especially in the context of microservices. Each

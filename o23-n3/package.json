@@ -15,6 +15,7 @@
 		"type": "git",
 		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
 	},
+	"author": "Rainbow Team",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"

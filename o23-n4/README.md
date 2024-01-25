@@ -1,3 +1,7 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n4
 
 `o23/n4` provides the ability to read pipeline and pipeline step configurations, currently supporting the YAML format. While reading the

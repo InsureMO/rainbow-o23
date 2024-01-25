@@ -1,3 +1,10 @@
+![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
+
+![ExcelJS](https://img.shields.io/badge/ExcelJS-white.svg?logo=microsoftexcel&logoColor=217346&style=social)
+![CSV for Node.js](https://img.shields.io/badge/CSV%20for%20Node.js-548694.svg)
+
+![Module Formats](https://img.shields.io/badge/module%20formats-cjs-green.svg)
+
 # o23/n6
 
 `o23/n6` provides
