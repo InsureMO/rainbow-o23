@@ -96,6 +96,6 @@ export const registerDefaults = () => {
 
 	StepBuilders.register(DefaultSteps.HTTP_FETCH, FetchPipelineStepBuilder);
 
-	StepBuilders.register(DefaultSteps.REF_STEP, RefPipelinePipelineStepBuilder);
+	StepBuilders.register(DefaultSteps.REF_PIPELINE, RefPipelinePipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.REF_STEP, RefStepPipelineStepBuilder);
 };
