@@ -69,6 +69,17 @@ you deploy to a real service environment, you can modify the following configura
   from the startup scope,
 - `CFG_APP_EXAMPLES_ENABLED`: Change it to `false` to exclude the tutorial examples from the startup scope.
 
+## YAML Reader
+
+Property value of yaml could be use `env:` prefix to identify environment variable, for example:
+
+```yaml
+- name: Load Scripts
+  use: scripts-load-files
+  dir: "env:app.db.scripts.dir"
+  from-input: $factor.db.type
+```
+
 # Pipeline Configuration
 
 In general, pipelines are divided into two types:
@@ -78,6 +89,7 @@ In general, pipelines are divided into two types:
 
 Pipelines are stored in the following locations:
 
+- `/scripts` directory,
 - `/server` directory,
 - `T_O23_PIPELINE_DEFS` table,
 - Alternatively, relevant configuration tables such as the pre-printing Pipeline can be found in `T_O23_PRINT_TEMPLATES`.
@@ -245,3 +257,796 @@ promotion due to the absence of other parameters):
 The file object structure is [`Express.Multer.File`](https://www.npmjs.com/package/@types/multer?activeTab=code).
 
 # Pipeline Step Configuration
+
+A pipeline step is a unit of execution logic. It can be a script fragment, a function, or a pipeline. The following table lists the steps:
+
+| Step Type                              | Extends From                           | Module    | Usage    | Description                                                                 |
+|----------------------------------------|----------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
+| `AbstractFragmentaryPipelineStep`      |                                        | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
+| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Get a property from the request payload.                                    |
+| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
+| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a script snippet.                                                   |
+| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Generate a snowflake number.                                                |
+| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
+| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a pipeline.                                                         |
+| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a step.                                                             |
+| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
+| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps.                                                     |
+| `AsyncPipelineStepSets`                | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
+| `ConditionalPipelineStepSets`          | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
+| `EachPipelineStepSets`                 | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
+| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
+| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
+| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
+| `AbstractTypeOrmLoadBySQLPipelineStep` | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Abstract | Execute SQL statement for loading data.                                     |
+| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
+| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
+| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
+| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
+| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
+| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n5`  | Print    | Print PDF file.                                                             |
+| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print CSV file.                                                             |
+| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print Excel file.                                                           |
+| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Load database scripts files.                                                |
+| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Parse pipeline definition                                                   |
+| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`                  | `o23/n90` | System   | Server initialization snippet                                               |
+| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
+
+Pipeline steps are divided into several categories:
+
+- `Abstract`: provides basic definitions and logic, cannot be used directly,
+- `System`: used to define system logic, not necessary for users to use,
+- `Standard`: can be used to define user logic,
+- `Print`: a printing plugin, can be used to define user logic.
+
+> All steps inherit the attribute definitions of their parent steps.
+
+Pipeline steps are stored in the following locations:
+
+- `/scripts` directory,
+- `/server` directory,
+- `T_O23_PIPELINE_DEFS` table,
+- Or in pipeline definitions.
+
+For example, when it is independently defined,
+
+```yaml
+code: Add2Numbers1
+name: Add2Numbers
+type: step
+use: snippet
+snippet: $factor.one + $factor.another
+---
+code: Add2Numbers2
+name: Add2Numbers
+type: step-sets
+use: sets
+steps:
+  - name: Add
+    use: snippet
+    snippet: $factor.one + $factor.another
+```
+
+## Configuration in YAML
+
+Typical step configuration requires at least two attributes, as follows:
+
+```yaml
+- name: Step Name
+  use: Step Type
+  # other properties
+```
+
+## Snippet Property
+
+The type of attribute values with many steps is `snippet` or compatible with `snippet`. This type is essentially a function body, and the
+function determined by the step itself. When configuring, it needs to conform to the requirements of the function, including
+possibly being a synchronous or asynchronous function, having multiple parameters, and possibly having a fixed return type. When configuring
+these attributes, you only need to write the function body. When interpreting and executing these function bodies, `o23` follows the
+principles below:
+
+- If it is a single line, it checks whether it starts with `return` or `throw`. If not, it automatically adds `return` and treats the
+  execution result of that line as the returned data.
+- If there are multiple lines, no processing will be done.
+- During execution, the parameters are passed in according to the agreed parameter names, which can be used directly in the function body.
+  For example, common ones are `$factor`, `$result`, `$helpers`, and `$`.
+
+Due to the issue of single-line and multi-line function bodies, we have to take a closer look at the YAML configuration syntax. In YAML, a
+single line can be directly after the attribute name, or it can be represented using preset commands. Let's practice with a few actual
+examples:
+
+```yaml
+# no, it is incorrect. yaml reader reads it as a json object, 
+# will be "[object Object]" after to string, which leads exception when cast to function.
+snippet: { one: $factor.one, another: $factor.another }
+---
+# 5. no, it is incorrect, yaml reader reads it as a boolean value.
+# 6. noinspection YAMLIncompatibleTypes
+snippet: true
+---
+# single-line expressions, they will be interpreted as "return $factor.one + $factor.another;"
+snippet: $factor.one + $factor.another
+---
+# 7. single-line expressions, they will be interpreted as "return {one: $factor.one, another: $factor.another};"
+snippet: "{one: $factor.one, another: $factor.another}"
+---
+# single-line expressions, "|-" and ">-" will remove all tailing blank lines.
+# the following 4 expressions are equivalent.
+snippet: |-
+  return $factor.one + $factor.another;
+---
+snippet: >-
+  return $factor.one + $factor.another;
+---
+snippet: |-
+  $factor.one + $factor.another;
+---
+snippet: >-
+  $factor.one + $factor.another;
+```
+
+When there is indeed only one line of snippet, but you don't want to return any data, we recommend returning a `null`
+value to indicate that no operation is performed on the input data. This means explicitly adding a line `return null;` at the end of the
+script. Alternatively, you can use YAML syntax `|` or `>`, which adds a blank line at the end of the text. This will make the interpreter
+recognize the function body as a multi-line code and prevent the automatic addition of `return `.
+
+```yaml
+# 8. no return, because they are multiple lines.
+snippet: |
+  $factor.one + $factor.another;
+---
+snippet: >
+  $factor.one + $factor.another;
+---
+snippet: |+
+  $factor.one + $factor.another;
+---
+snippet: >+
+  $factor.one + $factor.another;
+```
+
+> `o23` use [js-yaml](https://github.com/nodeca/js-yaml) to read yaml files.
+
+## AbstractFragmentaryPipelineStep
+
+| Attribute                   | Type                     | Mandatory | Description                                                               |
+|-----------------------------|--------------------------|-----------|---------------------------------------------------------------------------|
+| `from-input`                | `snippet`                | No        | Convert the given input data into the format required for this step.      |
+| `to-output`                 | `snippet`                | No        | Convert the output data of this step into the format required for output. |
+| `merge`                     | `string`, `boolean`      | No        | Merge return data to output data.                                         |
+| `errorHandles`              | `map`                    | No        | Error handlers.                                                           |
+| `errorHandlers.catchable`   | `snippet`, `steps array` | No        | Catchable error handler.                                                  |
+| `errorHandlers.exposed`     | `snippet`, `steps array` | No        | Exposed uncatchable error handler.                                        |
+| `errorHandlers.uncatchable` | `snippet`, `steps array` | No        | Uncatchable error handler.                                                |
+| `errorHandlers.any`         | `snippet`, `steps array` | No        | Any error handler.                                                        |
+
+### `from-input`
+
+`($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => InFragment`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The data returned by `from-input` will serve as the input of this step.
+
+> If `from-input` is not defined, the pipeline will directly pass the input data to this step.
+
+### `to-output`
+
+`($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Out`:
+
+- `$result`: result data after step execution,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The data returned by `to-output` will serve as the output of this step and be used as the input for the next step. However, in many
+scenarios, the returned data from a step is just a fragment that will be added to the context data of the entire pipeline for later use. In
+such scenarios, the `merge` attribute should be used in conjunction.
+
+> If `to-output` is not defined, the pipeline will directly pass the result data to the next step.
+
+### `merge`
+
+`boolean | string`, after receiving the returned data from this step, it may have undergone processing through `to-output` and
+will be merged into the input data according to the definition of `merge`. If `merge` is not defined, the returned data will be directly
+used as the input data for the next step.
+
+- `true`: merge the returned data into the input data, ensure that the returned data is an object. It will be automatically unboxed and
+  merged with the input data.
+- `false`: replace the input data with the returned data. It's default behavior, actually, there is no need to explicitly declare it
+  as `false`.
+- A name: merge the returned data as a property into the input data, using the specified string as the property name,
+
+> We strongly recommend keeping the input and output data as JSON object whenever possible, as it helps avoid unnecessary complications,
+> especially when using `merge` where both automatic unboxing and boxing require JSON object support.
+
+### `error-handles`
+
+`error-handles` can include handlers for the following four types of exceptions, each of which is optional. And they
+will be matched based on the exception type. It is important to note that if `exposed` is not defined, `uncatchable` will also
+catch `ExposedUncatchableError`. And `any` will catch all other exceptions that are not caught by other handlers. Each type of exception
+handler can be defined as a `snippet` or a step set. Let's first take a look at the function signature for defining a handler as
+a `snippet`.
+
+| Error Handler               | Error Type                | Signature                                                                                                                                                         |
+|-----------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `error-handles.catchable`   | `CatchableError`          | `($options: ErrorHandleOptions<In, InFragment, CatchableError>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> \| never`          |
+| `error-handles.exposed`     | `ExposedUncatchableError` | `($options: ErrorHandleOptions<In, InFragment, ExposedUncatchableError>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> \| never` |
+| `error-handles.uncatchable` | `UncatchableError`        | `($options: ErrorHandleOptions<In, InFragment, UncatchableError>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> \| never`        |
+| `error-handles.any`         | `Error`                   | `($options: ErrorHandleOptions<In, InFragment>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> \| never`                          |
+
+```typescript
+// o23/n3
+interface ErrorHandleOptions<In, InFragment, E extends Error = Error> {
+	$code: string;
+	$error: E;
+	$factor: InFragment;
+	$request: PipelineStepData<In>;
+}
+```
+
+As you can see, the exception handling function can access four parameter data: the current error code `$code`, the
+error object `$error`, the current step input data `$factor`, and the step context `$request`. Additionally, the handler can choose to
+continue throwing the exception or perform logical and data repairs, that's why this handler function allows to return normally.
+
+In addition to handling exceptions using a `snippet`, it is also possible to directly define a set of steps for exception handling. The
+input data for the first step of this set is the `$options` object of the function. For example:
+
+```yaml
+error-handles:
+  any:
+    - name: Print Console Log
+      use: snippet
+      snippet: |-
+        // "Example" is category of log
+        $.$logger.error($options.$error, 'Example');
+        return null;
+    - name: Rethrow
+      use: snippet
+      snippet: |-
+        throw $options.$error;
+```
+
+> <span style='color: red;'>**DO NOT**</span> attempt to modify the context data under any circumstances,
+
+## GetPropertyPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Get the value of a specified property from the input data. Execute after `from-input`.
+
+| Attribute  | Type     | Mandatory | Description                                                        |
+|------------|----------|-----------|--------------------------------------------------------------------|
+| `property` | `string` | Yes       | Property name, multiple-level property can be connected using `.`. |
+
+For example,
+
+```yaml
+- name: Get Property
+  use: get-property
+  property: customer.name
+  merge: customerName
+```
+
+## DeletePropertyPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Delete the given properties from the input data. Execute after `from-input`.
+
+| Attribute  | Type                     | Mandatory | Description                                               |
+|------------|--------------------------|-----------|-----------------------------------------------------------|
+| `property` | `string`, `string array` | Yes       | Property names, multiple-level property is not supported. |
+
+> Delete multiple properties at once by defining an array of property names or using `,` to connect multiple property names.
+
+> Since deletion only supports deleting direct properties, if the property you want to delete is not directly owned by the input data,
+> please use `from-input` first to obtain the object to which the property belongs.
+
+For example,
+
+```yaml
+- name: Del Property
+  use: del-property
+  property: one, two
+```
+
+> `use: del-properties` also works.
+
+## SnippetPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Execute given script snippet. Execute after `from-input`.
+
+| Attribute | Type      | Mandatory | Description     |
+|-----------|-----------|-----------|-----------------|
+| `snippet` | `snippet` | Yes       | Script snippet. |
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>`
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+> `$factor` is the return value of `from-input` when it is defined, otherwise it is the input data of this step.
+
+For example,
+
+```yaml
+- name: Snippet
+  use: snippet
+  snippet: |-
+    return $factor.one + $factor.another;
+```
+
+## SnowflakePipelineStep, extends AbstractFragmentaryPipelineStep
+
+Generate a snowflake number and returns it. Execute after `from-input`.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+> Please note that if you do not want the input data to be overwritten, please use `to-output` or `merge` to merge it into the input data.
+
+For example,
+
+```yaml
+- name: Generate Snowflake ID
+  use: snowflake
+  merge: id
+```
+
+## FetchPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Use `node-fetch` to call remote service APIs. Execute after `from-input`.
+
+| Attribute                    | Type      | Mandatory | Description                                            |
+|------------------------------|-----------|-----------|--------------------------------------------------------|
+| `system`                     | `string`  | Yes       | Code of remote service.                                |
+| `endpoint`                   | `string`  | Yes       | Name of remote service endpoint.                       |
+| `decorate-url`               | `snippet` | No        | Decorate url, which loaded from environment variables. |
+| `generate-headers`           | `snippet` | No        | Generate request headers, for remote service endpoint. |
+| `generate-body`              | `snippet` | No        | Generate request body, for remote service endpoint.    |
+| `read-response`              | `snippet` | No        | Generate response body, from remote service endpoint.  |
+| `response-error-handles`     | `map`     | No        | Error handlers for response.                           |
+| `response-error-handles.400` | `snippet` | No        | Error handler for 400.                                 |
+
+For example,
+
+```yaml
+- name: Fetch Sth
+  use: http-fetch
+  system: example
+  endpoint: user.find
+  decorate-url: |-
+    return $endpointUrl + '?userId=' + $factor.userId;
+  merge: user
+```
+
+### `system`
+
+`string`, system code is used to look up the corresponding configuration information when executing the fetch step, as follows:
+
+- `endpoints.{system}.global.headers`: request headers for all endpoints of the system,
+- `endpoints.{system}.global.timeout`: request timeout for all endpoints of the system.
+
+### `endpoint`
+
+`string`, endpoint name is used to look up the corresponding configuration information when executing the fetch step, as
+follows:
+
+- `endpoints.{system}.{endpoint}.url`: request url,
+- `endpoints.{system}.{endpoint}.method`: request method, default is `post`,
+- `endpoints.{system}.{endpoint}.headers`: request headers, for this endpoint only. Will overwrite global headers if with same name,
+- `endpoints.{system}.{endpoint}.timeout`: request timeout, for this endpoint only. Will overwrite global timeout if defined,
+- `endpoints.{system}.{endpoint}.body.used`: whether to use request body, default is `true`.
+
+### `decorate-url`
+
+`($endpointUrl: string, $factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => string`:
+
+- `$endpointUrl`: request url,
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+### `generate-headers`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Undefinable<Record<string, string>>`,
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The returned request headers will be merged with the globally defined headers. If there are duplicate names, the values generated by this
+function will take precedence.
+
+### `generate-body`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => any`,
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The returned body will be stringified.
+
+### `read-response`
+
+`($response: Response, $factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<any>`
+
+- `$response`: `Response` object, see [`node-fetch`](https://github.com/node-fetch/node-fetch),
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+By default, `json()` is used to retrieve a JSON object from the response body. However, if the data is not a JSON object, you can define
+your own function to handle data retrieval.
+
+### `response-error-handles`
+
+`response-error-handles` can define exception handling for specific HTTP statuses. The exception handler will be called in the following
+cases:
+
+- Response HTTP status is greater than or equal to `400`,
+- An error occurred due to a timeout, with a status code of `600`,
+- Any exceptions that occur during the execution, not caused by a remote call. For example, errors that occur during the execution
+  of `generate-body`, will have a status code of `000`,
+
+However, it is important to note that if the exception is an `UncatchableError`, it will not be caught.
+
+For each handler, signature
+is `($options: HttpErrorHandleOptions<In, InFragment>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> | never`:
+
+- `$options`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+```typescript
+// o23/n3
+interface HttpErrorHandleOptions<In, InFragment> {
+	$errorCode: HttpErrorCode;
+	$url: string;
+	$response?: Response;
+	$factor: InFragment;
+	$request: PipelineStepData<In>;
+}
+```
+
+## RefPipelinePipelineStep, extends AbstractFragmentaryPipelineStep
+
+Execute pipeline by given code, Use the input data of this step as the input data for the specified pipeline, and use the output data of the
+specified pipeline as the output data for this step. Execute after `from-input`.
+
+| Attribute | Type     | Mandatory | Description    |
+|-----------|----------|-----------|----------------|
+| `code`    | `string` | Yes       | Pipeline code. |
+
+For example,
+
+```yaml
+- name: Execute Pipeline
+  use: ref-pipeline
+  code: AnotherPipelineCode
+```
+
+## RefStepPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Execute pipeline step by given code, Use the input data of this step as the input data for the specified pipeline step, and use the output
+data of the specified pipeline step as the output data for this step. Execute after `from-input`.
+
+| Attribute | Type     | Mandatory | Description         |
+|-----------|----------|-----------|---------------------|
+| `code`    | `string` | Yes       | Pipeline step code. |
+
+For example,
+
+```yaml
+- name: Execute Pipeline Step
+  use: ref-step
+  code: AnotherPipelineStepCode
+```
+
+## RoutesPipelineStepSets, extends AbstractFragmentaryPipelineStep
+
+According to the given conditions, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
+execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+
+| Attribute      | Type         | Mandatory | Description               |
+|----------------|--------------|-----------|---------------------------|
+| `routes`       | `array`      | Yes       | Conditions and sub-steps. |
+| `routes.check` | `snippet`    | Yes       | Condition of route.       |
+| `routes.steps` | `step array` | Yes       | Sub-steps of route.       |
+| `otherwise`    | `step array` | No        | Sub-steps of otherwise.   |
+
+For example,
+
+```yaml
+- name: Routes
+  use: routes
+  routes:
+    - check: $factor.code = 'A'
+      steps:
+        - name: Print A
+          use: snippet
+          snippet: $.$logger.log('Got code A, it is amazing.');
+    - check: $factor.code = 'B'
+      steps:
+        - name: Print B
+          use: snippet
+          snippet: $.$logger.log('Got code B, it is great.');
+  otherwise:
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Got code ${factor.code}.`);
+```
+
+### `routes.check`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => boolean`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+### `routes.steps`
+
+A steps set.
+
+### `otherwise`
+
+A steps set.
+
+### Input Data for `routes.check`, `routes.steps` and `otherwise`
+
+It is important to note that the input data of this step is only used by `routes.check`. When executing the subset of sub-steps, whether
+they are defined under a specific route or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
+the `from-input` function of this step only affects the `check` definition in each route.
+
+## PipelineStepSets, extends AbstractFragmentaryPipelineStep
+
+Execute the given subset of sub-steps. Execute after `from-input`.
+
+| Attribute | Type         | Mandatory | Description |
+|-----------|--------------|-----------|-------------|
+| `steps`   | `step array` | Yes       | Sub-steps.  |
+
+For example,
+
+```yaml
+- name: Sets
+  use: sets
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Print code A, it is amazing.');
+    - name: Print B
+      use: snippet
+      snippet: $.$logger.log('Print code B, it is great.');
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Print code ${factor.code}.`);
+```
+
+## AsyncPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+Async Step Sets and Pipeline Step Sets are exactly the same, except that async step sets are executed asynchronously and therefore do not
+have a return value.
+
+| Attribute | Type         | Mandatory | Description |
+|-----------|--------------|-----------|-------------|
+| `steps`   | `step array` | Yes       | Sub-steps.  |
+
+For example,
+
+```yaml
+- name: Sets
+  use: async-sets
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Print code A, it is amazing.');
+    - name: Print B
+      use: snippet
+      snippet: $.$logger.log('Print code B, it is great.');
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Print code ${factor.code}.`);
+```
+
+> <span style='color: red;'>**NEVER**</span> put an async step set into a database transaction.
+
+## ConditionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+According to the given condition, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
+execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+
+| Attribute   | Type         | Mandatory | Description                       |
+|-------------|--------------|-----------|-----------------------------------|
+| `check`     | `snippet`    | Yes       | Condition.                        |
+| `steps`     | `step array` | Yes       | Sub-steps when condition matched. |
+| `otherwise` | `step array` | No        | Sub-steps of otherwise.           |
+
+For example,
+
+```yaml
+- name: Conditional
+  use: conditional
+  check: $factor.code = 'A'
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Got code A, it is amazing.');
+  otherwise:
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Got code ${factor.code}.`);
+```
+
+### `check`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => boolean`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+### `steps`
+
+A steps set.
+
+### `otherwise`
+
+A steps set.
+
+### Input Data for `routes.check`, `routes.steps` and `otherwise`
+
+It is important to note that the input data of this step is only used by `check`. When executing the subset of sub-steps, whether
+they are defined under `steps` or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
+the `from-input` function of this step only affects the `check` definition.
+
+## EachPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+For each item of the given array, execute the specified set of steps. Execute after `from-input`.
+
+| Attribute               | Type     | Mandatory | Description                       |
+|-------------------------|----------|-----------|-----------------------------------|
+| `original-content-name` | `string` | No        | Condition.                        |
+| `item-name`             | `string` | No        | Sub-steps when condition matched. |
+
+For example,
+
+```yaml
+- name: Each
+  use: each
+  from-input: $factor.locations
+  steps:
+    - name: Print Location
+      use: snippet
+      snippet: "$.$logger.log(`Location: ${$item.name}, ${$item.address}.`);"
+```
+
+> Given input data must be an array, otherwise use `from-input` to prepare.
+
+The input data structure for the sub-step set is as follows:
+
+```typescript
+interface EachPipelineStepSetsInputData<In> {
+	[Content]: any;     // original input data, before 'from-input'
+	item: any;          // item of input data, this input data is after 'from-input'
+	$semaphore: Symbol; // a symbol, when last step of step set returns this symbol, the pipeline will break the loop
+}
+```
+
+The return data from each iteration will be collected into an array as the return data for this step.
+
+## AbstractTypeOrmPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Provide an execution environment for TypeORM.
+
+| Attribute     | Type      | Mandatory | Description                            |
+|---------------|-----------|-----------|----------------------------------------|
+| `datasource`  | `string`  | No        | Datasource name                        |
+| `transaction` | `string`  | No        | Transaction name.                      |
+| `autonomous`  | `boolean` | No        | Whether to use autonomous transaction. |
+
+### `datasource`
+
+`string`, datasource name is used to look up the corresponding configuration information when executing the TypeORM step, as follows:
+
+- `typeorm.{datasource}.**`: datasource configurations.
+
+### `transaction`
+
+`string`, transaction name is used to look up the existing transaction when executing the TypeORM step. Default value is `$default`.
+
+### `autonomous`
+
+With autonomous transaction or not. Default value is `false`.
+
+### Redress when read YAML
+
+When the following environment variables are defined, YAML reader will do redressing for TypeORM steps:
+
+- `CFG_APP_ENV_STRICT=false`: default `true`, but `false` is recommended,
+- `CFG_APP_ENV_REDRESS_TYPEORM_DATASOURCE=true`: default `true`, will redress `datasource` attribute if it is not defined, using value
+  of `CFG_APP_DATASOURCE_DEFAULT`.
+- `CFG_APP_ENV_REDRESS_TYPEORM_TRANSACTION=true`: default `true`, will redress `transaction` and `autonomous` attributes,
+	- TypeORM step must have `datasource` declared,
+	- TypeORM step must not have `autonomous: true` declared,
+	- TypeORM step must not have `transaction` declared,
+	- TypeORM is not in a transaction,
+	- Set `autonomous` to `true`.
+
+## TypeOrmBySnippetPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## AbstractTypeOrmBySQLPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## AbstractTypeOrmLoadBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## TypeOrmLoadOneBySQLPipelineStep, extends AbstractTypeOrmLoadBySQLPipelineStep, AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## TypeOrmLoadManyBySQLPipelineStep, extends AbstractTypeOrmLoadBySQLPipelineStep, AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## TypeOrmSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## TypeOrmBulkSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+## TypeOrmTransactionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+## PrintPdfPipelineStep, extends AbstractFragmentaryPipelineStep
+
+## PrintCsvPipelineStep, extends AbstractFragmentaryPipelineStep
+
+## PrintExcelPipelineStep, extends AbstractFragmentaryPipelineStep
+
+## TriggerPipelinePipelineStep, extends AbstractFragmentaryPipelineStep
+
+## Helper Functions
+
+```typescript
+// o23/n1
+interface PipelineStepHelpers {
+	$config?: Config;
+	$logger?: Logger;
+	$date: PipelineStepDateHelper;
+	$nano: (size?: number) => string;
+	$ascii: (size?: number) => string;
+	/** create an exposed uncatchable error*/
+	$error: (options: PipelineStepErrorOptions) => never;
+	$errors: {
+		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		exposed: (options: PipelineStepErrorOptions) => never;
+		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+	};
+	/** create a file */
+	$file: (options: PipelineStepFileOptions) => PipelineStepFile;
+	$clearContextData: () => typeof PIPELINE_STEP_RETURN_NULL;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isEmpty: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotEmpty: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isBlank: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotBlank: (value: any) => boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	trim: (value: any) => string;
+}
+```
+
+`$clearContextData` should be particularly noted. Usually, when a step does not return anything or returns null or undefined, it means the
+pipeline will continue to execute the next step using the request data received by the current step. This implies that regardless of
+whether the input data has been modified in this step, the number and names of the attributes of the input data for the next step will not
+change. If `$.$clearContextData()` is returned, it means that the input data is cleared, and the data returned by `$.$clearContextData()` is
+used as the input data for the next Step. This data is a Symbol and does not have any meaningful value. When this return serves as the exit
+of the entire pipeline, and the pipeline itself is exposed as a Rest API, the response body given to the caller is empty.
+
+> Helper functions may vary depending on customization, and an existing example can be found in the implementation
+> of `ServerInitSnippetPipelineStep` in `o23/n90`.
