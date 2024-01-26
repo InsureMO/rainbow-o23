@@ -69,6 +69,17 @@ you deploy to a real service environment, you can modify the following configura
   from the startup scope,
 - `CFG_APP_EXAMPLES_ENABLED`: Change it to `false` to exclude the tutorial examples from the startup scope.
 
+## YAML Reader
+
+Property value of yaml could be use `env:` prefix to identify environment variable, for example:
+
+```yaml
+- name: Load Scripts
+  use: scripts-load-files
+  dir: "env:app.db.scripts.dir"
+  from-input: $factor.db.type
+```
+
 # Pipeline Configuration
 
 In general, pipelines are divided into two types:
@@ -78,6 +89,7 @@ In general, pipelines are divided into two types:
 
 Pipelines are stored in the following locations:
 
+- `/scripts` directory,
 - `/server` directory,
 - `T_O23_PIPELINE_DEFS` table,
 - Alternatively, relevant configuration tables such as the pre-printing Pipeline can be found in `T_O23_PRINT_TEMPLATES`.
@@ -248,49 +260,72 @@ The file object structure is [`Express.Multer.File`](https://www.npmjs.com/packa
 
 A pipeline step is a unit of execution logic. It can be a script fragment, a function, or a pipeline. The following table lists the steps:
 
-| Step Type                              | Extends From                           | Module    | Usage           | Description                                                                 |
-|----------------------------------------|----------------------------------------|-----------|-----------------|-----------------------------------------------------------------------------|
-| `AbstractFragmentaryPipelineStep`      |                                        | `o23/n3`  | Abstract        | Provide in, out, error handlers.                                            |
-| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Get a property from the request payload.                                    |
-| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Delete a property from the request payload.                                 |
-| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a script snippet.                                                   |
-| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Generate a snowflake number.                                                |
-| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Fetch data from a remote server.                                            |
-| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a pipeline.                                                         |
-| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a step.                                                             |
-| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a set of steps for each route, semantically equivalent to a switch. |
-| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard        | Execute a set of steps.                                                     |
-| `AsyncPipelineStepSets`                | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps asynchronously.                                      |
-| `ConditionalPipelineStepSets`          | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps conditionally.                                       |
-| `EachPipelineStepSets`                 | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps for each item in an array.                           |
-| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Abstract        | Provide TypeORM connection and transaction.                                 |
-| `TypeOrmLoadEntityByIdPipelineStep`    | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Not Recommended | Load TypeORM entity by id.                                                  |
-| `TypeOrmSaveEntityPipelineStep`        | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Not Recommended | Save TypeORM entity.                                                        |
-| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Standard        | Execute a snippet based on TypeORM connection.                              |
-| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Abstract        | Execute SQL statement.                                                      |
-| `AbstractTypeOrmLoadBySQLPipelineStep` | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Abstract        | Execute SQL statement for loading data.                                     |
-| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard        | Execute SQL statement for loading one data, single record.                  |
-| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard        | Execute SQL statement for loading many data, multiple records.              |
-| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard        | Execute SQL statement for saving data.                                      |
-| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard        | Execute SQL statement for bulk saving data.                                 |
-| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                     | `o23/n3`  | Standard        | Execute a set of steps in a transaction.                                    |
-| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n5`  | Print           | Print PDF file.                                                             |
-| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print           | Print CSV file.                                                             |
-| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print           | Print Excel file.                                                           |
-| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System          | Load database scripts files.                                                |
-| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System          | Parse pipeline definition                                                   |
-| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`                  | `o23/n90` | System          | Server initialization snippet                                               |
-| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n90` | Standard        | Trigger a pipeline by code, a pipeline or step by given content.            |
+| Step Type                              | Extends From                           | Module    | Usage    | Description                                                                 |
+|----------------------------------------|----------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
+| `AbstractFragmentaryPipelineStep`      |                                        | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
+| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Get a property from the request payload.                                    |
+| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
+| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a script snippet.                                                   |
+| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Generate a snowflake number.                                                |
+| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
+| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a pipeline.                                                         |
+| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a step.                                                             |
+| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
+| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps.                                                     |
+| `AsyncPipelineStepSets`                | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
+| `ConditionalPipelineStepSets`          | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
+| `EachPipelineStepSets`                 | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
+| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
+| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
+| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
+| `AbstractTypeOrmLoadBySQLPipelineStep` | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Abstract | Execute SQL statement for loading data.                                     |
+| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
+| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
+| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
+| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
+| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
+| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n5`  | Print    | Print PDF file.                                                             |
+| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print CSV file.                                                             |
+| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print Excel file.                                                           |
+| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Load database scripts files.                                                |
+| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Parse pipeline definition                                                   |
+| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`                  | `o23/n90` | System   | Server initialization snippet                                               |
+| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
 
 Pipeline steps are divided into several categories:
 
 - `Abstract`: provides basic definitions and logic, cannot be used directly,
 - `System`: used to define system logic, not necessary for users to use,
 - `Standard`: can be used to define user logic,
-- `Print`: a printing plugin, can be used to define user logic,
-- `Not Recommended`: not recommended to use.
+- `Print`: a printing plugin, can be used to define user logic.
 
 > All steps inherit the attribute definitions of their parent steps.
+
+Pipeline steps are stored in the following locations:
+
+- `/scripts` directory,
+- `/server` directory,
+- `T_O23_PIPELINE_DEFS` table,
+- Or in pipeline definitions.
+
+For example, when it is independently defined,
+
+```yaml
+code: Add2Numbers1
+name: Add2Numbers
+type: step
+use: snippet
+snippet: $factor.one + $factor.another
+---
+code: Add2Numbers2
+name: Add2Numbers
+type: step-sets
+use: sets
+steps:
+  - name: Add
+    use: snippet
+    snippet: $factor.one + $factor.another
+```
 
 ## Configuration in YAML
 
@@ -525,9 +560,11 @@ Execute given script snippet. Execute after `from-input`.
 |-----------|-----------|-----------|-----------------|
 | `snippet` | `snippet` | Yes       | Script snippet. |
 
-`($factor: InFragment, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>`
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>`
 
 - `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
 - `$helpers`, `$`: helper functions.
 
 > `$factor` is the return value of `from-input` when it is defined, otherwise it is the input data of this step.
@@ -573,6 +610,18 @@ Use `node-fetch` to call remote service APIs. Execute after `from-input`.
 | `read-response`              | `snippet` | No        | Generate response body, from remote service endpoint.  |
 | `response-error-handles`     | `map`     | No        | Error handlers for response.                           |
 | `response-error-handles.400` | `snippet` | No        | Error handler for 400.                                 |
+
+For example,
+
+```yaml
+- name: Fetch Sth
+  use: http-fetch
+  system: example
+  endpoint: user.find
+  decorate-url: |-
+    return $endpointUrl + '?userId=' + $factor.userId;
+  merge: user
+```
 
 ### `system`
 
@@ -668,18 +717,6 @@ interface HttpErrorHandleOptions<In, InFragment> {
 }
 ```
 
-For example,
-
-```yaml
-- name: Fetch Sth
-  use: http-fetch
-  system: example
-  endpoint: user.find
-  decorate-url: |-
-    return $endpointUrl + '?userId=' + $factor.userId;
-  merge: user
-```
-
 ## RefPipelinePipelineStep, extends AbstractFragmentaryPipelineStep
 
 Execute pipeline by given code, Use the input data of this step as the input data for the specified pipeline, and use the output data of the
@@ -716,19 +753,236 @@ For example,
 
 ## RoutesPipelineStepSets, extends AbstractFragmentaryPipelineStep
 
+According to the given conditions, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
+execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+
+| Attribute      | Type         | Mandatory | Description               |
+|----------------|--------------|-----------|---------------------------|
+| `routes`       | `array`      | Yes       | Conditions and sub-steps. |
+| `routes.check` | `snippet`    | Yes       | Condition of route.       |
+| `routes.steps` | `step array` | Yes       | Sub-steps of route.       |
+| `otherwise`    | `step array` | No        | Sub-steps of otherwise.   |
+
+For example,
+
+```yaml
+- name: Routes
+  use: routes
+  routes:
+    - check: $factor.code = 'A'
+      steps:
+        - name: Print A
+          use: snippet
+          snippet: $.$logger.log('Got code A, it is amazing.');
+    - check: $factor.code = 'B'
+      steps:
+        - name: Print B
+          use: snippet
+          snippet: $.$logger.log('Got code B, it is great.');
+  otherwise:
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Got code ${factor.code}.`);
+```
+
+### `routes.check`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => boolean`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+### `routes.steps`
+
+A steps set.
+
+### `otherwise`
+
+A steps set.
+
+### Input Data for `routes.check`, `routes.steps` and `otherwise`
+
+It is important to note that the input data of this step is only used by `routes.check`. When executing the subset of sub-steps, whether
+they are defined under a specific route or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
+the `from-input` function of this step only affects the `check` definition in each route.
+
 ## PipelineStepSets, extends AbstractFragmentaryPipelineStep
+
+Execute the given subset of sub-steps. Execute after `from-input`.
+
+| Attribute | Type         | Mandatory | Description |
+|-----------|--------------|-----------|-------------|
+| `steps`   | `step array` | Yes       | Sub-steps.  |
+
+For example,
+
+```yaml
+- name: Sets
+  use: sets
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Print code A, it is amazing.');
+    - name: Print B
+      use: snippet
+      snippet: $.$logger.log('Print code B, it is great.');
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Print code ${factor.code}.`);
+```
 
 ## AsyncPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
 
+Async Step Sets and Pipeline Step Sets are exactly the same, except that async step sets are executed asynchronously and therefore do not
+have a return value.
+
+| Attribute | Type         | Mandatory | Description |
+|-----------|--------------|-----------|-------------|
+| `steps`   | `step array` | Yes       | Sub-steps.  |
+
+For example,
+
+```yaml
+- name: Sets
+  use: async-sets
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Print code A, it is amazing.');
+    - name: Print B
+      use: snippet
+      snippet: $.$logger.log('Print code B, it is great.');
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Print code ${factor.code}.`);
+```
+
+> <span style='color: red;'>**NEVER**</span> put an async step set into a database transaction.
+
 ## ConditionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+According to the given condition, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
+execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+
+| Attribute   | Type         | Mandatory | Description                       |
+|-------------|--------------|-----------|-----------------------------------|
+| `check`     | `snippet`    | Yes       | Condition.                        |
+| `steps`     | `step array` | Yes       | Sub-steps when condition matched. |
+| `otherwise` | `step array` | No        | Sub-steps of otherwise.           |
+
+For example,
+
+```yaml
+- name: Conditional
+  use: conditional
+  check: $factor.code = 'A'
+  steps:
+    - name: Print A
+      use: snippet
+      snippet: $.$logger.log('Got code A, it is amazing.');
+  otherwise:
+    - name: Print Otherwise
+      use: snippet
+      snippet: $.$logger.log(`Got code ${factor.code}.`);
+```
+
+### `check`
+
+`($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => boolean`:
+
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+### `steps`
+
+A steps set.
+
+### `otherwise`
+
+A steps set.
+
+### Input Data for `routes.check`, `routes.steps` and `otherwise`
+
+It is important to note that the input data of this step is only used by `check`. When executing the subset of sub-steps, whether
+they are defined under `steps` or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
+the `from-input` function of this step only affects the `check` definition.
 
 ## EachPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
 
+For each item of the given array, execute the specified set of steps. Execute after `from-input`.
+
+| Attribute               | Type     | Mandatory | Description                       |
+|-------------------------|----------|-----------|-----------------------------------|
+| `original-content-name` | `string` | No        | Condition.                        |
+| `item-name`             | `string` | No        | Sub-steps when condition matched. |
+
+For example,
+
+```yaml
+- name: Each
+  use: each
+  from-input: $factor.locations
+  steps:
+    - name: Print Location
+      use: snippet
+      snippet: "$.$logger.log(`Location: ${$item.name}, ${$item.address}.`);"
+```
+
+> Given input data must be an array, otherwise use `from-input` to prepare.
+
+The input data structure for the sub-step set is as follows:
+
+```typescript
+interface EachPipelineStepSetsInputData<In> {
+	[Content]: any;     // original input data, before 'from-input'
+	item: any;          // item of input data, this input data is after 'from-input'
+	$semaphore: Symbol; // a symbol, when last step of step set returns this symbol, the pipeline will break the loop
+}
+```
+
+The return data from each iteration will be collected into an array as the return data for this step.
+
 ## AbstractTypeOrmPipelineStep, extends AbstractFragmentaryPipelineStep
 
-## TypeOrmLoadEntityByIdPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+Provide an execution environment for TypeORM.
 
-## TypeOrmSaveEntityPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+| Attribute     | Type      | Mandatory | Description                            |
+|---------------|-----------|-----------|----------------------------------------|
+| `datasource`  | `string`  | No        | Datasource name                        |
+| `transaction` | `string`  | No        | Transaction name.                      |
+| `autonomous`  | `boolean` | No        | Whether to use autonomous transaction. |
+
+### `datasource`
+
+`string`, datasource name is used to look up the corresponding configuration information when executing the TypeORM step, as follows:
+
+- `typeorm.{datasource}.**`: datasource configurations.
+
+### `transaction`
+
+`string`, transaction name is used to look up the existing transaction when executing the TypeORM step. Default value is `$default`.
+
+### `autonomous`
+
+With autonomous transaction or not. Default value is `false`.
+
+### Redress when read YAML
+
+When the following environment variables are defined, YAML reader will do redressing for TypeORM steps:
+
+- `CFG_APP_ENV_STRICT=false`: default `true`, but `false` is recommended,
+- `CFG_APP_ENV_REDRESS_TYPEORM_DATASOURCE=true`: default `true`, will redress `datasource` attribute if it is not defined, using value
+  of `CFG_APP_DATASOURCE_DEFAULT`.
+- `CFG_APP_ENV_REDRESS_TYPEORM_TRANSACTION=true`: default `true`, will redress `transaction` and `autonomous` attributes,
+	- TypeORM step must have `datasource` declared,
+	- TypeORM step must not have `autonomous: true` declared,
+	- TypeORM step must not have `transaction` declared,
+	- TypeORM is not in a transaction,
+	- Set `autonomous` to `true`.
 
 ## TypeOrmBySnippetPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
 
