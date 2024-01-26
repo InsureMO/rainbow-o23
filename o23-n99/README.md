@@ -260,37 +260,36 @@ The file object structure is [`Express.Multer.File`](https://www.npmjs.com/packa
 
 A pipeline step is a unit of execution logic. It can be a script fragment, a function, or a pipeline. The following table lists the steps:
 
-| Step Type                              | Extends From                           | Module    | Usage    | Description                                                                 |
-|----------------------------------------|----------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
-| `AbstractFragmentaryPipelineStep`      |                                        | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
-| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Get a property from the request payload.                                    |
-| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
-| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a script snippet.                                                   |
-| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Generate a snowflake number.                                                |
-| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
-| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a pipeline.                                                         |
-| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a step.                                                             |
-| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
-| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Standard | Execute a set of steps.                                                     |
-| `AsyncPipelineStepSets`                | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
-| `ConditionalPipelineStepSets`          | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
-| `EachPipelineStepSets`                 | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
-| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
-| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
-| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`          | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
-| `AbstractTypeOrmLoadBySQLPipelineStep` | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Abstract | Execute SQL statement for loading data.                                     |
-| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
-| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmLoadBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
-| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
-| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep`     | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
-| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                     | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
-| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n5`  | Print    | Print PDF file.                                                             |
-| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print CSV file.                                                             |
-| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`      | `o23/n6`  | Print    | Print Excel file.                                                           |
-| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Load database scripts files.                                                |
-| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`      | `o23/n90` | System   | Parse pipeline definition                                                   |
-| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`                  | `o23/n90` | System   | Server initialization snippet                                               |
-| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`      | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
+| Step Type                              | Extends From                       | Module    | Usage    | Description                                                                 |
+|----------------------------------------|------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
+| `AbstractFragmentaryPipelineStep`      |                                    | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
+| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Get a property from the request payload.                                    |
+| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
+| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a script snippet.                                                   |
+| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Generate a snowflake number.                                                |
+| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
+| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a pipeline.                                                         |
+| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a step.                                                             |
+| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
+| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps.                                                     |
+| `AsyncPipelineStepSets`                | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
+| `ConditionalPipelineStepSets`          | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
+| `EachPipelineStepSets`                 | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
+| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
+| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
+| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
+| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
+| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
+| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
+| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
+| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
+| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n5`  | Print    | Print PDF file.                                                             |
+| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print CSV file.                                                             |
+| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print Excel file.                                                           |
+| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Load database scripts files.                                                |
+| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Parse pipeline definition                                                   |
+| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`              | `o23/n90` | System   | Server initialization snippet                                               |
+| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`  | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
 
 Pipeline steps are divided into several categories:
 
@@ -753,15 +752,15 @@ For example,
 
 ## RoutesPipelineStepSets, extends AbstractFragmentaryPipelineStep
 
-According to the given conditions, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
-execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+According to the given conditions, if the condition is met, execute the corresponding subset of sub steps. If no condition is matched,
+execute the subset of sub steps corresponding to `otherwise`. Execute after `from-input`.
 
 | Attribute      | Type         | Mandatory | Description               |
 |----------------|--------------|-----------|---------------------------|
-| `routes`       | `array`      | Yes       | Conditions and sub-steps. |
+| `routes`       | `array`      | Yes       | Conditions and sub steps. |
 | `routes.check` | `snippet`    | Yes       | Condition of route.       |
-| `routes.steps` | `step array` | Yes       | Sub-steps of route.       |
-| `otherwise`    | `step array` | No        | Sub-steps of otherwise.   |
+| `routes.steps` | `step array` | Yes       | Sub steps of route.       |
+| `otherwise`    | `step array` | No        | Sub steps of otherwise.   |
 
 For example,
 
@@ -804,17 +803,17 @@ A steps set.
 
 ### Input Data for `routes.check`, `routes.steps` and `otherwise`
 
-It is important to note that the input data of this step is only used by `routes.check`. When executing the subset of sub-steps, whether
+It is important to note that the input data of this step is only used by `routes.check`. When executing the subset of sub steps, whether
 they are defined under a specific route or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
 the `from-input` function of this step only affects the `check` definition in each route.
 
 ## PipelineStepSets, extends AbstractFragmentaryPipelineStep
 
-Execute the given subset of sub-steps. Execute after `from-input`.
+Execute the given subset of sub steps. Execute after `from-input`.
 
 | Attribute | Type         | Mandatory | Description |
 |-----------|--------------|-----------|-------------|
-| `steps`   | `step array` | Yes       | Sub-steps.  |
+| `steps`   | `step array` | Yes       | Sub steps.  |
 
 For example,
 
@@ -840,7 +839,7 @@ have a return value.
 
 | Attribute | Type         | Mandatory | Description |
 |-----------|--------------|-----------|-------------|
-| `steps`   | `step array` | Yes       | Sub-steps.  |
+| `steps`   | `step array` | Yes       | Sub steps.  |
 
 For example,
 
@@ -863,14 +862,14 @@ For example,
 
 ## ConditionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
 
-According to the given condition, if the condition is met, execute the corresponding subset of sub-steps. If no condition is matched,
-execute the subset of sub-steps corresponding to `otherwise`. Execute after `from-input`.
+According to the given condition, if the condition is met, execute the corresponding subset of sub steps. If no condition is matched,
+execute the subset of sub steps corresponding to `otherwise`. Execute after `from-input`.
 
 | Attribute   | Type         | Mandatory | Description                       |
 |-------------|--------------|-----------|-----------------------------------|
 | `check`     | `snippet`    | Yes       | Condition.                        |
-| `steps`     | `step array` | Yes       | Sub-steps when condition matched. |
-| `otherwise` | `step array` | No        | Sub-steps of otherwise.           |
+| `steps`     | `step array` | Yes       | Sub steps when condition matched. |
+| `otherwise` | `step array` | No        | Sub steps of otherwise.           |
 
 For example,
 
@@ -907,7 +906,7 @@ A steps set.
 
 ### Input Data for `routes.check`, `routes.steps` and `otherwise`
 
-It is important to note that the input data of this step is only used by `check`. When executing the subset of sub-steps, whether
+It is important to note that the input data of this step is only used by `check`. When executing the subset of sub steps, whether
 they are defined under `steps` or under `otherwise`, they directly use the input data in this step before `from-input`. Therefore,
 the `from-input` function of this step only affects the `check` definition.
 
@@ -918,7 +917,7 @@ For each item of the given array, execute the specified set of steps. Execute af
 | Attribute               | Type     | Mandatory | Description                       |
 |-------------------------|----------|-----------|-----------------------------------|
 | `original-content-name` | `string` | No        | Condition.                        |
-| `item-name`             | `string` | No        | Sub-steps when condition matched. |
+| `item-name`             | `string` | No        | Sub steps when condition matched. |
 
 For example,
 
@@ -984,29 +983,391 @@ When the following environment variables are defined, YAML reader will do redres
 	- TypeORM is not in a transaction,
 	- Set `autonomous` to `true`.
 
-## TypeOrmBySnippetPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+### TypeOrmBySnippetPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
 
-## AbstractTypeOrmBySQLPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+Execute given script snippet. Execute after `from-input`.
 
-## AbstractTypeOrmLoadBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+| Attribute | Type      | Mandatory | Description     |
+|-----------|-----------|-----------|-----------------|
+| `snippet` | `snippet` | Yes       | Script snippet. |
 
-## TypeOrmLoadOneBySQLPipelineStep, extends AbstractTypeOrmLoadBySQLPipelineStep, AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+`($runner: QueryRunner, $factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>`
 
-## TypeOrmLoadManyBySQLPipelineStep, extends AbstractTypeOrmLoadBySQLPipelineStep, AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+- `$runner`: `QueryRunner` from [TypeORM](https://typeorm.io/),
+- `$factor`: input data,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
 
-## TypeOrmSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+> <span style='color: red;'>**DO NOT**</span> control transactions in the step snippet, transactions should be handled by transaction step
+> declarations.
 
-## TypeOrmBulkSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+### AbstractTypeOrmBySQLPipelineStep, extends AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
 
-## TypeOrmTransactionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+Execute given sql. Execute after `from-input`.
+
+| Attribute | Type     | Mandatory | Description |
+|-----------|----------|-----------|-------------|
+| `sql`     | `string` | No        | SQL.        |
+
+Use `sql: @ignore` to declare sql should be passed in by input data. When defining, do not declare the SQL, as it should be constructed
+based on the actual data requirements in certain scenarios. In this case, this step will require the input data to meet the following
+structure,
+
+```typescript
+interface TypeOrmBasis {
+	sql?: TypeOrmSql;
+}
+```
+
+Even if the `sql` attribute has been defined, if the `sql` is still passed in the input data, the `sql` in the input data will still take
+precedence.
+
+To learn more about the usage of SQL, please refer to the documentation for `o23/n3`. Simply put, `o23/n3` provides certain enhancements to
+the native SQL syntax in order to use the same SQL syntax to accommodate different database dialects. Here is the current list of
+enhancements in `o23/n3` syntax:
+
+- `$name` represents get `name` from given parameter object,
+- `IN ($...names)` represents `one-of`, `names` must be an array,
+- `LIKE $name%` represents `starts-with`,
+- `LIKE $%name` represents `ends-with`,
+- `LIKE $%name%` represents `contains`,
+- `$.limit($offset, $limit)` represents pagination,
+- Explicit data type,
+	- `$config.@json` explicitly indicate that the `config` column is of JSON data type,
+	- `$enabled.@bool` explicitly indicate that the `enabled` column is of boolean in-memory and numeric in database data type,
+	- `$createdAt.@ts` explicitly indicate that the `createAt` column is of string in-memory and timestamp in database data type,
+	- All data type explicitly indicator can be used in alias, simply remove the `$` suffix, such as `CREATED_AT AS "createdAt.@ts"`.
+
+> Find details on [`o23/n3`](https://github.com/InsureMO/rainbow-o23/tree/main/o23-n3).
+
+### TypeOrmLoadOneBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+Load a row of data. Execute after `from-input`.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+This step requires input data structure as follows:
+
+```typescript
+type TypeOrmEntityValue = string | number | bigint | boolean | Date | null | undefined;
+type TypeOrmEntityToLoad = DeepPartial<ObjectLiteral>;
+
+interface TypeOrmLoadBasis extends TypeOrmBasis {
+	params?: Array<TypeOrmEntityValue> | TypeOrmEntityToSave;
+}
+```
+
+- If SQL uses native dialect placeholders, the `params` parameter should be an array with the same length as the number of placeholders.
+- If SQL uses `o23/n3` enhanced syntax placeholders, the `params` parameter should be an object with properties corresponding to the
+  placeholders.
+
+For example,
+
+```yaml
+- name: Load One
+  use: typeorm-load-one
+  sql: SELECT USER_ID AS "userId", USER_NAME AS "userName" FROM T_USER WHERE USER_ID = $userId
+  merge: user
+```
+
+The above definition will use input data `{params: {userId: 1}}`, and return an object `{userId: 1, userName: 'Joe'}`. If the query does not
+match any data, it will return `undefined`. And because returning `undefined` would cause the pipeline to interpret it as "use the input
+data of this step as the input data for the next step," it is generally important to use `to-output` or `merge` to write the returned data
+back into the input data when using this step.
+
+> In SQL, the `AS "alias"` syntax is used because database fields commonly use underscore to connect words, while in-memory objects often
+> use camel case for property names. Therefore, aliasing is used to transform them. Additionally, some database dialects will standardize
+> the aliases to lowercase if double quotes are not used to enclose them. Hence, we strongly recommend using this approach when writing SQL
+> statements for loading data. Similarly, `$userId` is a part of the enhanced SQL syntax provided by `o23/n3`. Due to the differences in
+> placeholder syntax among various dialects, it is not possible to achieve consistent SQL execution across different databases. Moreover,
+> placeholders typically use array positions for matching, which requires the parameters to be of array type, contradicting the typical
+> practice of manipulating in-memory data. Therefore, we also highly recommend using the enhanced syntax of `o23/n3` to describe
+> placeholders.
+
+### TypeOrmLoadManyBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+Load multiple rows of data, using the same method as `TypeOrmLoadOneBySQLPipelineStep`, but returns an array where each row of data is an
+element of the array. Execute after `from-input`.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+For example,
+
+```yaml
+- name: Load Many
+  use: typeorm-load-many
+  sql: SELECT USER_ID AS "userId", USER_NAME AS "userName" FROM T_USER WHERE LOWER(USER_NAME) LIKE $name%
+  merge: users
+```
+
+The above definition will use input data `{params: {userName: 'john'}}`, and return an
+object `[{userId: 2, userName: 'Johnson'}, {userId: 3, userName: 'John'}]`. If the query does not match any data, it will return an empty
+array.
+
+### TypeOrmSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+Executing a single write SQL statement may affect more than one row of data, or it may not affect any data at all. Execute
+after `from-input`.  
+Even when executing write SQL statements, it is still possible to return data, such as the number of affected rows, newly created IDs, or
+certain database dialects may allow specifying the content to be returned through SQL syntax. These returned data will be returned as the
+output of this step.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+This step requires input data structure as follows:
+
+```typescript
+type TypeOrmEntityValue = string | number | bigint | boolean | Date | null | undefined;
+type TypeOrmEntityToSave = DeepPartial<ObjectLiteral>;
+
+interface TypeOrmSaveBasis extends TypeOrmBasis {
+	values?: Array<TypeOrmEntityValue> | TypeOrmEntityToSave;
+}
+```
+
+- If SQL uses native dialect placeholders, the `values` parameter should be an array with the same length as the number of placeholders.
+- If SQL uses `o23/n3` enhanced syntax placeholders, the `values` parameter should be an object with properties corresponding to the
+  placeholders.
+
+For example,
+
+```yaml
+- name: Save
+  use: typeorm-save
+  sql: UPDATE T_USER SET USER_NAME = $userName WHERE USER_ID = $userId
+  merge: results
+```
+
+The above definition will use input data `{values: {userId: 1, userName: 'Jane'}}`, and return data depends on the database
+dialect. `o23/n3` attempts to format the returned data in a standardized manner, as follows:
+
+- If the SQL execution returns a number, bigint, string, or boolean, it is returned as is.
+- If the database is `MySQL`, the following detections are done in the specified order:
+	- If there are changed rows count, returns it,
+	- If there is an auto-incremented ID, returns it,
+	- If there are affected rows count, returns it,
+	- The execution result is returned directly.
+- If the database is `PostgreSQL`:
+	- If the executed query is an `UPDATE` or `DELETE`, the number of affected rows is returned.
+	- If the returned data contains a result set, returns it.
+	- An empty array is returned (usually for `INSERT` operations).
+- If it is `MSSQL`, the returned result depends on the SQL syntax, as the dialect supports the `OUTPUT` grammar.
+- If it is `Oracle`, no additional processing is done, and the data is returned directly.
+
+### TypeOrmBulkSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+Batch write data by executing the same write SQL statement. Execute after `from-input`.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+This step requires input data structure as follows:
+
+```typescript
+type TypeOrmEntityValue = string | number | bigint | boolean | Date | null | undefined;
+type TypeOrmEntityToSave = DeepPartial<ObjectLiteral>;
+
+interface TypeOrmBulkSaveBasis extends TypeOrmBasis {
+	items?: Array<Array<TypeOrmEntityValue> | TypeOrmEntityToSave>;
+}
+```
+
+For example,
+
+```yaml
+- name: Save
+  use: typeorm-bulk-save
+  sql: UPDATE T_USER SET USER_NAME = $userName WHERE USER_ID = $userId
+  merge: results
+```
+
+The above definition will use input data `{items: [{userId: 1, userName: 'Jane'}]}`, The execution results of each element will be collected
+into an array and finally returned as the output data.
+
+### TypeOrmTransactionalPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+Start a database transaction to be used by a set of sub steps. It is important to note that not every sub step requires executing a database
+operation. Additionally, this transaction can be used across layers, not limited to direct sub steps only.
+
+| Attribute     | Type         | Mandatory | Description       |
+|---------------|--------------|-----------|-------------------|
+| `datasource`  | `string`     | No        | Datasource name   |
+| `transaction` | `string`     | No        | Transaction name. |
+| `steps`       | `step array` | Yes       | Sub steps.        |
+
+The transaction step itself does not perform any logic, it merely manages the transaction it initiated, ensuring that the transaction is
+started here and committed or rolled back after executing all sub steps. It is important to note that `o23/n3` uses the data source name and
+transaction name to locate the transaction. Therefore, when a database step needs to be managed by a transaction, you need to specify the
+same data source name and transaction name, and ensure that the transaction has already been started.
+
+For example,
+
+```yaml
+- name: Transaction
+  use: typeorm-transactional
+  datasource: example
+  transaction: first
+  steps:
+    - name: Save
+      use: typeorm-bulk-save
+      datasource: example
+      transaction: first
+      sql: UPDATE T_USER SET USER_NAME = $userName WHERE USER_ID = $userId
+      merge: results
+```
+
+The reason for explicitly specifying the data source and transaction name is that transactions can actually be nested. In scenarios with
+nested transactions, it becomes particularly important to specify which data source and transaction a database step should use. In some
+scenarios, there may be nested autonomous transactions within a transaction. In such cases, you can explicitly define `autonomous: true` to
+control an individual autonomous transaction.
 
 ## PrintPdfPipelineStep, extends AbstractFragmentaryPipelineStep
 
+Print the PDF file using a predefined template.
+
+| Attribute      | Type                                                       | Mandatory | Description                 |
+|----------------|------------------------------------------------------------|-----------|-----------------------------|
+| `browser-args` | `string`, `string array`                                   | No        | Chromium browser arguments. |
+| `viewport`     | [`Viewport`](https://pptr.dev/api/puppeteer.viewport/)     | No        | Chromium viewport settings. |
+| `pdf-options`  | [`PDFOptions`](https://pptr.dev/api/puppeteer.pdfoptions/) | No        | Chromium PDF print options. |
+
+> All PDF printing related configurations can be found in `/envs/common/.print`.
+
+> Normally, there is no need to set the `viewport`, and the `pdf-options` can be individually controlled in the template, so there is no
+> need to set them in the step definition either.
+
+This step requires the input data structure as follows:
+
+```typescript
+interface PrintCsvPipelineStepInFragment {
+	template: Buffer | string;
+	data: any;
+}
+```
+
+> The data format of `data` depends on the template definition.
+
+For example,
+
+```yaml
+- name: Print Pdf
+  use: print-pdf
+  from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+  merge: printed
+```
+
 ## PrintCsvPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Print the CSV file using a predefined template.
+
+| Attribute   | Type     | Mandatory | Description                                   |
+|-------------|----------|-----------|-----------------------------------------------|
+| `delimiter` | `string` | No        | Column delimiter, default `,`.                |
+| `escape`    | `string` | No        | Column content escape character, default `"`. |
+
+This step requires the input data structure as follows:
+
+```typescript
+interface PrintCsvPipelineStepInFragment {
+	template: Buffer | string;
+	data: any;
+}
+```
+
+> The data format of `data` depends on the template definition.
+
+For example,
+
+```yaml
+- name: Print Csv
+  use: print-csv
+  from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+  merge: printed
+```
 
 ## PrintExcelPipelineStep, extends AbstractFragmentaryPipelineStep
 
+Print the Excel file using a predefined template.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+This step requires the input data structure as follows:
+
+```typescript
+interface PrintExcelPipelineStepInFragment {
+	/** it is an Excel file, after 2007 */
+	template: Buffer;
+	data: any;
+}
+```
+
+> The data format of `data` depends on the template definition.
+
+For example,
+
+```yaml
+- name: Print Excel
+  use: print-excel
+  from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
+  merge: printed
+```
+
 ## TriggerPipelinePipelineStep, extends AbstractFragmentaryPipelineStep
+
+Trigger the specified pipeline or pipeline step based on the given input data.
+
+| Attribute    | Type | Mandatory | Description |
+|--------------|------|-----------|-------------|
+| No attribute |      |           |             |
+
+This step requires the input data structure as follows:
+
+```typescript
+interface PipelineTrigger {
+	data?: any;
+}
+
+interface PipelineTriggerByContent extends PipelineTrigger {
+	content?: string | ParsedDef;   // ParsedDef is not supported in YAML, only supported programmatically.
+	cacheKey?: string;
+}
+
+interface PipelineTriggerByCode extends PipelineTrigger {
+	code?: PipelineCode;
+}
+```
+
+The given input data can be either:
+
+- `PipelineTriggerByContent`: Parse the given `content` and execute it. The content can be a pipeline or a pipeline step. If a `cacheKey` is
+  specified, it will be used to cache parsed definition and the content's MD5 hash.
+- or `PipelineTriggerByCode`: Execute the pipeline with the given code.
+
+> Use the given data as input data.
+
+For example,
+
+```yaml
+- name: Prepare Trigger Data
+  use: snippet
+  snippet: |-
+    return {...$factor.trigger, data: $factor.data, cacheKey: `d9-config-${$factor.configuration.configId}`};
+  merge: trigger
+- name: Call Prepare Data Pipeline
+  use: trigger-pipeline
+  from-input: $factor.trigger
+  merge: preparedData
+```
 
 ## Helper Functions
 

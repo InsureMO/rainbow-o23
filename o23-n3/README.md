@@ -349,7 +349,7 @@ When `typeorm.DB.type=better-sqlite3`:
 
 > SQLite save `DateTime` column as javascript `string`.
 
-> NEVER use it in production. 
+> NEVER use it in production.
 
 ### Constructor Parameters
 
@@ -436,8 +436,8 @@ Since different databases have varying degrees of support for dialects, `o23/n3`
 - For pagination, `$.limit($offset, $limit)` will be translated and executed in the appropriate dialect. For example,
 	- `MySQL` uses `LIMIT $offset, $limit`,
 	- `PostgreSQL` uses `OFFSET $offset LIMIT $limit`.
-	- `MSSQL` uses `OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`,
-		- SQL Server requires an `ORDER BY` clause for pagination SQL. If there is no `ORDER BY` clause, will
+	- `MSSQL` and `Oracle` use `OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`,
+		- `MSSQL` requires an `ORDER BY` clause for pagination SQL. If there is no `ORDER BY` clause, will
 		  use `ORDER BY 1 OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`.
 - For JSON column, because some databases (such as MSSQL) do not have a JSON column type, they cannot automatically replace strings in the
   result set with JSON objects,
@@ -450,9 +450,9 @@ Since different databases have varying degrees of support for dialects, `o23/n3`
 	- Use `$enabled.@bool` to explicitly indicate that the `enabled` property of given parameters is of boolean in-memory and numeric in
 	  database data type.
 - For datetime (MySQL, MSSQL) / timestamp (Oracle, PostgreSQL) column,
-	- Use `created_at as "createAt.@ts"` to explicitly indicate that the `createAt` column is of string in-memory and timestamp in database
-	  data type.
-	- Use `$createAt.@ts` to explicitly indicate that the `createAt` property of given parameters is of string in-memory and timestamp in
+	- Use `created_at as "createdAt.@ts"` to explicitly indicate that the `createdAt` column is of string in-memory and timestamp in
+	  database data type.
+	- Use `$createdAt.@ts` to explicitly indicate that the `createdAt` property of given parameters is of string in-memory and timestamp in
 	  database data type.
 
 > We recommend that if you need to consider support for multiple database dialects, using enhanced syntax will make it easier to write SQL.

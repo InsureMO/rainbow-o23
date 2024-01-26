@@ -536,7 +536,7 @@ export abstract class AbstractTypeOrmBySQLPipelineStep<In = PipelineStepPayload,
 						// eslint-disable-next-line no-prototype-builtins
 						if (result.hasOwnProperty('rows')) {
 							// for SELECT
-							return result.rows;
+							return (result.rows ?? []).map(item => this.beautify({data: item, datasourceType}));
 						} else {
 							// INSERT, an empty array
 							return result;
@@ -550,7 +550,7 @@ export abstract class AbstractTypeOrmBySQLPipelineStep<In = PipelineStepPayload,
 					return this.beautify({data: result, datasourceType});
 				}
 			default:
-				return result;
+				return this.beautify({data: result, datasourceType});
 		}
 	}
 }
