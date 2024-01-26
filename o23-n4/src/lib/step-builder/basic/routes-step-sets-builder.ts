@@ -15,7 +15,7 @@ import {
 
 export interface RoutesConditionalStepBuilderOptions {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	check: ScriptFuncOrBody<ConditionCheckFunc<any>>,
+	check: ScriptFuncOrBody<ConditionCheckFunc<any, any>>,
 	steps?: Array<PipelineStepDef | PipelineStepSetsDef>;
 }
 

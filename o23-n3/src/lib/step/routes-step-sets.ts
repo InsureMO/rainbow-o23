@@ -8,28 +8,24 @@ import {
 } from '@rainbow-o23/n1';
 import {ERR_PIPELINE_STEP_CONDITIONAL_SNIPPET_NOT_EMPTY, ERR_PIPELINE_STEP_METHOD_NOT_SUPPORTED} from '../error-codes';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from './abstract-fragmentary-pipeline-step';
-import {
-	ConditionCheckFunc,
-	ConditionCheckWithInFragment,
-	ConditionCheckWithoutInFragment
-} from './conditional-step-sets';
+import {ConditionCheckFunc} from './conditional-step-sets';
 import {PipelineStepSets} from './step-sets';
 import {ScriptFuncOrBody} from './types';
 import {Utils} from './utils';
 
-export interface RoutesConditionalStepOptions<InFragment> {
-	check: ScriptFuncOrBody<ConditionCheckFunc<InFragment>>,
+export interface RoutesConditionalStepOptions<In, InFragment> {
+	check: ScriptFuncOrBody<ConditionCheckFunc<In, InFragment>>,
 	steps?: Array<PipelineStepBuilder>;
 }
 
 export interface RoutesPipelineStepSetsOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
-	conditionalSteps: Array<RoutesConditionalStepOptions<InFragment>>;
+	conditionalSteps: Array<RoutesConditionalStepOptions<In, InFragment>>;
 	otherwiseSteps?: Array<PipelineStepBuilder>;
 }
 
-export interface RoutesConditionalStep<InFragment> {
-	check: ConditionCheckFunc<InFragment>;
+export interface RoutesConditionalStep<In, InFragment> {
+	check: ConditionCheckFunc<In, InFragment>;
 	steps: Array<PipelineStepBuilder>;
 }
 
@@ -38,7 +34,7 @@ export interface RoutesConditionalStep<InFragment> {
  */
 export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends AbstractFragmentaryPipelineStep<In, Out, InFragment, OutFragment> {
-	private readonly _conditionalStepBuilders: Array<RoutesConditionalStep<InFragment>>;
+	private readonly _conditionalStepBuilders: Array<RoutesConditionalStep<In, InFragment>>;
 	private readonly _otherwiseStepBuilders: Undefinable<Array<PipelineStepBuilder>>;
 
 	constructor(options: RoutesPipelineStepSetsOptions<In, Out, InFragment, OutFragment>) {
@@ -61,7 +57,7 @@ export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStep
 		this._otherwiseStepBuilders = options.otherwiseSteps;
 	}
 
-	protected getConditionalStepBuilders(): Array<RoutesConditionalStep<InFragment>> {
+	protected getConditionalStepBuilders(): Array<RoutesConditionalStep<In, InFragment>> {
 		return this._conditionalStepBuilders;
 	}
 
@@ -74,20 +70,12 @@ export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStep
 	}
 
 	protected generateVariableNames(): Array<string> {
-		return [
-			this.isInFragmentIgnored() ? null : this.getInFragmentVariableName(),
-			...this.getHelpersVariableNames()
-		].filter(x => x != null);
+		return [this.getInFragmentVariableName(), this.getRequestVariableName(), ...this.getHelpersVariableNames()];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async check(func: ConditionCheckFunc<InFragment>, data: InFragment, _request: PipelineStepData<In>): Promise<boolean> {
+	protected async check(func: ConditionCheckFunc<In, InFragment>, data: InFragment, request: PipelineStepData<In>): Promise<boolean> {
 		const $helpers = this.getHelpers();
-		if (this.isInFragmentIgnored()) {
-			return await (func as ConditionCheckWithoutInFragment)($helpers, $helpers);
-		} else {
-			return await (func as ConditionCheckWithInFragment<InFragment>)(data, $helpers, $helpers);
-		}
+		return await func(data, request, $helpers, $helpers);
 	}
 
 	/**
@@ -131,17 +119,13 @@ export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStep
 	}
 
 	/**
-	 * is request step data ignored to snippet function.
-	 * default returns false
-	 */
-	protected isInFragmentIgnored(): boolean {
-		return false;
-	}
-
-	/**
 	 * override this method when want to use another variable name rather than "$factor"
 	 */
 	protected getInFragmentVariableName(): string {
 		return '$factor';
+	}
+
+	protected getRequestVariableName(): string {
+		return '$request';
 	}
 }

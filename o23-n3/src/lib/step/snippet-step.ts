@@ -4,16 +4,12 @@ import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '.
 import {ScriptFuncOrBody} from './types';
 import {Utils} from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PerformWithInFragment<InFragment, OutFragment> = ($factor: InFragment, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PerformWithoutInFragment<OutFragment> = ($helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
-export type PerformFunc<InFragment, OutFragment> =
-	PerformWithInFragment<InFragment, OutFragment> | PerformWithoutInFragment<OutFragment>;
+export type PerformFunc<In, InFragment, OutFragment> =
+	($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
 
 export interface SnippetPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
-	snippet: ScriptFuncOrBody<PerformFunc<InFragment, OutFragment>>;
+	snippet: ScriptFuncOrBody<PerformFunc<In, InFragment, OutFragment>>;
 }
 
 /**
@@ -24,8 +20,8 @@ export interface SnippetPipelineStepOptions<In = PipelineStepPayload, Out = Pipe
  */
 export class SnippetPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends AbstractFragmentaryPipelineStep<In, Out, InFragment, OutFragment> {
-	private readonly _snippet: ScriptFuncOrBody<PerformFunc<InFragment, OutFragment>>;
-	private readonly _func: PerformFunc<InFragment, OutFragment>;
+	private readonly _snippet: ScriptFuncOrBody<PerformFunc<In, InFragment, OutFragment>>;
+	private readonly _func: PerformFunc<In, InFragment, OutFragment>;
 
 	public constructor(options: SnippetPipelineStepOptions<In, Out, InFragment, OutFragment>) {
 		super(options);
@@ -42,33 +38,17 @@ export class SnippetPipelineStep<In = PipelineStepPayload, Out = PipelineStepPay
 		});
 	}
 
-	public getSnippet(): ScriptFuncOrBody<PerformFunc<InFragment, OutFragment>> {
+	public getSnippet(): ScriptFuncOrBody<PerformFunc<In, InFragment, OutFragment>> {
 		return this._snippet;
 	}
 
 	protected generateVariableNames(): Array<string> {
-		return [
-			this.isInFragmentIgnored() ? null : this.getInFragmentVariableName(),
-			...this.getHelpersVariableNames()
-		].filter(x => x != null);
+		return [this.getInFragmentVariableName(), this.getRequestVariableName(), ...this.getHelpersVariableNames()];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async doPerform(data: InFragment, _request: PipelineStepData<In>): Promise<OutFragment> {
+	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		const $helpers = this.getHelpers();
-		if (this.isInFragmentIgnored()) {
-			return await (this._func as PerformWithoutInFragment<OutFragment>)($helpers, $helpers);
-		} else {
-			return await (this._func as PerformWithInFragment<InFragment, OutFragment>)(data, $helpers, $helpers);
-		}
-	}
-
-	/**
-	 * is request step data ignored to snippet function.
-	 * default returns false
-	 */
-	protected isInFragmentIgnored(): boolean {
-		return false;
+		return await this._func(data, request, $helpers, $helpers);
 	}
 
 	/**
@@ -76,5 +56,9 @@ export class SnippetPipelineStep<In = PipelineStepPayload, Out = PipelineStepPay
 	 */
 	protected getInFragmentVariableName(): string {
 		return '$factor';
+	}
+
+	protected getRequestVariableName(): string {
+		return '$request';
 	}
 }

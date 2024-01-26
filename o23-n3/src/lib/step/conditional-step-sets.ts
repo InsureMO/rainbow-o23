@@ -11,16 +11,11 @@ import {PipelineStepSets, PipelineStepSetsOptions} from './step-sets';
 import {ScriptFuncOrBody} from './types';
 import {Utils} from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ConditionCheckWithInFragment<InFragment> = ($factor: InFragment, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<boolean>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ConditionCheckWithoutInFragment = ($helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<boolean>;
-export type ConditionCheckFunc<InFragment> =
-	ConditionCheckWithInFragment<InFragment> | ConditionCheckWithoutInFragment;
+export type ConditionCheckFunc<In, InFragment> = ($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<boolean>;
 
 export interface ConditionalPipelineStepSetsOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends PipelineStepSetsOptions<In, Out, InFragment, OutFragment> {
-	check: ScriptFuncOrBody<ConditionCheckFunc<InFragment>>;
+	check: ScriptFuncOrBody<ConditionCheckFunc<In, InFragment>>;
 	otherwiseSteps: Array<PipelineStepBuilder>;
 }
 
@@ -29,8 +24,8 @@ export interface ConditionalPipelineStepSetsOptions<In = PipelineStepPayload, Ou
  */
 export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends PipelineStepSets<In, Out, InFragment, OutFragment> {
-	private readonly _checkSnippet: ScriptFuncOrBody<ConditionCheckFunc<InFragment>>;
-	private readonly _func: ConditionCheckFunc<InFragment>;
+	private readonly _checkSnippet: ScriptFuncOrBody<ConditionCheckFunc<In, InFragment>>;
+	private readonly _func: ConditionCheckFunc<In, InFragment>;
 	private readonly _otherwiseStepBuilders: Undefinable<Array<PipelineStepBuilder>>;
 
 	// noinspection TypeScriptAbstractClassConstructorCanBeMadeProtected
@@ -50,7 +45,7 @@ export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = Pipelin
 		this._otherwiseStepBuilders = options.otherwiseSteps;
 	}
 
-	public getCheckSnippet(): ScriptFuncOrBody<ConditionCheckFunc<InFragment>> {
+	public getCheckSnippet(): ScriptFuncOrBody<ConditionCheckFunc<In, InFragment>> {
 		return this._checkSnippet;
 	}
 
@@ -59,20 +54,12 @@ export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = Pipelin
 	}
 
 	protected generateVariableNames(): Array<string> {
-		return [
-			this.isInFragmentIgnored() ? null : this.getInFragmentVariableName(),
-			...this.getHelpersVariableNames()
-		].filter(x => x != null);
+		return [this.getInFragmentVariableName(), this.getRequestVariableName(), ...this.getHelpersVariableNames()];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async check(data: InFragment, _request: PipelineStepData<In>): Promise<boolean> {
+	protected async check(data: InFragment, request: PipelineStepData<In>): Promise<boolean> {
 		const $helpers = this.getHelpers();
-		if (this.isInFragmentIgnored()) {
-			return await (this._func as ConditionCheckWithoutInFragment)($helpers, $helpers);
-		} else {
-			return await (this._func as ConditionCheckWithInFragment<InFragment>)(data, $helpers, $helpers);
-		}
+		return await this._func(data, request, $helpers, $helpers);
 	}
 
 	public async perform(request: PipelineStepData<In>): Promise<PipelineStepData<Out>> {
@@ -99,17 +86,13 @@ export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = Pipelin
 	}
 
 	/**
-	 * is request step data ignored to snippet function.
-	 * default returns false
-	 */
-	protected isInFragmentIgnored(): boolean {
-		return false;
-	}
-
-	/**
 	 * override this method when want to use another variable name rather than "$factor"
 	 */
 	protected getInFragmentVariableName(): string {
 		return '$factor';
+	}
+
+	protected getRequestVariableName(): string {
+		return '$request';
 	}
 }

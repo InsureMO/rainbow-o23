@@ -4,16 +4,11 @@ import {ERR_TYPEORM_STEP_SNIPPET_NOT_EMPTY} from '../error-codes';
 import {ScriptFuncOrBody, Utils} from '../step';
 import {AbstractTypeOrmPipelineStep, TypeOrmPipelineStepOptions} from './abstract-typeorm-step';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TypeOrmPerformWithInFragment<InFragment, OutFragment> = ($runner: QueryRunner, $factor: InFragment, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TypeOrmPerformWithoutInFragment<OutFragment> = ($runner: QueryRunner, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
-export type TypeOrmPerformFunc<InFragment, OutFragment> =
-	TypeOrmPerformWithInFragment<InFragment, OutFragment> | TypeOrmPerformWithoutInFragment<OutFragment>;
+export type TypeOrmPerformFunc<In, InFragment, OutFragment> = ($runner: QueryRunner, $factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment>;
 
 export interface TypeOrmBySnippetPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends TypeOrmPipelineStepOptions<In, Out, InFragment, OutFragment> {
-	snippet: ScriptFuncOrBody<TypeOrmPerformFunc<InFragment, OutFragment>>;
+	snippet: ScriptFuncOrBody<TypeOrmPerformFunc<In, InFragment, OutFragment>>;
 }
 
 /**
@@ -21,8 +16,8 @@ export interface TypeOrmBySnippetPipelineStepOptions<In = PipelineStepPayload, O
  */
 export class TypeOrmBySnippetPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends AbstractTypeOrmPipelineStep<In, Out, InFragment, OutFragment> {
-	private readonly _snippet: ScriptFuncOrBody<TypeOrmPerformFunc<InFragment, OutFragment>>;
-	private readonly _func: TypeOrmPerformFunc<InFragment, OutFragment>;
+	private readonly _snippet: ScriptFuncOrBody<TypeOrmPerformFunc<In, InFragment, OutFragment>>;
+	private readonly _func: TypeOrmPerformFunc<In, InFragment, OutFragment>;
 
 	public constructor(options: TypeOrmBySnippetPipelineStepOptions<In, Out, InFragment, OutFragment>) {
 		super(options);
@@ -39,35 +34,24 @@ export class TypeOrmBySnippetPipelineStep<In = PipelineStepPayload, Out = Pipeli
 		});
 	}
 
-	public getSnippet(): ScriptFuncOrBody<TypeOrmPerformFunc<InFragment, OutFragment>> {
+	public getSnippet(): ScriptFuncOrBody<TypeOrmPerformFunc<In, InFragment, OutFragment>> {
 		return this._snippet;
 	}
 
 	protected generateVariableNames(): Array<string> {
 		return [
 			this.getRunnerVariableName(),
-			this.isInFragmentIgnored() ? null : this.getInFragmentVariableName(),
+			this.getInFragmentVariableName(),
+			this.getRequestVariableName(),
 			...this.getHelpersVariableNames()
-		].filter(x => x != null);
+		];
 	}
 
 	protected async doPerform(basis: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.autoTrans<OutFragment>(async (runner) => {
 			const $helpers = this.getHelpers();
-			if (this.isInFragmentIgnored()) {
-				return await (this._func as TypeOrmPerformWithoutInFragment<OutFragment>)(runner, $helpers, $helpers);
-			} else {
-				return await (this._func as TypeOrmPerformWithInFragment<InFragment, OutFragment>)(runner, basis, $helpers, $helpers);
-			}
+			return await this._func(runner, basis, request, $helpers, $helpers);
 		}, request);
-	}
-
-	/**
-	 * is request step data ignored to snippet function.
-	 * default returns false
-	 */
-	protected isInFragmentIgnored(): boolean {
-		return false;
 	}
 
 	protected getRunnerVariableName(): string {
@@ -79,5 +63,9 @@ export class TypeOrmBySnippetPipelineStep<In = PipelineStepPayload, Out = Pipeli
 	 */
 	protected getInFragmentVariableName(): string {
 		return '$factor';
+	}
+
+	protected getRequestVariableName(): string {
+		return '$request';
 	}
 }
