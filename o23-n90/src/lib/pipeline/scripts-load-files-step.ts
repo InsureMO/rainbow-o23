@@ -1,4 +1,4 @@
-import {PipelineStepData, PipelineStepType} from '@rainbow-o23/n1';
+import {PipelineStepData, PipelineStepType, UncatchableError} from '@rainbow-o23/n1';
 import {BootstrapOptions} from '@rainbow-o23/n2';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '@rainbow-o23/n3';
 import {
@@ -10,14 +10,18 @@ import * as fs from 'fs';
 import {glob} from 'glob';
 import * as path from 'path';
 import {ConfigConstants} from '../config';
+import {ERR_SCRIPTS_CONTAINS_INCORRECT_PARAMS} from '../error-codes';
 import {CryptoUtils, MD5} from '../utils';
 
 export interface Script {
 	filename: string;
+	sql: string;
 	content: string;
 	author?: string;
 	md5: MD5;
 	deploymentTag: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	params: Array<any>;
 	ddl: boolean;
 }
 
@@ -47,29 +51,53 @@ export class ScriptsLoadFilesPipelineStep
 		const content = fs.readFileSync(file).toString();
 		const lines = content.split('\n');
 		let good = 0;
+		let sqlStartLineIndex = 0;
 		let author = 'Anonymous';
 		let tags = (void 0);
+		let params = (void 0);
+		let lineIndex = 0;
 		for (let line of lines) {
 			if (line.trim().startsWith('--')) {
 				line = line.substring(2).trim();
 				if (line.startsWith('author:')) {
 					author = line.substring(7).trim();
 					good = good + 1;
+					sqlStartLineIndex = lineIndex + 1;
 				} else if (line.startsWith('tags:')) {
 					tags = line.substring(5).trim();
 					good = good + 1;
+					sqlStartLineIndex = lineIndex + 1;
+				} else if (line.startsWith('params:')) {
+					const lineContent = line.substring(7).trim();
+					params = JSON.parse(lineContent);
+					if (Array.isArray(params)) {
+						params = params.map(param => {
+							if (param.startsWith('$hex_blob:')) {
+								return Buffer.from(param.substring(10), 'hex');
+							} else {
+								return param;
+							}
+						});
+					} else {
+						throw new UncatchableError(ERR_SCRIPTS_CONTAINS_INCORRECT_PARAMS, `In file ${file}, invalid params[${lineContent}] found, it must be an array and matches placeholders.`);
+					}
+					good = good + 1;
+					sqlStartLineIndex = lineIndex + 1;
 				}
 			}
-			if (good === 2) {
+			lineIndex++;
+			if (good === 3) {
 				break;
 			}
 		}
 		return {
 			filename: file,
+			sql: lines.filter((_, index) => index >= sqlStartLineIndex).join('\n').trim(),
 			content,
 			md5: CryptoUtils.md5(content),
 			author,
 			deploymentTag: tags,
+			params,
 			ddl: file.endsWith('.ddl.sql')
 		};
 	}

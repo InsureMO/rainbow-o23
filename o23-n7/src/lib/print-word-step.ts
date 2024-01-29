@@ -1,6 +1,6 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError} from '@rainbow-o23/n1';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '@rainbow-o23/n3';
-import createReport from 'docx-templates';
+import {createReport} from 'docx-templates';
 import {UserOptions} from 'docx-templates/lib/types';
 import {ERR_TEMPLATE_NOT_DEFINED} from './error-codes';
 
