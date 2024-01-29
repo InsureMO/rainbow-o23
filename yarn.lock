@@ -3626,6 +3626,14 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
+docx-templates@^4.11.4:
+  version "4.11.4"
+  resolved "https://registry.yarnpkg.com/docx-templates/-/docx-templates-4.11.4.tgz#664a1181cd309cb390adfeef81cfd6b400846a15"
+  integrity sha512-VjsYlNrhk0UlUA4ddzNJCBw+ctw2KgjXrzs7qfQ1gf+caT3VtyUkPIpNKwOACm9k6xqre5WAQ4YMdIVAht98mQ==
+  dependencies:
+    jszip "^3.10.1"
+    sax "1.2.4"
+
 dotenv@^16.0.3, dotenv@^16.3.1:
   version "16.3.1"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
@@ -7232,6 +7240,11 @@ safe-stable-stringify@^2.3.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+sax@1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
+  integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
 saxes@^5.0.1:
   version "5.0.1"

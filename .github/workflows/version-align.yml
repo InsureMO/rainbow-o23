@@ -66,6 +66,12 @@ jobs:
         with:
           module-name: o23-n6
           target-version: ${{ inputs.version }}
+      - name: Change Version of o23-n7
+        uses: ./.github/actions/change-node-version/
+        id: change-node-version-o23-n7
+        with:
+          module-name: o23-n7
+          target-version: ${{ inputs.version }}
       - name: Change Version of o23-n90
         uses: ./.github/actions/change-node-version/
         id: change-node-version-o23-n90
