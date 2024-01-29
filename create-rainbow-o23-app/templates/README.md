@@ -70,6 +70,18 @@ you deploy to a real service environment, you can modify the following configura
   from the startup scope,
 - `CFG_APP_EXAMPLES_ENABLED`: Change it to `false` to exclude the tutorial examples from the startup scope.
 
+## Upgrade Recommendations
+
+Currently, `o23` does not provide a way to upgrade, so please do not change any existing directory structure, including the following
+directories:
+
+- `db-scripts`: it is recommended to start numbering the directory names from `100-` for better differentiation,
+- `scripts`: the files in this directory theoretically do not need to be modified,
+- `server`: it is recommended to start numbering the directory names from `100-` for better differentiation
+- `src`: free to add new source files, but please restrict the references to the `scripts.ts` and `server.ts` files.
+
+If you follow the above rules, upgrading only requires obtaining the relevant files from the latest Github repository and replacing them.
+
 ## YAML Reader
 
 Property value of yaml could be use `env:` prefix to identify environment variable, for example:
