@@ -25,9 +25,7 @@ export const buildConfig = (lint) => {
 		external(id) {
 			return ["@rainbow-o23/"].some(scope => id.startsWith(scope))
 				|| [
-					"fs", "path",
-					"nanoid",
-					"exceljs", "csv-parse/sync", "csv-stringify/sync"
+					"fs", "path", "docx-templates"
 				].includes(id);
 		},
 		onLog(level, log, handler) {

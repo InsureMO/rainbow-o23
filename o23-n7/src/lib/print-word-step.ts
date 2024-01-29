@@ -20,6 +20,7 @@ export interface PrintWordPipelineStepInFragment {
 	template: Buffer;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	data: any;
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	jsContext?: Object;
 }
 
@@ -63,7 +64,7 @@ export class PrintWordPipelineStep<In = PipelineStepPayload, Out = PipelineStepP
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
 	protected async printWord(templateWord: Buffer, data: any, jsContext?: Object): Promise<Buffer> {
 		const buffer = await createReport({
 			...this.getCreateReportOptions(),

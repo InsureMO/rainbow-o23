@@ -2,6 +2,7 @@ import {BootstrapOptions} from '@rainbow-o23/n2';
 import {StepBuilders} from '@rainbow-o23/n4';
 import {PrintPdfPipelineStepBuilder} from '@rainbow-o23/n5';
 import {PrintCsvPipelineStepBuilder, PrintExcelPipelineStepBuilder} from '@rainbow-o23/n6';
+import {PrintWordPipelineStepBuilder} from '@rainbow-o23/n7';
 import {ServerPipelineStepRegistrar} from '@rainbow-o23/n90';
 
 export const importPrintService = (options: BootstrapOptions) => {
@@ -9,6 +10,7 @@ export const importPrintService = (options: BootstrapOptions) => {
 		StepBuilders.register('print-pdf', PrintPdfPipelineStepBuilder);
 		StepBuilders.register('print-csv', PrintCsvPipelineStepBuilder);
 		StepBuilders.register('print-excel', PrintExcelPipelineStepBuilder);
+		StepBuilders.register('print-word', PrintWordPipelineStepBuilder);
 	}
 };
 

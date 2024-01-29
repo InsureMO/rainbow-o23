@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@rainbow-o23/n5": "0.1.15",
 		"@rainbow-o23/n6": "0.1.15",
+		"@rainbow-o23/n7": "0.1.15",
 		"@rainbow-o23/n90": "0.1.15"
 	},
 	"devDependencies": {
