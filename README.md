@@ -4,6 +4,7 @@
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-white.svg?logo=puppeteer&logoColor=40B5A4&style=social)
 ![ExcelJS](https://img.shields.io/badge/ExcelJS-white.svg?logo=microsoftexcel&logoColor=217346&style=social)
 ![CSV for Node.js](https://img.shields.io/badge/CSV%20for%20Node.js-548694.svg)
+![Docx-templates](https://img.shields.io/badge/Docx--templates-white.svg?logo=microsoftword&logoColor=2B579A&style=social)
 ![dotenv](https://img.shields.io/badge/dotenv-white.svg?logo=dotenv&logoColor=ECD53F&style=social)
 
 ![TypeORM](https://img.shields.io/badge/TypeORM-E83524.svg)
@@ -58,8 +59,9 @@ Based on the various scenarios described above, `o23` has been designed as multi
 - [o23/n4](o23-n4/README.md): An implementation of the pipeline configuration parser, providing basic capabilities to parse pipelines based
   on YAML configuration,
 - [o23/n5](o23-n5/README.md): Provides a pipeline step to generate PDFs based on HTML templates,
-- [o23/n6](o23-n6/README.md): Provides pipeline steps to generate Excel reports based on Excel templates and CSV reports based on CSV
+- [o23/n6](o23-n6/README.md): Provides pipeline steps to generate Excel reports based on xlsx templates and CSV reports based on CSV
   templates,
+- [o23/n7](o23-n7/README.md): Provides pipeline steps to generate Word reports based on docx templates,
 - [o23/n90](o23-n90/README.md): Application basic package, which includes all the fundamental settings for building O23 applications,
 - [o23/n91](o23-n91/README.md): O23 Application printing plugin package,
 - [o23/n99](o23-n99/README.md): A complete pre-application built on all the above modules, which is a complete web service itself and can
