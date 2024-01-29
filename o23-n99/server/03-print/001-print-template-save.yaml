@@ -23,7 +23,7 @@ steps:
         $.$error({status: 400, code: 'O99-10102', reason: 'Template type is required.'});
       }
       $factor.templateType = `${$factor.templateType}`.trim().toUpperCase();
-      if (!['PDF', 'EXCEL', 'CSV'].includes($factor.templateType)) {
+      if (!['PDF', 'EXCEL', 'CSV', 'WORD'].includes($factor.templateType)) {
         $.$error({status: 400, code: 'O99-10103', reason: `Given template type[${$factor.templateType}] is not supported yet.`});
       }
   - name: Check Template Id Existing

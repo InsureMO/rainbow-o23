@@ -38,6 +38,10 @@ steps:
               task.contentType = 'application/octet-stream';
               task.printedFileName = `${$factor.template.templateName}.${task.taskKey}.xlsx`;
               break;
+            case 'WORD':
+              task.contentType = 'application/octet-stream';
+              task.printedFileName = `${$factor.template.templateName}.${task.taskKey}.docx`;
+              break;
             default:
               task.contentType = 'application/octet-stream';
               task.printedFileName = `${$factor.template.templateName}.${task.taskKey}.file`
