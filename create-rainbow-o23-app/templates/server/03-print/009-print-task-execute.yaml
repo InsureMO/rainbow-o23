@@ -47,6 +47,12 @@ steps:
                     use: print-csv
                     from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
                     merge: printed
+              - check: $factor.template.templateType === 'WORD'
+                steps:
+                  - name: Print Word
+                    use: print-word
+                    from-input: "{template: $factor.template.templateFile, data: $factor.preparedData, jsContext: $factor.preparedData?.$jsContext}"
+                    merge: printed
             otherwise:
               - name: Throw Error
                 use: snippet

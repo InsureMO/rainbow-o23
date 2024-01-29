@@ -85,6 +85,7 @@ steps:
     snippet: |
       if (($factor.foundType === 'PDF' && ['htm', 'html'].includes($factor.givenType))
         || ($factor.foundType === 'EXCEL' && ['xlsx'].includes($factor.givenType))
+        || ($factor.foundType === 'WORD' && ['docx'].includes($factor.givenType))
         || ($factor.foundType === 'CSV' && ['csv', 'txt'].includes($factor.givenType))
       ) {
         // do nothing, it's ok

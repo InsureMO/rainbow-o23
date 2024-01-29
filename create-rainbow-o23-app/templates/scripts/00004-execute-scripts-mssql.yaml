@@ -81,7 +81,7 @@ steps:
                   if (!$item.ddl) {
                     await $runner.startTransaction();
                   }
-                  await $runner.query($item.content);
+                  await $runner.query($item.sql);
                   await $runner.query(
                     "INSERT INTO T_O23_DB_CHANGE_LOG(AUTHOR, FILE_NAME, DATE_EXECUTED, CONTENT, MD5_SUM, CONTEXTS, DEPLOYMENT_TAG) VALUES (@0, @1, GETDATE(), @2, @3, NULL, @4)",
                     [$item.author || 'Anonymous', $item.filename, $item.content, $item.md5, $item.deploymentTag]);

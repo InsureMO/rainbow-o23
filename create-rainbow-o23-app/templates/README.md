@@ -4,6 +4,7 @@
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-white.svg?logo=puppeteer&logoColor=40B5A4&style=social)
 ![ExcelJS](https://img.shields.io/badge/ExcelJS-white.svg?logo=microsoftexcel&logoColor=217346&style=social)
 ![CSV for Node.js](https://img.shields.io/badge/CSV%20for%20Node.js-548694.svg)
+![Docx-templates](https://img.shields.io/badge/Docx--templates-white.svg?logo=microsoftword&logoColor=2B579A&style=social)
 ![dotenv](https://img.shields.io/badge/dotenv-white.svg?logo=dotenv&logoColor=ECD53F&style=social)
 
 ![TypeORM](https://img.shields.io/badge/TypeORM-E83524.svg)
@@ -286,6 +287,7 @@ A pipeline step is a unit of execution logic. It can be a script fragment, a fun
 | `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n5`  | Print    | Print PDF file.                                                             |
 | `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print CSV file.                                                             |
 | `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print Excel file.                                                           |
+| `PrintWordPipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n7`  | Print    | Print Word file.                                                            |
 | `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Load database scripts files.                                                |
 | `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Parse pipeline definition                                                   |
 | `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`              | `o23/n90` | System   | Server initialization snippet                                               |
@@ -1321,6 +1323,46 @@ For example,
   from-input: "{template: $factor.template.templateFile, data: $factor.preparedData}"
   merge: printed
 ```
+
+## PrintWordPipelineStep, extends AbstractFragmentaryPipelineStep
+
+Print the Word file using a predefined template.
+
+| Attribute                         | Type                         | Mandatory | Description                                                                                                                                                                                                                                                                                                                                                                                                      |
+|-----------------------------------|------------------------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cmd`                             | `string`, `[string, string]` | No        | Defines a custom command delimiter, default `+++`. This can be a String e.g. '+++' or an Array of Strings with length 2: ['{', '}'] in which the first element serves as the start delimiter and the second as the end delimiter.                                                                                                                                                                                |
+| `literal-xml-delimiter`           | `string`                     | No        | The delimiter that's used to indicate literal XML that should be inserted into the docx XML tree as-is, default `\|\|`.                                                                                                                                                                                                                                                                                          |
+| `process-line-breaks`             | `boolean`                    | No        | Handle linebreaks in result of commands as actual linebreaks, default `true`.                                                                                                                                                                                                                                                                                                                                    |
+| `fail-fast`                       | `boolean`                    | No        | Whether to fail on the first error encountered in the template, default `true`.                                                                                                                                                                                                                                                                                                                                  |
+| `reject-nullish`                  | `boolean`                    | No        | When set to true, this setting ensures createReport throws a NullishCommandResultError when the result of an INS, HTML, IMAGE, or LINK command is null or undefined. This is useful as nullish return values usually indicate a mistake in the template or the invoking code, default `false`.                                                                                                                   |
+| `fix-smart-quotes`                | `boolean`                    | No        | MS Word usually autocorrects JS string literal quotes with unicode 'smart' quotes ('curly' quotes). E.g. 'aubergine' -> ‘aubergine’. This causes an error when evaluating commands containing these smart quotes, as they are not valid JavaScript. If you set fixSmartQuotes to 'true', these smart quotes will automatically get replaced with straight quotes (') before command evaluation, default `false`. |
+| `process-line-breaks-as-new-text` | `boolean`                    | No        | Use the new way of injecting line breaks from command results (only applies when processLineBreaks is true) which has better results in LibreOffice and Google Drive, default `false`.                                                                                                                                                                                                                           |
+
+This step requires the input data structure as follows:
+
+```typescript
+interface PrintExcelPipelineStepInFragment {
+	template: Buffer;
+	data: any;
+	jsContext?: Object;
+}
+```
+
+> The data format of `data` depends on the template definition.  
+> The context format of `jsContext` depends on the template definition.
+
+For example,
+
+```yaml
+- name: Print Word
+  use: print-word
+  from-input: "{template: $factor.template.templateFile, data: $factor.preparedData, jsContext: $factor.preparedData?.$jsContext}"
+  merge: printed
+```
+
+> Note that in `o23/n99`, if the `jsContext` object is needed, it will be automatically retrieved from `prepareData`. In other words, the
+> data generated by the pre-printing pipeline of the print task should include an object with a fixed property name of `$jsContext`, which
+> will be used for the `jsContext` of word printing.
 
 ## TriggerPipelinePipelineStep, extends AbstractFragmentaryPipelineStep
 

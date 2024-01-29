@@ -75,6 +75,7 @@ steps:
           $factor.contentType = 'text/csv';
           break;
         case 'EXCEL':
+        case 'WORD':
         default:
           $factor.contentType = 'application/octet-stream';
           break;

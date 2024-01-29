@@ -1,0 +1,4 @@
+-- author: brad.wu
+-- tags: system
+
+ALTER TABLE T_O23_PRINT_TEMPLATES MODIFY TEMPLATE_TYPE ENUM ('PDF', 'EXCEL', 'CSV', 'WORD') NOT NULL;
