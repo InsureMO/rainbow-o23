@@ -38,7 +38,7 @@ export interface PrintWordPipelineStepOutFragment {
 }
 ```
 
-### An Example
+### Syntax
 
 Find template and unit test in `/test` folder, syntax for using a Word template is as follows.
 
@@ -193,9 +193,43 @@ Similarly, `IF ... END-IF` can also be used in table output:
 | `+++END-FOR dept+++`                    |                    |                           |                                     |                                     |
 | `+++END-FOR group+++`                   |                    |                           |                                     |                                     |
 
+#### HTML
+
+Replace HTML-based text with `HTML` syntax, as follows:
+
+```
++++HTML `
+<meta charset="UTF-8">
+<body>
+  <h1>${$film.title}</h1>
+  <h3>${$film.releaseDate.slice(0, 4)}</h3>
+  <p>
+    <strong style="color: red;">This paragraph should be red and strong</strong>
+  </p>
+</body>
+`+++
+```
+
+`HTML` executes a JavaScript script, which can also be achieved through `jsContext`, for example:
+
+- ```+++HTML html()+++```.
+
+```typescript
+jsContext: {
+	html: () => {
+		return `<meta charset="UTF-8"><body><strong style="color: red;">This paragraph should be red and strong</strong></body>`;
+	}
+}
+```
+
+> It should be noted that the content of HTML needs to be wrapped within the `<body>` tag, and it is recommended to
+> use `<meta charset="UTF-8">` to define the character set.
+
 ### Known Issues
 
 - If the `LINK` syntax is used in the header or footer, it may result in the issue of "Word found unreachable content" when opening the
   document in Word. Although this does not affect the final content display (the link will not work), it can easily confuse users. However,
   if it is a static link, it is not affected,
+- If the `HTML` syntax is used in the header or footer, it may result in the issue of "Word found unreachable content" when opening the
+  document in Word. Additionally, HTML cannot display correctly and may also affect other content in the header and footer,
 - Odd and even row background colors are currently not supported.

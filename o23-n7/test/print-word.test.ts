@@ -47,6 +47,9 @@ test('Test Print Word', async () => {
 				logo: () => {
 					const data = logoData;
 					return {width: 1.66687479, height: 0.5291666, data, extension: '.svg'};
+				},
+				html: () => {
+					return `<meta charset="UTF-8"><body><strong style="color: red;">This paragraph should be red and strong</strong></body>`;
 				}
 			}
 		}

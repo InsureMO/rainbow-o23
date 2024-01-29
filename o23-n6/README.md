@@ -121,7 +121,7 @@ export interface PrintExcelPipelineStepOutFragment {
 }
 ```
 
-### An Example
+### Syntax
 
 Find template and unit test in `/test` folder, syntax for using an Excel template is as follows:
 
