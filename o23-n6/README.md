@@ -99,6 +99,33 @@ Id,Product Name,Product Info
 1000002,PRDT-002,PRDT-002-INFO
 ```
 
+### Performance Benchmark
+
+This benchmark was conducted on the following hardware and environment:
+
+- CPU: 2.6 GHz 6-Core Intel Core i7,
+- Memory: 64 GB 2667 MHz DDR4,
+- OS: macOS Sonoma 14.2.1,
+- MySQL: 8.2.0,
+- NodeJS: v18.19.0,
+- NPM: v10.2.3.
+
+With scenario:
+
+- Flow:
+	- Load template from database,
+	- Print file,
+	- Write printed file to database,
+	- Return to client,
+- Template size: 0.4kb, 4 lines * 30 columns,
+- Output size: 5.8mb, 10001 lines * 30 columns.
+
+| # | Item                                 | Max CPU Usage | Max Memory Usage | Avg. Response Time (ms) |
+|---|--------------------------------------|---------------|------------------|-------------------------|
+| 1 | 100 iterations, single thread        | 120%          | 600M             | 471                     |
+| 2 | 100 iterations, 4 concurrent threads | 150%          | 700M             | 1444                    |
+| 3 | 100 iterations, 8 concurrent threads | 160%          | 750M             | 2917                    |
+
 ## Excel Generate Step
 
 ### Environment Parameters
@@ -143,3 +170,30 @@ Find template and unit test in `/test` folder, syntax for using an Excel templat
 - Cannot copy theme correctly, please use the specified color and do not choose from the suggested theme colors provided by Excel.
 - ExcelJS does not read the note data of empty cells. Therefore, when the loop flag appears on an empty cell, it needs to be specially
   marked with the `$.$del` flag.
+
+### Performance Benchmark
+
+This benchmark was conducted on the following hardware and environment:
+
+- CPU: 2.6 GHz 6-Core Intel Core i7,
+- Memory: 64 GB 2667 MHz DDR4,
+- OS: macOS Sonoma 14.2.1,
+- MySQL: 8.2.0,
+- NodeJS: v18.19.0,
+- NPM: v10.2.3.
+
+With scenario:
+
+- Flow:
+	- Load template from database,
+	- Print file,
+	- Write printed file to database,
+	- Return to client,
+- Template size: 12kb, 2 lines * 30 columns,
+- Output size: 4.1mb, 10001 lines * 30 columns.
+
+| # | Item                                 | Max CPU Usage | Max Memory Usage | Avg. Response Time (ms) |
+|---|--------------------------------------|---------------|------------------|-------------------------|
+| 1 | 100 iterations, single thread        | 120%          | 550M             | 945                     |
+| 2 | 100 iterations, 4 concurrent threads | 150%          | 850M             | 2878                    |
+| 3 | 100 iterations, 8 concurrent threads | 170%          | 1000M            | 5718                    |

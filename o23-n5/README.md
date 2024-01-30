@@ -193,3 +193,32 @@ node ./node_modules/puppeteer/install.mjs
 ```
 
 > Use `puppeteer.config.cjs` to provide the location of chromium, see https://pptr.dev/guides/configuration for more details.
+
+## Performance Benchmark
+
+This benchmark was conducted on the following hardware and environment:
+
+- CPU: 2.6 GHz 6-Core Intel Core i7,
+- Memory: 64 GB 2667 MHz DDR4,
+- OS: macOS Sonoma 14.2.1,
+- MySQL: 8.2.0,
+- NodeJS: v18.19.0,
+- NPM: v10.2.3.
+
+With scenario:
+
+- With one headless Chrome instance,
+- Flow:
+	- Load template from database,
+	- Print file,
+	- Write printed file to database,
+	- Return to client,
+- Template size: 1.7mb, 9 pages,
+- No command inside.
+- Output size: 1.1mb, 9 pages.
+
+| # | Item                                 | Max CPU Usage | Max Memory Usage | Avg. Response Time (ms) |
+|---|--------------------------------------|---------------|------------------|-------------------------|
+| 1 | 100 iterations, single thread        | 25%           | 400M             | 2128                    |
+| 2 | 100 iterations, 4 concurrent threads | 60%           | 450M             | 2541                    |
+| 3 | 100 iterations, 8 concurrent threads | 70%           | 450M             | 3991                    |

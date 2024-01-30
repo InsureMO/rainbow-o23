@@ -233,3 +233,32 @@ jsContext: {
 - If the `HTML` syntax is used in the header or footer, it may result in the issue of "Word found unreachable content" when opening the
   document in Word. Additionally, HTML cannot display correctly and may also affect other content in the header and footer,
 - Odd and even row background colors are currently not supported.
+
+## Performance Benchmark
+
+This benchmark was conducted on the following hardware and environment:
+
+- CPU: 2.6 GHz 6-Core Intel Core i7,
+- Memory: 64 GB 2667 MHz DDR4,
+- OS: macOS Sonoma 14.2.1,
+- MySQL: 8.2.0,
+- NodeJS: v18.19.0,
+- NPM: v10.2.3.
+
+With scenario:
+
+- Flow:
+	- Load template from database,
+	- Print file,
+	- Write printed file to database,
+	- Return to client,
+- Template size: 258kb, 9 pages,
+- No command inside,
+- Output size: 304kb, 9 pages.
+
+| # | Item                                 | Max CPU Usage | Max Memory Usage | Avg. Response Time (ms) |
+|---|--------------------------------------|---------------|------------------|-------------------------|
+| 1 | 100 iterations, single thread        | 120%          | 450M             | 267                     |
+| 2 | 100 iterations, 4 concurrent threads | 130%          | 650M             | 236                     |
+| 3 | 100 iterations, 8 concurrent threads | 140%          | 750M             | 231                     |
+
