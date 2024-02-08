@@ -17,6 +17,7 @@ steps:
     merge: templateCode
   - name: Load Template
     use: typeorm-load-one
+    datasource: "env:app.datasource.config"
     from-input: "{params: $factor}"
     sql: |-
       SELECT 

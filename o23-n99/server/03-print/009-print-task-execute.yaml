@@ -20,6 +20,7 @@ steps:
           $factor.task.printFinishedAt = $.$date.now();
       - name: Update Task Status To Processing
         use: typeorm-save
+        datasource: "env:app.datasource.config"
         from-input: "{values: $factor.task}"
         sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'PROCESSING', PRINT_STARTED_AT = $printFinishedAt WHERE TASK_ID = $taskId
         to-output: "null"
@@ -65,6 +66,7 @@ steps:
               $factor.task.printFinishedAt = $.$date.now();
           - name: Update Task Status To Success
             use: typeorm-save
+            datasource: "env:app.datasource.config"
             from-input: "{values: {task: $factor.task, printed: $factor.printed}}"
             sql: UPDATE T_O23_PRINT_TASKS SET STATUS = 'SUCCESS', PRINTED_FILE=$printed.file, PRINT_FINISHED_AT = $task.printFinishedAt WHERE TASK_ID = $task.taskId
             to-output: "null"
@@ -79,6 +81,7 @@ steps:
             $factor.task.printFinishedAt = $.$date.now();
         - name: Update Task Status To Fail
           use: typeorm-save
+          datasource: "env:app.datasource.config"
           from-input: |-
             const {$factor: {task, preparedData}, $error, $code} = $factor;
             return {
@@ -109,6 +112,7 @@ error-handles:
         $factor.task.printFinishedAt = $.$date.now();
     - name: Update Task Status To Fail
       use: typeorm-save
+      datasource: "env:app.datasource.config"
       from-input: |-
         const {$factor: {task, data}, $error, $code} = $factor;
         return {

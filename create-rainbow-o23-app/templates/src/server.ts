@@ -1,6 +1,6 @@
 import {BootstrapOptions} from '@rainbow-o23/n2';
 import {launchServer} from '@rainbow-o23/n90';
-import {usePdfSubTemplates} from './plugins/print';
+import {usePluginsInitialize} from './plugins';
 import {SimpleModule} from './simple';
 
 const useSimpleModule = async (options: BootstrapOptions) => {
@@ -11,7 +11,7 @@ const useSimpleModule = async (options: BootstrapOptions) => {
 // noinspection JSIgnoredPromiseFromCall
 launchServer({
 	beforeDoPipelineInitialization: async (options: BootstrapOptions) => {
-		usePdfSubTemplates(options);
+		await usePluginsInitialize(options);
 	},
 	beforeDoServerLaunch: async (options: BootstrapOptions) => {
 		await useSimpleModule(options);

@@ -27,6 +27,7 @@ steps:
     steps:
       - name: Find Dependencies
         use: typeorm-load-many
+        datasource: "env:app.datasource.config"
         from-input: "{params: $factor}"
         sql: |-
           SELECT

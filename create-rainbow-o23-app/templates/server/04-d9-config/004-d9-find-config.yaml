@@ -35,6 +35,7 @@ steps:
       }
   - name: Find Configurations
     use: typeorm-load-many
+    datasource: "env:app.datasource.config"
     from-input: "{params: $factor}"
     sql: |-
       SELECT 

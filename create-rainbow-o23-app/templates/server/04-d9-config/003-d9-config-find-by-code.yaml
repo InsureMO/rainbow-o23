@@ -18,6 +18,7 @@ steps:
     merge: configCode
   - name: Load Configuration
     use: typeorm-load-one
+    datasource: "env:app.datasource.config"
     from-input: "{params: $factor}"
     sql: |-
       SELECT 

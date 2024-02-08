@@ -5,6 +5,7 @@ use: sets
 steps:
   - name: Check Existing
     use: typeorm-snippet
+    datasource: "env:app.datasource.config"
     snippet: |-
       try {
         const [rows] = await $runner.query('SELECT COUNT(1) AS ROWS_COUNT FROM T_O23_DB_CHANGE_LOCK');
@@ -21,6 +22,7 @@ steps:
     steps:
       - name: Create Lock
         use: typeorm-snippet
+        datasource: "env:app.datasource.config"
         snippet: |-
           await $runner.query(`CREATE TABLE T_O23_DB_CHANGE_LOCK(
             ID BIGINT NOT NULL PRIMARY KEY,
@@ -40,6 +42,7 @@ steps:
           $.$logger.log('O23 scripts def tables created.', 'ScriptsPipelineInitializer');
   - name: Try to Lock
     use: typeorm-snippet
+    datasource: "env:app.datasource.config"
     snippet: |-
       const changedRows = await $runner.query("UPDATE T_O23_DB_CHANGE_LOCK SET LOCKED = 1, LOCKED_AT = GETDATE(), LOCKED_BY = 'SCRIPTS-PIPELINE' OUTPUT DELETED.ID WHERE ID = 1 AND LOCKED != 1");
       // $.$logger.log(changedRows, 'ScriptsPipelineInitializer');
@@ -71,6 +74,7 @@ steps:
         steps:
           - name: Execute Script
             use: typeorm-snippet
+            datasource: "env:app.datasource.config"
             snippet: |-
               const $item = $factor.$item;
               const rst = await $runner.query("SELECT MD5_SUM FROM T_O23_DB_CHANGE_LOG WHERE FILE_NAME = @0", [$item.filename]);
@@ -111,6 +115,7 @@ steps:
               }
       - name: Unlock
         use: typeorm-save
+        datasource: "env:app.datasource.config"
         # no params for sql
         from-input: "null"
         sql: UPDATE T_O23_DB_CHANGE_LOCK SET LOCKED = 0 WHERE ID = 1

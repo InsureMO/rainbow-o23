@@ -4,6 +4,7 @@ init-only: true
 
 steps:
   - name: Load
+    datasource: "env:app.datasource.config"
     use: typeorm-load-many
     # no params for sql
     from-input: "null"

@@ -15,6 +15,7 @@ steps:
       $factor.key = key;
   - name: Load Task
     use: typeorm-load-one
+    datasource: "env:app.datasource.config"
     from-input: "{params: $factor}"
     sql: |-
       SELECT STATUS AS "status", PRINTED_FILE as "printedFile", PRINTED_FILE_NAME AS "printedFileName", CONTENT_TYPE AS "contentType" 

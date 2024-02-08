@@ -59,15 +59,17 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Create Template
         use: typeorm-save
+        datasource: "env:app.datasource.config"
         from-input: "{values: $factor.data}"
         sql: |-
           INSERT INTO T_O23_PRINT_TEMPLATES
-          (TEMPLATE_ID, TEMPLATE_CODE, TEMPLATE_NAME, ENABLED, DATA_PIPELINE, TENANT_CODE, VERSION, CREATED_AT, CREATED_BY, LAST_MODIFIED_AT, LAST_MODIFIED_BY)
-          VALUES ($templateId, $templateCode, $templateName, $enabled.@bool, $dataPipeline.@json, $tenantCode, $version, $createdAt.@ts, $createdBy, $lastModifiedAt.@ts, $lastModifiedBy)
+          (TEMPLATE_ID, TEMPLATE_CODE, TEMPLATE_NAME, TEMPLATE_TYPE, ENABLED, DATA_PIPELINE, TENANT_CODE, VERSION, CREATED_AT, CREATED_BY, LAST_MODIFIED_AT, LAST_MODIFIED_BY)
+          VALUES ($templateId, $templateCode, $templateName, $templateType, $enabled.@bool, $dataPipeline.@json, $tenantCode, $version, $createdAt.@ts, $createdBy, $lastModifiedAt.@ts, $lastModifiedBy)
         to-output: "null"
     otherwise:
       - name: Find Existing Template
         use: typeorm-load-one
+        datasource: "env:app.datasource.config"
         from-input: "{params: $factor.data}"
         sql: SELECT TEMPLATE_CODE AS "TEMPLATE_CODE", TENANT_CODE AS "TENANT_CODE" FROM T_O23_PRINT_TEMPLATES WHERE TEMPLATE_ID = $templateId
         merge: existing
@@ -95,6 +97,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Update Template
         use: typeorm-save
+        datasource: "env:app.datasource.config"
         from-input: "{values: $factor.data}"
         sql: |-
           UPDATE T_O23_PRINT_TEMPLATES SET
