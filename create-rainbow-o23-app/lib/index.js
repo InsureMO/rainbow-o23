@@ -32,12 +32,12 @@ const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
 	writePluginFiles(pluginOptions, directory);
 };
 
-const cleanPluginSrcFolder = async (directory) => {
-	const files = fs.readdirSync(path.resolve(directory, 'src', 'plugins'));
-	if (files.length === 0) {
-		fs.rmdirSync(path.resolve(directory, 'src', 'plugins'));
-	}
-}
+// const cleanPluginSrcFolder = async (directory) => {
+// 	const files = fs.readdirSync(path.resolve(directory, 'src', 'plugins'));
+// 	if (files.length === 0) {
+// 		fs.rmdirSync(path.resolve(directory, 'src', 'plugins'));
+// 	}
+// }
 
 exports.createApp = async () => {
 	const packageName = process.argv[2];
@@ -55,7 +55,7 @@ exports.createApp = async () => {
 	await generatePackageJson(stdOptions, dataSourceOptions, pluginOptions, directory);
 	await generateReadme(packageName, directory);
 	await generateFiles(dataSourceOptions, pluginOptions, directory);
-	await cleanPluginSrcFolder(directory);
+	// await cleanPluginSrcFolder(directory);
 	// install dependencies
 	await install(packageManager, directory);
 

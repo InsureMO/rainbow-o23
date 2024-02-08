@@ -32,15 +32,16 @@ exports.writePluginOptions = (json, options) => {
 
 exports.writePluginFiles = (options, directory) => {
 	const {plugins} = options;
+	const pluginIndexTsFile = path.resolve(directory, 'src', 'plugins', 'index.ts');
+	let content = fs.readFileSync(pluginIndexTsFile).toString();
 	if (!plugins.includes(Plugins.PRINT)) {
-		const serverTsFile = path.resolve(directory, 'src', 'server.ts');
-		let content = fs.readFileSync(serverTsFile).toString();
-		content = content.replace('import {usePdfSubTemplates} from \'./plugins/print\';\n', '')
-			.replace('\t\tusePdfSubTemplates(options);\n', '');
-		fs.writeFileSync(serverTsFile, content);
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
 		fs.rmSync(path.resolve(directory, 'src', 'plugins', 'print.ts'))
 		fs.rmSync(path.resolve(directory, '.puppeteerrc'));
+		// remove print part
+		content = content.replace('import {usePdfSubTemplates} from \'./print\';\n', '')
+			.replace('\tusePdfSubTemplates(options);\n', '');
 	}
+	fs.writeFileSync(pluginIndexTsFile, content);
 };
