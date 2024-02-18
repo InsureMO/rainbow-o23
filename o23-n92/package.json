@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n92",
-	"version": "0.1.21-alpha.1",
+	"version": "0.1.21-alpha.2",
 	"description": "o23 aws server base",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -21,8 +21,8 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n8": "0.1.21-alpha.1",
-		"@rainbow-o23/n90": "0.1.21-alpha.1"
+		"@rainbow-o23/n8": "0.1.21-alpha.2",
+		"@rainbow-o23/n90": "0.1.21-alpha.2"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
