@@ -1,11 +1,14 @@
 ![Static Badge](https://img.shields.io/badge/InsureMO-777AF2.svg)
 
 ![Nest](https://img.shields.io/badge/nest-white.svg?logo=nestjs&logoColor=E0234E&style=social)
+![dotenv](https://img.shields.io/badge/dotenv-white.svg?logo=dotenv&logoColor=ECD53F&style=social)
+
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-white.svg?logo=puppeteer&logoColor=40B5A4&style=social)
 ![ExcelJS](https://img.shields.io/badge/ExcelJS-white.svg?logo=microsoftexcel&logoColor=217346&style=social)
 ![CSV for Node.js](https://img.shields.io/badge/CSV%20for%20Node.js-548694.svg)
 ![Docx-templates](https://img.shields.io/badge/Docx--templates-white.svg?logo=microsoftword&logoColor=2B579A&style=social)
-![dotenv](https://img.shields.io/badge/dotenv-white.svg?logo=dotenv&logoColor=ECD53F&style=social)
+
+![Amazon S3](https://img.shields.io/badge/Amazon%20S3-white.svg?logo=amazons3&logoColor=569A31&style=social)
 
 ![TypeORM](https://img.shields.io/badge/TypeORM-E83524.svg)
 ![MySQL](https://img.shields.io/badge/MySQL-white.svg?logo=mysql&logoColor=4479A1&style=social)
