@@ -8,33 +8,45 @@
 
 `o23/n8` provides the pipeline steps related to AWS.
 
-## S3 Steps
+## AWS Credential Identity Environment Parameters
+
+| Name                                 | Type   | Default Value | Comments                      |
+|--------------------------------------|--------|---------------|-------------------------------|
+| `aws.client.CLIENT.access.key`       | string |               | AWS credential access key.    |
+| `aws.client.CLIENT.secret.key`       | string |               | AWS credential secret key.    |
+| `aws.client.CLIENT.session.token`    | string |               | AWS credential session token. |
+| `aws.client.CLIENT.credential.scope` | string |               | AWS credential scope.         |
+
+## AWS Region Step Environment Parameters
+
+| Name                       | Type   | Default Value | Comments    |
+|----------------------------|--------|---------------|-------------|
+| `aws.client.CLIENT.region` | string |               | AWS region. |
+
+## AWS S3 Steps
 
 S3 pipeline steps are actually a simple wrapper for the AWS SDK, so their parameters and returns follow the specifications
 of [@aws-sdk/client-s3](https://www.npmjs.com/package/@aws-sdk/client-s3).
 
 ### Environment Parameters
 
-| Name                 | Type   | Default Value | Comments     |
-|----------------------|--------|---------------|--------------|
-| `aws.s3.CLIENT.type` | string | `default`     | Client type. |
+| Name                        | Type   | Default Value | Comments     |
+|-----------------------------|--------|---------------|--------------|
+| `aws.s3.CLIENT.client.type` | string | `default`     | Client type. |
 
 `CLIENT` represents client name.
 
-> Use `ClientManager.registerClientCreator` to register client creator.
+> Use `RegionClientManager.registerS3ClientCreator` to register client creator.
 
 #### Default
 
-When `aws.s3.CLIENT.type=default` or not presents:
+When `aws.s3.CLIENT.client.type=default` or not presents:
 
-| Name                             | Type   | Default Value | Comments                      |
-|----------------------------------|--------|---------------|-------------------------------|
-| `aws.s3.CLIENT.region`           | string |               | AWS region.                   |
-| `aws.s3.CLIENT.access.key`       | string |               | AWS credential access key.    |
-| `aws.s3.CLIENT.secret.key`       | string |               | AWS credential secret key.    |
-| `aws.s3.CLIENT.session.token`    | string |               | AWS credential session token. |
-| `aws.s3.CLIENT.credential.scope` | string |               | AWS credential scope.         |
-| `aws.s3.CLIENT.bucket`           | string |               | AWS bucket name.              |
+| Name                   | Type   | Default Value | Comments         |
+|------------------------|--------|---------------|------------------|
+| `aws.s3.CLIENT.bucket` | string |               | AWS bucket name. |
+
+> `default` client type read AWS credential identity and region environment parameters.
 
 ### Constructor Parameters
 
