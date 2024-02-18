@@ -62,8 +62,10 @@ Based on the various scenarios described above, `o23` has been designed as multi
 - [o23/n6](o23-n6/README.md): Provides pipeline steps to generate Excel reports based on xlsx templates and CSV reports based on CSV
   templates,
 - [o23/n7](o23-n7/README.md): Provides pipeline steps to generate Word reports based on docx templates,
+- [o23/n8](o23-n8/README.md): Provides pipeline steps to execute AWS commands,
 - [o23/n90](o23-n90/README.md): Application basic package, which includes all the fundamental settings for building O23 applications,
 - [o23/n91](o23-n91/README.md): O23 Application printing plugin package,
+- [o23/n92](o23-n92/README.md): O23 Application AWS plugin package,
 - [o23/n99](o23-n99/README.md): A complete pre-application built on all the above modules, which is a complete web service itself and can
   also be used as an engineering template,
 - [create-rainbow-o23-app](create-rainbow-o23-app/README.md): `npx` module for create customized awesome `o23` application.
