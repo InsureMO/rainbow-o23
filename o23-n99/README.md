@@ -1401,7 +1401,7 @@ for all region-based AWS pipeline steps to use.
 
 - `aws.client.{client}.**`: client configurations.
 
-## AbstractS3PipelineStep, extends AbstractRegionPipelineStep
+### AbstractS3PipelineStep, extends AbstractRegionPipelineStep
 
 Execute AWS S3 command.
 
@@ -1409,19 +1409,24 @@ Execute AWS S3 command.
 |-----------|----------|-----------|--------------|
 | `bucket`  | `string` | No        | Bucket name. |
 
-### `client`
+#### `client`
 
 `string`, client name is used to look up the corresponding configuration information when executing the AWS S3 step, as follows:
 
 - `aws.s3.{client}.client.type`: to identify how to read client configurations.
 
-### `bucket`
+#### `bucket`
 
 `string`, bucket name is used to look up the existing bucket when executing the AWS S3 step.
 
-### S3GetObjectPipelineStep, extends AbstractS3PipelineStep
+#### S3GetObjectPipelineStep, extends AbstractS3PipelineStep
 
 Get an object from AWS S3 bucket.
+
+| Attribute          | Type      | Mandatory | Description                                          |
+|--------------------|-----------|-----------|------------------------------------------------------|
+| `content-as`       | `string`  | No        | Read object content as `string` or `buffer`.         |
+| `ignore-not-found` | `boolean` | No        | Ignore error when object not found, default `false`. |
 
 For example,
 
@@ -1433,7 +1438,7 @@ For example,
   to-output: "$result.Body"
 ```
 
-### S3PutObjectPipelineStep, extends AbstractS3PipelineStep
+#### S3PutObjectPipelineStep, extends AbstractS3PipelineStep
 
 Put an object into AWS S3 bucket.
 
@@ -1446,7 +1451,7 @@ For example,
   from-input: "{Key: $factor.objectKey, Body: $factor.fileBuffer}"
 ```
 
-### S3DeleteObjectPipelineStep, extends AbstractS3PipelineStep
+#### S3DeleteObjectPipelineStep, extends AbstractS3PipelineStep
 
 Delete an object from AWS S3 bucket.
 
@@ -1459,7 +1464,7 @@ For example,
   from-input: "{Key: $factor.objectKey}"
 ```
 
-### S3ListObjectsPipelineStep, extends AbstractS3PipelineStep
+#### S3ListObjectsPipelineStep, extends AbstractS3PipelineStep
 
 List objects from AWS S3 bucket.
 

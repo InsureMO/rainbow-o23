@@ -68,6 +68,13 @@ export interface AbstractS3PipelineStepOutFragment {
 
 ### Get Object Step
 
+### Constructor Parameters
+
+| Name           | Type    | Default Value | Comments                                     |
+|----------------|---------|---------------|----------------------------------------------|
+| contentAs      | string  |               | Read object content as `string` or `buffer`. |
+| ignoreNotFound | boolean | false         | Ignore error when object not found.          |
+
 #### Request and Response
 
 ```typescript
