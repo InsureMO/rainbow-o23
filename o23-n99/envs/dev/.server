@@ -7,6 +7,7 @@ CFG_APP_EXAMPLES_ENABLED=true
 CFG_APP_INIT_PIPELINES_DIR=server
 # plugins, all plugins default disabled
 CFG_APP_PLUGINS_PRINT=true
+CFG_APP_PLUGINS_AWS_S3=true
 # excluded pipeline directory
 #CFG_APP_EXCLUDED_PIPELINES_DIRS=02-api-test
 # for homepage proxy

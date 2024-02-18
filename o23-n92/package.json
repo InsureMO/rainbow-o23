@@ -1,0 +1,72 @@
+{
+	"name": "@rainbow-o23/n92",
+	"version": "0.1.20",
+	"description": "o23 aws server base",
+	"main": "index.cjs",
+	"module": "index.js",
+	"types": "index.d.ts",
+	"type": "module",
+	"scripts": {
+		"build": "rollup -c",
+		"build:ci": "rollup -c rollup.config.ci.js",
+		"test": "jest"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/InsureMO/rainbow-o23.git"
+	},
+	"author": "Rainbow Team",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/InsureMO/rainbow-o23/issues"
+	},
+	"dependencies": {
+		"@rainbow-o23/n8": "0.1.20",
+		"@rainbow-o23/n90": "0.1.20"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.23.9",
+		"@babel/preset-env": "^7.23.9",
+		"@babel/preset-typescript": "^7.23.3",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-eslint": "^9.0.3",
+		"@types/events": "^3.0.1",
+		"@types/node": "18.16.12",
+		"@typescript-eslint/eslint-plugin": "^5.46.0",
+		"@typescript-eslint/parser": "^5.46.0",
+		"eslint": "^8.29.0",
+		"rollup": "^3.7.0",
+		"rollup-plugin-tslint": "^0.2.2",
+		"rollup-plugin-typescript2": "^0.34.1",
+		"tslib": "^2.4.1",
+		"typescript": "5.1.6"
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"json",
+			"ts",
+			"yaml",
+			"yml"
+		],
+		"testRegex": "(/test/.*\\.(test|spec))\\.[tj]sx?$",
+		"testPathIgnorePatterns": [
+			"/node_modules/"
+		],
+		"transform": {
+			"^.+\\.(t|j)s$": "ts-jest"
+		},
+		"collectCoverageFrom": [
+			"src/**/*.(t|j)s"
+		],
+		"coverageDirectory": "./coverage",
+		"coverageReporters": [
+			"html"
+		],
+		"testEnvironment": "node"
+	},
+	"volta": {
+		"node": "18.19.0",
+		"yarn": "1.22.21"
+	}
+}

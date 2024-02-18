@@ -110,6 +110,8 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: ./o23-n6
+      - run: |
+          echo "Package ${{ steps.publish-n6.outputs.id }} published to lane [${{ steps.publish-n6.outputs.tag }}]"
 #          dry-run: true
       - name: "Publish @o23/n7"
         id: publish-n7
@@ -121,7 +123,18 @@ jobs:
           package: ./o23-n7
       #          dry-run: true
       - run: |
-          echo "Package ${{ steps.publish-n6.outputs.id }} published to lane [${{ steps.publish-n6.outputs.tag }}]"
+          echo "Package ${{ steps.publish-n7.outputs.id }} published to lane [${{ steps.publish-n7.outputs.tag }}]"
+      - name: "Publish @o23/n8"
+        id: publish-n8
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n8
+      #          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n8.outputs.id }} published to lane [${{ steps.publish-n8.outputs.tag }}]"
       - name: "Publish @o23/n90"
         id: publish-n90
         uses: JS-DevTools/npm-publish@v2
@@ -143,7 +156,18 @@ jobs:
           package: ./o23-n91
 #          dry-run: true
       - run: |
-          echo "Package ${{ steps.publish-n91.outputs.id }} published to lane [${{ steps.publish-n92.outputs.tag }}]"
+          echo "Package ${{ steps.publish-n91.outputs.id }} published to lane [${{ steps.publish-n91.outputs.tag }}]"
+      - name: "Publish @o23/n92"
+        id: publish-n92
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          tag: ${{ inputs.lane }}
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./o23-n92
+      #          dry-run: true
+      - run: |
+          echo "Package ${{ steps.publish-n92.outputs.id }} published to lane [${{ steps.publish-n92.outputs.tag }}]"
       - name: "Publish @o23/n99"
         id: publish-n99
         uses: JS-DevTools/npm-publish@v2
