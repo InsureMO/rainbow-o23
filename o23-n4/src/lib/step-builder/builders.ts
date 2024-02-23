@@ -5,6 +5,7 @@ import {
 	DeletePropertyPipelineStepBuilder,
 	EachPipelineStepSetsBuilder,
 	GetPropertyPipelineStepBuilder,
+	ParallelPipelineStepSetsBuilder,
 	PipelineStepSetsBuilder,
 	RefPipelinePipelineStepBuilder,
 	RefStepPipelineStepBuilder,
@@ -54,6 +55,7 @@ export enum DefaultSteps {
 	SETS = 'sets',
 	ASYNC_SETS = 'async-sets',
 	EACH_SETS = 'each',
+	PARALLEL_SETS = 'parallel',
 	CONDITIONAL_SETS = 'conditional',
 	ROUTES_SETS = 'routes',
 
@@ -82,6 +84,7 @@ export const registerDefaults = () => {
 	StepBuilders.register(DefaultSteps.SETS, PipelineStepSetsBuilder);
 	StepBuilders.register(DefaultSteps.ASYNC_SETS, AsyncPipelineStepSetsBuilder);
 	StepBuilders.register(DefaultSteps.EACH_SETS, EachPipelineStepSetsBuilder);
+	StepBuilders.register(DefaultSteps.PARALLEL_SETS, ParallelPipelineStepSetsBuilder);
 	StepBuilders.register(DefaultSteps.CONDITIONAL_SETS, ConditionalPipelineStepSetsBuilder);
 	StepBuilders.register(DefaultSteps.ROUTES_SETS, RoutesPipelineStepSetsBuilder);
 

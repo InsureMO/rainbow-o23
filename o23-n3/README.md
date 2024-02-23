@@ -171,6 +171,29 @@ const RequestContent = {$content: content, $item: element, $semaphore};
 If you need to terminate the loop prematurely, you just need to return the `$semaphore` signal from the request data. The loop will
 automatically end, and the collected processing results will be gathered and returned as an array.
 
+### Parallel
+
+#### Constructor Parameters
+
+| Name      | Type                                                              | Default Value | Comments                                      |
+|-----------|-------------------------------------------------------------------|---------------|-----------------------------------------------|
+| cloneData | ScriptFuncOrBody\<CloneDataFunc\<In, InFragment, EachInFragment>> |               | Clone request data for each step.             |
+| race      | boolean                                                           | false         | Returns first settled result if race is true. |
+
+The specified set of pipeline steps will be executed parallel, and
+
+- All the execution results will be gathered into an array and returned when `race` is false,
+- Returns the first settled result when `race` is true,
+
+It is important to note that
+
+- Each sub pipeline step will use the same request data, they share the same content memory address. So please be very
+  careful <span style='color: red;'>**NOT**</span> to attempt to modify the request data in the sub pipeline steps. Alternatively, you can
+  use `cloneData` to create a copy of the request data for each sub pipeline steps, so that request data operations can be modified in
+  certain sub pipeline steps without affecting other sub pipeline steps.
+- The error handles of the `For Each` pipeline step will be used for each iteration of executing individual elements, rather than being
+  applied to the execution of the array as a whole.
+
 ### Trigger Pipeline
 
 #### Constructor Parameters

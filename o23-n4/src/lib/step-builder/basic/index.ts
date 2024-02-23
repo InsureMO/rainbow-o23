@@ -8,6 +8,7 @@ export * from './delete-property-step-builder';
 
 export * from './step-sets-builder';
 export * from './async-step-sets-builder';
+export * from './parallel-step-sets-builder';
 export * from './each-step-sets-builder';
 export * from './conditional-step-sets-builder';
 export * from './routes-step-sets-builder';

@@ -85,7 +85,7 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 					const request = await promise;
 					return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 						.execute(async () => {
-							this.traceStepOut(traceId, step, request);
+							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({...request, $context: {...context, traceId}});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next

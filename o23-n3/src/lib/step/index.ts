@@ -5,6 +5,7 @@ export * from './abstract-fragmentary-pipeline-step';
 
 export * from './step-sets';
 export * from './async-step-sets';
+export * from './parallel-step-sets';
 export * from './each-step-sets';
 export * from './conditional-step-sets';
 export * from './routes-step-sets';

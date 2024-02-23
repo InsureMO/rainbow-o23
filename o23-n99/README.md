@@ -291,6 +291,7 @@ A pipeline step is a unit of execution logic. It can be a script fragment, a fun
 | `AsyncPipelineStepSets`                | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
 | `ConditionalPipelineStepSets`          | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
 | `EachPipelineStepSets`                 | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
+| `ParallelPipelineStepSets`             | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps parallel.                                            |
 | `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
 | `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
 | `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
@@ -968,6 +969,41 @@ interface EachPipelineStepSetsInputData<In> {
 ```
 
 The return data from each iteration will be collected into an array as the return data for this step.
+
+## ParallelPipelineStepSets, extends PipelineStepSets, AbstractFragmentaryPipelineStep
+
+Execute the specified set of steps parallel. Execute after `from-input`.
+
+| Attribute    | Type      | Mandatory | Description                                           |
+|--------------|-----------|-----------|-------------------------------------------------------|
+| `clone-data` | `snippet` | No        | Clone request data for each step before executing it. |
+| `race`       | `boolean` | No        | Returns first settled result or not.                  |
+
+For example,
+
+```yaml
+- name: Parallel
+  use: parallel
+  from-input: $factor.salary
+  steps:
+    - name: Calculate Bonus
+      use: snippet
+      snippet: "$factor * 1.5"
+    - name: Calculate Tax
+      use: snippet
+      snippet: "$factor * 1.5 * 0.05"
+
+# assume fetch-from-s1, fetch-from-s2 are customized steps, retrieve result from service 1 and 2 by given data
+- name: Choose the Best Service
+  use: parallel
+  from-input: $factor.data
+  race: true
+  steps:
+    - name: Calculate Service 1
+      use: fetch-from-s1
+    - name: Calculate Service 2
+      use: fetch-from-s2
+```
 
 ## AbstractTypeOrmPipelineStep, extends AbstractFragmentaryPipelineStep
 
