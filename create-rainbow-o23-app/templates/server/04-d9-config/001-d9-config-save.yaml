@@ -102,7 +102,7 @@ steps:
         sql: |-
           UPDATE T_O23_D9_CONFIG SET
           CONFIG_NAME = $configName, CONFIG_TYPE = $configType, LANGUAGE = $language, ENABLED = $enabled.@bool, 
-          CONFIG = $config, DATA_PIPELINE = $dataPipeline, 
+          CONFIG = $config.@json, DATA_PIPELINE = $dataPipeline, 
           VERSION = VERSION + 1, LAST_MODIFIED_AT = $lastModifiedAt.@ts, LAST_MODIFIED_BY = $lastModifiedBy
           WHERE CONFIG_ID = $configId AND VERSION = $version
         merge: affectedRows
