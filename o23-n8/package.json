@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n8",
-	"version": "1.0.23",
+	"version": "1.0.24",
 	"description": "o23 aws",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -22,8 +22,8 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.515.0",
-		"@rainbow-o23/n3": "1.0.23",
-		"@rainbow-o23/n4": "1.0.23"
+		"@rainbow-o23/n3": "1.0.24",
+		"@rainbow-o23/n4": "1.0.24"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",

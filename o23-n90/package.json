@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n90",
-	"version": "1.0.23",
+	"version": "1.0.24",
 	"description": "o23 server base",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -21,9 +21,9 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n2": "1.0.23",
-		"@rainbow-o23/n3": "1.0.23",
-		"@rainbow-o23/n4": "1.0.23",
+		"@rainbow-o23/n2": "1.0.24",
+		"@rainbow-o23/n3": "1.0.24",
+		"@rainbow-o23/n4": "1.0.24",
 		"dotenv": "^16.3.1",
 		"glob": "^10.3.10"
 	},
@@ -31,8 +31,8 @@
 		"@babel/core": "^7.23.9",
 		"@babel/preset-env": "^7.23.9",
 		"@babel/preset-typescript": "^7.23.3",
-		"@rainbow-o23/n5": "1.0.23",
-		"@rainbow-o23/n6": "1.0.23",
+		"@rainbow-o23/n5": "1.0.24",
+		"@rainbow-o23/n6": "1.0.24",
 		"@rollup/plugin-babel": "^6.0.4",
 		"@rollup/plugin-eslint": "^9.0.3",
 		"@rollup/plugin-yaml": "^4.1.2",
