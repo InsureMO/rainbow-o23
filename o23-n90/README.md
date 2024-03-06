@@ -46,10 +46,11 @@ The environment files is defined in `CFG_ENV_FILE`, such as in `package.json`:
 
 ### Environment Parameters
 
-| Name                          | Type   | Default Value | Comments                                                                |
-|-------------------------------|--------|---------------|-------------------------------------------------------------------------|
-| `app.init.pipelines.dir`      | string |               | Entry point pipelines directory.                                        |
-| `app.excluded.pipelines.dirs` | string |               | Exclude directories, connected by `,`, relative to pipelines directory. |
+| Name                          | Type    | Default Value | Comments                                                                |
+|-------------------------------|---------|---------------|-------------------------------------------------------------------------|
+| `app.api.test`                | boolean | false         | Enable the api test rest ports.                                         |
+| `app.init.pipelines.dir`      | string  |               | Entry point pipelines directory.                                        |
+| `app.excluded.pipelines.dirs` | string  |               | Exclude directories, connected by `,`, relative to pipelines directory. |
 
 ## Database Configuration
 

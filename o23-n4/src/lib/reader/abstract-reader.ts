@@ -14,6 +14,9 @@ export interface ReaderOptions {
 }
 
 export interface Reader<C> {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	read(def: any): ParsedDef;
+
 	load(content: C): ParsedDef;
 }
 
@@ -98,8 +101,8 @@ export abstract class AbstractReader<C> implements Reader <C> {
 		return def.type === 'step-sets';
 	}
 
-	public load(content: C): ParsedDef {
-		const def = this.redressDef(this.parse(content));
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	public read(def: any): ParsedDef {
 		switch (true) {
 			case this.isPipeline(def):
 				return PipelineReader.read(def);
@@ -110,5 +113,10 @@ export abstract class AbstractReader<C> implements Reader <C> {
 			default:
 				throw new UncatchableError(ERR_DEF_TYPE_NOT_SUPPORTED, `Definition type[${def.type}] is not supported.`);
 		}
+	}
+
+	public load(content: C): ParsedDef {
+		const def = this.redressDef(this.parse(content));
+		return this.read(def);
 	}
 }

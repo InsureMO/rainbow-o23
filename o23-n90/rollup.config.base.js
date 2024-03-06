@@ -1,5 +1,6 @@
 import {babel} from '@rollup/plugin-babel';
 import eslint from '@rollup/plugin-eslint';
+import {string} from "rollup-plugin-string";
 import typescript from 'rollup-plugin-typescript2';
 
 export const buildConfig = (lint) => {
@@ -17,7 +18,8 @@ export const buildConfig = (lint) => {
 			{format: 'cjs', file: './index.cjs'}
 		],
 		plugins: [
-			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
+			string({include: '**/*.yaml'}),
+			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**', '**/*.yaml']}) : null,
 			// lint ? tslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
 			typescript({clean: true}),
 			babel({babelHelpers: 'bundled'})

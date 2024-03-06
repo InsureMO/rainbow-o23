@@ -30,6 +30,8 @@ const generateReadme = async (packageName, directory) => {
 const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
 	writeDatasourceFiles(datasourceOptions, pluginOptions, directory);
 	writePluginFiles(pluginOptions, directory);
+	fs.mkdirSync(path.resolve(directory, 'scripts'));
+	fs.mkdirSync(path.resolve(directory, 'server'));
 };
 
 // const cleanPluginSrcFolder = async (directory) => {

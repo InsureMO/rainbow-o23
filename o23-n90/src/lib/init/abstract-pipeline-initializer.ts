@@ -1,6 +1,6 @@
 import {EnhancedLogger, PipelineCode, PipelineRepository, PipelineStepCode, UncatchableError} from '@rainbow-o23/n1';
 import {BootstrapOptions} from '@rainbow-o23/n2';
-import {ParsedPipelineDef, ParsedPipelineStepDef, registerDefaults} from '@rainbow-o23/n4';
+import {ParsedDef, ParsedPipelineDef, ParsedPipelineStepDef, registerDefaults} from '@rainbow-o23/n4';
 import * as fs from 'fs';
 import {glob} from 'glob';
 import * as path from 'path';
@@ -38,36 +38,61 @@ export abstract class AbstractPipelineInitializer {
 			.map(dir => path.resolve(process.cwd(), scanDir, dir));
 	}
 
-	protected async readDefs(options: BootstrapOptions, add: (def: ParsedPipelineDef) => void): Promise<void> {
+	private parseDef(options: {
+		key: string; def: ParsedDef;
+		pipelineMap: Record<PipelineCode, string>; stepMap: Record<PipelineStepCode, string>;
+		options: BootstrapOptions;
+		add: (def: ParsedPipelineDef) => void
+	}) {
+		const {
+			key, def,
+			pipelineMap, stepMap,
+			options: bootstrapOptions, add
+		} = options;
+
+		if (def.type === 'step-sets' || def.type === 'step') {
+			const parsed = def as ParsedPipelineStepDef;
+			if (parsed.enabled === false) {
+				bootstrapOptions.getConfig().getLogger().warn(`Pipeline Step[${def.code}] is disabled, ignored.`);
+			} else {
+				if (stepMap[parsed.code] != null) {
+					throw new UncatchableError('', `Duplicated pipeline step definitions[code=${parsed.code}, first=${stepMap[parsed.code]}, second=${key}] detected.`);
+				}
+				PipelineRepository.putStep({[parsed.code]: parsed.def});
+				stepMap[parsed.code] = key;
+			}
+		} else {
+			const parsed = def as ParsedPipelineDef;
+			if (pipelineMap[parsed.code] != null) {
+				throw new UncatchableError('', `Duplicated pipeline definitions[code=${parsed.code}, first=${pipelineMap[parsed.code]}, second=${key}] detected.`);
+			}
+			add(parsed);
+			pipelineMap[parsed.code] = key;
+		}
+	}
+
+	protected async readDefs(
+		options: BootstrapOptions,
+		add: (def: ParsedPipelineDef) => void,
+		prebuilt?: (options: BootstrapOptions) => Array<{ key: string; content: string }>
+	): Promise<void> {
 		const files = await this.scanDefFiles(options);
 		const excludedDirs = this.getExcludedDirs(options);
-		const map: Record<PipelineCode, string> = {};
+		const pipelineMap: Record<PipelineCode, string> = {};
 		const stepMap: Record<PipelineStepCode, string> = {};
 		const reader = ConfigUtils.createDefReader(options);
+
+		const prebuiltDefs = prebuilt == null ? [] : prebuilt(options);
+		prebuiltDefs.forEach(({key, content}) => {
+			const def = reader.load(content);
+			this.parseDef({key, def, pipelineMap, stepMap, options, add});
+		});
 		files.filter(file => excludedDirs.every(dir => !file.startsWith(dir)))
 			.sort()
 			.forEach(file => {
 				const content = fs.readFileSync(file);
 				const def = reader.load(content.toString());
-				if (def.type === 'step-sets' || def.type === 'step') {
-					const parsed = def as ParsedPipelineStepDef;
-					if (parsed.enabled === false) {
-						options.getConfig().getLogger().warn(`Pipeline Step[${def.code}] is disabled, ignored.`);
-					} else {
-						if (stepMap[parsed.code] != null) {
-							throw new UncatchableError('', `Duplicated pipeline step definitions[code=${parsed.code}, first=${stepMap[parsed.code]}, second=${file}] detected.`);
-						}
-						PipelineRepository.putStep({[parsed.code]: parsed.def});
-						stepMap[parsed.code] = file;
-					}
-				} else {
-					const parsed = def as ParsedPipelineDef;
-					if (map[parsed.code] != null) {
-						throw new UncatchableError('', `Duplicated pipeline definitions[code=${parsed.code}, first=${map[parsed.code]}, second=${file}] detected.`);
-					}
-					add(parsed);
-					map[parsed.code] = file;
-				}
+				this.parseDef({key: file, def, pipelineMap, stepMap, options, add});
 			});
 	}
 

@@ -9,6 +9,7 @@ import {
 } from '../pipeline';
 import {ServerPipelineStepRegistrar} from '../plugins';
 import {AbstractPipelineInitializer} from './abstract-pipeline-initializer';
+import {prebuilt} from './server';
 
 interface InitOnlyPipelineDef extends ParsedPipelineDef {
 	initOnly: boolean;
@@ -49,14 +50,31 @@ export class ServerPipelineInitializer extends AbstractPipelineInitializer {
 					}
 				}));
 			}));
-		await this.readDefs(options, (def) => {
-			if (this.isInitOnly(def)) {
-				// for startup
-				initPipelines.push(def);
-			} else {
-				serverPipelines.push(def);
-			}
-		});
+		await this.readDefs(options,
+			(def) => {
+				if (this.isInitOnly(def)) {
+					// for startup
+					initPipelines.push(def);
+				} else {
+					serverPipelines.push(def);
+				}
+			}, (options) => {
+				const {
+					initServer,
+					apiTest,
+					print,
+					d9Config,
+					pipelineDef
+				} = prebuilt;
+				const apiTestEnabled = options.getEnvAsBoolean('app.api.test', false);
+				const printEnabled = options.getEnvAsBoolean('app.plugins.print', false);
+				return [
+					...initServer,
+					...(apiTestEnabled ? apiTest : []),
+					...(printEnabled ? print : []),
+					...d9Config, ...pipelineDef
+				];
+			});
 		// startup pipelines
 		await this.executeInitPipelines(initPipelines, options);
 		// register pipelines to server
