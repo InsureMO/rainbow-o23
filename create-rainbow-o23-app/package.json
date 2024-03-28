@@ -1,6 +1,6 @@
 {
 	"name": "create-rainbow-o23-app",
-	"version": "1.0.24",
+	"version": "1.0.25",
 	"description": "Create rainbow o23 application.",
 	"bin": {
 		"create-rainbow-o23-app": "./index.js"
