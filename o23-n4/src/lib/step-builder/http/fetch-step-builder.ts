@@ -54,14 +54,16 @@ export class FetchPipelineStepBuilder
 
 export class FetchPostPipelineStepBuilder extends FetchPipelineStepBuilder {
 	protected readMoreOptions(given: FetchPipelineStepBuilderOptions, transformed: FetchPipelineStepOptions): FetchPipelineStepOptions {
+		transformed = super.readMoreOptions(given, transformed);
 		transformed.method = 'post';
-		return super.readMoreOptions(given, transformed);
+		return transformed;
 	}
 }
 
 export class FetchGetPipelineStepBuilder extends FetchPipelineStepBuilder {
 	protected readMoreOptions(given: FetchPipelineStepBuilderOptions, transformed: FetchPipelineStepOptions): FetchPipelineStepOptions {
+		transformed = super.readMoreOptions(given, transformed);
 		transformed.method = 'get';
-		return super.readMoreOptions(given, transformed);
+		return transformed;
 	}
 }
