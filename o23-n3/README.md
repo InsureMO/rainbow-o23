@@ -589,8 +589,8 @@ step set. Additionally, nested transactions are also supported, which means Tran
 | `endpoints.SYSTEM.ENDPOINT.method`    | string  | POST          | Endpoint http method.                                                                                                             |
 | `endpoints.SYSTEM.ENDPOINT.headers`   | string  |               | Endpoint request headers, use global headers if this parameter doesn't present.<br>Format follows `name=value[;name=value[...]]`. |
 | `endpoints.SYSTEM.global.headers`     | string  |               | Endpoint system global request headers.<br>Format follows `name=value[;name=value[...]]`.                                         |
-| `endpoints.SYSTEM.ENDPOINT.timeout`   | string  |               | Endpoint request timeout, in milliseconds, use global timeout if this parameter doesn't present.                                  |
-| `endpoints.SYSTEM.global.timeout`     | string  | -1            | Endpoint system global timeout, in milliseconds, `-1` represents no timeout.                                                      |
+| `endpoints.SYSTEM.ENDPOINT.timeout`   | string  |               | Endpoint request timeout, in seconds, use global timeout if this parameter doesn't present.                                       |
+| `endpoints.SYSTEM.global.timeout`     | string  | -1            | Endpoint system global timeout, in seconds, `-1` represents no timeout.                                                           |
 | `endpoints.SYSTEM.ENDPOINT.body.used` | boolean | true          | Endpoint use request body or not.                                                                                                 |
 
 `SYSTEM` represents endpoint system, `ENDPOINT` represents endpoint url. For example:
@@ -607,6 +607,8 @@ CFG_ENDPOINTS_ORDER_PAYMENT_URL=https://order.com/payment
 | endpointSystemCode   | string                                                     |               | Endpoint system code.                          |
 | endpointName         | string                                                     |               | Endpoint name.                                 |
 | urlGenerate          | ScriptFuncOrBody\<HttpGenerateUrl>                         |               | Endpoint url generator, `$endpointUrl`.        |
+| method               | string                                                     |               | Http method.                                   |
+| timeout              | number                                                     |               | Endpoint timeout, in seconds.                  |
 | headersGenerate      | ScriptFuncOrBody\<HttpGenerateHeaders>                     |               | Endpoint request headers generator.            |
 | bodyGenerate         | ScriptFuncOrBody\<HttpGenerateBody>                        |               | Endpoint request body generator.               |
 | responseGenerate     | ScriptFuncOrBody\<HttpGenerateResponse>                    |               | Endpoint response body generator, `$response`. |

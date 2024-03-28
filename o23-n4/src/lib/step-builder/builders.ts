@@ -13,7 +13,7 @@ import {
 	SnippetPipelineStepBuilder,
 	SnowflakePipelineStepBuilder
 } from './basic';
-import {FetchPipelineStepBuilder} from './http';
+import {FetchGetPipelineStepBuilder, FetchPipelineStepBuilder, FetchPostPipelineStepBuilder} from './http';
 import {
 	TypeOrmBulkSaveBySQLPipelineStepBuilder,
 	TypeOrmBySnippetPipelineStepBuilder,
@@ -69,6 +69,8 @@ export enum DefaultSteps {
 	TYPEORM_TRANSACTIONAL = 'typeorm-transactional',
 
 	HTTP_FETCH = 'http-fetch',
+	HTTP_POST = 'http-post',
+	HTTP_GET = 'http-get',
 
 	REF_PIPELINE = 'ref-pipeline',
 	REF_STEP = 'ref-step'
@@ -98,6 +100,8 @@ export const registerDefaults = () => {
 	StepBuilders.register(DefaultSteps.TYPEORM_TRANSACTIONAL, TypeOrmTransactionalPipelineStepSetsBuilder);
 
 	StepBuilders.register(DefaultSteps.HTTP_FETCH, FetchPipelineStepBuilder);
+	StepBuilders.register(DefaultSteps.HTTP_POST, FetchPostPipelineStepBuilder);
+	StepBuilders.register(DefaultSteps.HTTP_GET, FetchGetPipelineStepBuilder);
 
 	StepBuilders.register(DefaultSteps.REF_PIPELINE, RefPipelinePipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.REF_STEP, RefStepPipelineStepBuilder);

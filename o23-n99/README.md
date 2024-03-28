@@ -629,6 +629,8 @@ Use `node-fetch` to call remote service APIs. Execute after `from-input`.
 | `system`                     | `string`  | Yes       | Code of remote service.                                |
 | `endpoint`                   | `string`  | Yes       | Name of remote service endpoint.                       |
 | `decorate-url`               | `snippet` | No        | Decorate url, which loaded from environment variables. |
+| `method`                     | `string`  | No        | Http method.                                           |
+| `timeout`                    | `number`  | No        | Request timeout.                                       |
 | `generate-headers`           | `snippet` | No        | Generate request headers, for remote service endpoint. |
 | `generate-body`              | `snippet` | No        | Generate request body, for remote service endpoint.    |
 | `read-response`              | `snippet` | No        | Generate response body, from remote service endpoint.  |
@@ -646,6 +648,8 @@ For example,
     return $endpointUrl + '?userId=' + $factor.userId;
   merge: user
 ```
+
+> Use `http-post` for post request, `http-get` for get request.
 
 ### `system`
 

@@ -19,6 +19,9 @@ export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = Pipeli
 	endpointSystemCode: string;
 	endpointName: string;
 	urlGenerate?: ScriptFuncOrBody<HttpGenerateUrl<In, InFragment>>;
+	method?: string;
+	/** on seconds */
+	timeout?: number;
 	headersGenerate?: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment>>;
 	responseGenerate?: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>>;
@@ -53,12 +56,13 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		this._endpointName = options.endpointName;
 		const endpointKey = this.getEndpointKey();
 		this._endpointUrl = config.getString(`endpoints.${endpointKey}.url`);
-		this._endpointMethod = config.getString(`endpoints.${endpointKey}.method`, 'POST').toLowerCase();
+		this._endpointMethod = ((options.method ?? '').trim() || config.getString(`endpoints.${endpointKey}.method`, 'POST')).toLowerCase();
 		this._endpointHeaders = this.generateEndpointHeaders(
 			config.getString(`endpoints.${endpointKey}.headers`),
 			this.generateEndpointHeaders(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers`)));
 		// in second
-		this._endpointTimeout = config.getNumber(`endpoints.${endpointKey}.timeout`)
+		this._endpointTimeout = options.timeout
+			?? config.getNumber(`endpoints.${endpointKey}.timeout`)
 			?? config.getNumber(`endpoints.${this.getEndpointSystemCode()}.global.timeout`, -1);
 		// to millisecond
 		this._endpointTimeout = this._endpointTimeout > 0 ? this._endpointTimeout * 1000 : -1;

@@ -11,6 +11,8 @@ export type FetchPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOpti
 	system: FetchPipelineStepOptions['endpointSystemCode'];
 	endpoint: FetchPipelineStepOptions['endpointName'];
 	decorateUrl?: FetchPipelineStepOptions['urlGenerate'];
+	method?: FetchPipelineStepOptions['method'];
+	timeout?: FetchPipelineStepOptions['timeout'];
 	generateHeaders?: FetchPipelineStepOptions['headersGenerate'];
 	generateBody?: FetchPipelineStepOptions['bodyGenerate'];
 	readResponse?: FetchPipelineStepOptions['responseGenerate'];
@@ -34,6 +36,8 @@ export class FetchPipelineStepBuilder
 			throw new UncatchableError(ERR_PIPELINE_STEP_FETCH_ENDPOINT_NOT_DEFINED, `Endpoint[endpoint] not defined for fetch pipeline step[${given.name}].`);
 		}
 		transformed.urlGenerate = redressSnippet(given.decorateUrl);
+		transformed.method = redressString(given.method);
+		transformed.timeout = given.timeout;
 		transformed.headersGenerate = redressSnippet(given.generateHeaders);
 		transformed.bodyGenerate = redressSnippet(given.generateBody);
 		transformed.responseGenerate = redressSnippet(given.readResponse);
@@ -45,5 +49,19 @@ export class FetchPipelineStepBuilder
 		}
 
 		return transformed;
+	}
+}
+
+export class FetchPostPipelineStepBuilder extends FetchPipelineStepBuilder {
+	protected readMoreOptions(given: FetchPipelineStepBuilderOptions, transformed: FetchPipelineStepOptions): FetchPipelineStepOptions {
+		transformed.method = 'post';
+		return super.readMoreOptions(given, transformed);
+	}
+}
+
+export class FetchGetPipelineStepBuilder extends FetchPipelineStepBuilder {
+	protected readMoreOptions(given: FetchPipelineStepBuilderOptions, transformed: FetchPipelineStepOptions): FetchPipelineStepOptions {
+		transformed.method = 'get';
+		return super.readMoreOptions(given, transformed);
 	}
 }
