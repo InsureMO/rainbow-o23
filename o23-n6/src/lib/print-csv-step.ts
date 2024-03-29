@@ -2,6 +2,9 @@ import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} fr
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
 import {parse} from 'csv-parse/sync';
 import {stringify} from 'csv-stringify/sync';
+import * as fs from 'fs';
+import {nanoid} from 'nanoid';
+import * as path from 'path';
 import {
 	ERR_INCORRECT_LOOP_END,
 	ERR_INCORRECT_LOOP_END_VARIABLE,
@@ -15,6 +18,7 @@ export interface PrintCsvPipelineStepOptions<In = PipelineStepPayload, Out = Pip
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
 	delimiter?: string;
 	escapeChar?: string;
+	useTempFile?: boolean;
 }
 
 export interface PrintCsvPipelineStepInFragment {
@@ -30,6 +34,11 @@ export interface PrintCsvPipelineStepOutFragment {
 type CsvCell = string;
 type CsvRow = Array<CsvCell>;
 type CsvSheet = Array<CsvRow>;
+
+interface PrintedCsvSheet {
+	push: (...rows: Array<CsvRow>) => void;
+	csv: () => string;
+}
 
 enum CsvAstCellType {
 	STANDARD, VARIABLE
@@ -79,13 +88,18 @@ type CsvSheetAst = Array<CsvAstRow>;
 
 export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, >
 	extends AbstractFragmentaryPipelineStep<In, Out, PrintCsvPipelineStepInFragment, PrintCsvPipelineStepOutFragment> {
+	private readonly _keepTempFile: boolean;
 	private readonly _delimiter: Undefinable<string>;
 	private readonly _escapeChar: Undefinable<string>;
+	private readonly _useTempFile: boolean;
 
 	public constructor(options: PrintCsvPipelineStepOptions<In, Out, PrintCsvPipelineStepInFragment, PrintCsvPipelineStepOutFragment>) {
 		super(options);
 		this._delimiter = options.delimiter;
 		this._escapeChar = options.escapeChar;
+		const config = this.getConfig();
+		this._keepTempFile = config.getBoolean('print.csv.temporary.file.keep', false);
+		this._useTempFile = options.useTempFile ?? config.getBoolean('print.csv.temporary.file.use', false);
 	}
 
 	protected getDelimiter(): Undefinable<string> {
@@ -94,6 +108,27 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 
 	protected getEscapeChar(): Undefinable<string> {
 		return this._escapeChar;
+	}
+
+	protected shouldKeepTempFile(): boolean {
+		return this._keepTempFile;
+	}
+
+	protected useTempFile(): boolean {
+		return this._useTempFile;
+	}
+
+	protected getTemporaryDir(): string {
+		// noinspection JSUnresolvedReference
+		const dir = path.resolve(process.cwd(), this.getConfig().getString('print.csv.temporary.dir', '.csv-temporary-files'));
+		if (!fs.existsSync(dir)) {
+			try {
+				fs.mkdirSync(dir);
+			} catch {
+				// ignore exception
+			}
+		}
+		return dir;
 	}
 
 	protected isEmptyRow(row: CsvAstRow): row is CsvAstEmptyRow {
@@ -211,7 +246,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected printEmptyRow(_row: CsvAstEmptyRow, printedRows: Array<Array<string>>): void {
+	protected printEmptyRow(_row: CsvAstEmptyRow, printedRows: PrintedCsvSheet): void {
 		printedRows.push([]);
 	}
 
@@ -228,12 +263,12 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printStandardRow(row: CsvAstStdRow, data: any, printedRows: Array<Array<string>>): void {
+	protected printStandardRow(row: CsvAstStdRow, data: any, printedRows: PrintedCsvSheet): void {
 		printedRows.push(row.cells.map((cell, cellIndex) => this.printCell(row, cell, cellIndex + 1, data)));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printLoopRows(row: CsvAstLoopRows, data: any, printedRows: Array<Array<string>>): void {
+	protected printLoopRows(row: CsvAstLoopRows, data: any, printedRows: PrintedCsvSheet): void {
 		let loopData = row.loopVariable === '' ? data : Utils.getValue(data, row.loopVariable);
 		loopData = loopData == null ? [] : (Array.isArray(loopData) ? loopData : [loopData]);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,7 +276,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printRow(row: CsvAstRow, data: any, printedRows: Array<Array<string>>): void {
+	protected printRow(row: CsvAstRow, data: any, printedRows: PrintedCsvSheet): void {
 		if (this.isEmptyRow(row)) {
 			this.printEmptyRow(row, printedRows);
 		} else if (this.isStandardRow(row)) {
@@ -254,16 +289,45 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		}
 	}
 
+	protected createPrintedRowsForTempFile(): PrintedCsvSheet {
+		const tempFileName = path.resolve(this.getTemporaryDir(), `${nanoid(16)}-${Date.now()}.temp.csv`);
+		return {
+			push: (...rows: Array<CsvRow>) => {
+				fs.appendFileSync(tempFileName, stringify(rows, {
+					delimiter: this.getDelimiter(), escape: this.getEscapeChar()
+				}));
+			},
+			csv: (): string => {
+				const content = fs.readFileSync(tempFileName, 'utf8');
+				if (!this.shouldKeepTempFile()) {
+					fs.unlinkSync(tempFileName);
+				}
+				return content;
+			}
+		};
+	}
+
+	protected createPrintedRowsInMemory(): PrintedCsvSheet {
+		const rows = [];
+		return {
+			push: (...newRows: Array<CsvRow>) => {
+				rows.push(...newRows);
+			},
+			csv: (): string => {
+				return stringify(rows, {delimiter: this.getDelimiter(), escape: this.getEscapeChar()});
+			}
+		};
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected async printCsv(templateCsv: Buffer | string, data: any): Promise<Buffer> {
 		const sheet: CsvSheet = parse(templateCsv, {
 			delimiter: this.getDelimiter(), escape: this.getEscapeChar(), relaxColumnCount: true
 		});
 		const ast = this.parseAst(sheet);
-		const printedRows: CsvSheet = [];
+		const printedRows = this.useTempFile() ? this.createPrintedRowsForTempFile() : this.createPrintedRowsInMemory();
 		ast.forEach(row => this.printRow(row, data, printedRows));
-		const printed = stringify(printedRows, {delimiter: this.getDelimiter(), escape: this.getEscapeChar()});
-		return Buffer.from(printed);
+		return Buffer.from(printedRows.csv());
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars

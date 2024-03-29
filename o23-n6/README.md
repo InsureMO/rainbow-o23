@@ -15,12 +15,21 @@
 
 ## CSV Generate Step
 
+### Environment Parameters
+
+| Name                            | Type    | Default Value          | Comments                                             |
+|---------------------------------|---------|------------------------|------------------------------------------------------|
+| `print.csv.temporary.file.keep` | boolean | false                  | Only for debug purpose, never turn on in production. |
+| `print.csv.temporary.file.use`  | boolean | false                  | Use temporary file or not.                           |
+| `print.csv.temporary.dir`       | string  | `.csv-temporary-files` | Temporary file directory.                            |
+
 ### Constructor Parameters
 
-| Name       | Type   | Default Value | Comments |
-|------------|--------|---------------|----------|
-| delimiter  | string | `,`           |          |
-| escapeChar | string | `"`           |          |
+| Name        | Type    | Default Value | Comments |
+|-------------|---------|---------------|----------|
+| delimiter   | string  | `,`           |          |
+| escapeChar  | string  | `"`           |          |
+| useTempFile | boolean |               |          |
 
 ### Request and Response
 
@@ -130,9 +139,10 @@ With scenario:
 
 ### Environment Parameters
 
-| Name                              | Type    | Default Value | Comments                                             |
-|-----------------------------------|---------|---------------|------------------------------------------------------|
-| `print.excel.temporary.file.keep` | boolean | false         | Only for debug purpose, never turn on in production. |
+| Name                              | Type    | Default Value            | Comments                                             |
+|-----------------------------------|---------|--------------------------|------------------------------------------------------|
+| `print.excel.temporary.file.keep` | boolean | false                    | Only for debug purpose, never turn on in production. |
+| `print.excel.temporary.dir`       | string  | `.excel-temporary-files` | Temporary file directory.                            |
 
 ### Request and Response
 

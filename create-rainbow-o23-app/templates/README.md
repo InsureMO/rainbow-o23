@@ -1336,10 +1336,11 @@ For example,
 
 Print the CSV file using a predefined template.
 
-| Attribute   | Type     | Mandatory | Description                                   |
-|-------------|----------|-----------|-----------------------------------------------|
-| `delimiter` | `string` | No        | Column delimiter, default `,`.                |
-| `escape`    | `string` | No        | Column content escape character, default `"`. |
+| Attribute       | Type      | Mandatory | Description                                   |
+|-----------------|-----------|-----------|-----------------------------------------------|
+| `delimiter`     | `string`  | No        | Column delimiter, default `,`.                |
+| `escape`        | `string`  | No        | Column content escape character, default `"`. |
+| `use-temp-file` | `boolean` | No        |                                               |
 
 This step requires the input data structure as follows:
 

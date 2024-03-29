@@ -2,6 +2,7 @@
 /node_modules/
 /.idea/
 /.excel-temporary-files/
+/.csv-temporary-files/
 /puppeteer/
 
 .DS_Store

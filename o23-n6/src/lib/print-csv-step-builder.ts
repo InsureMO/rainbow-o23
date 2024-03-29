@@ -5,6 +5,7 @@ import {PrintCsvPipelineStep, PrintCsvPipelineStepOptions} from './print-csv-ste
 export type PrintCsvPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOptions & {
 	delimiter?: string;
 	escape?: string;
+	useTempFile?: boolean;
 }
 
 export class PrintCsvPipelineStepBuilder
@@ -17,6 +18,7 @@ export class PrintCsvPipelineStepBuilder
 		transformed = super.readMoreOptions(given, transformed);
 		transformed.delimiter = given.delimiter;
 		transformed.escapeChar = given.escape;
+		transformed.useTempFile = given.useTempFile;
 		return transformed;
 	}
 }
