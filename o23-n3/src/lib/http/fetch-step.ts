@@ -23,6 +23,7 @@ export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = Pipeli
 	/** on seconds */
 	timeout?: number;
 	headersGenerate?: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
+	bodyUsed?: boolean;
 	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment>>;
 	responseGenerate?: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>>;
 	responseErrorHandles?: {
@@ -56,7 +57,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		this._endpointName = options.endpointName;
 		const endpointKey = this.getEndpointKey();
 		this._endpointUrl = config.getString(`endpoints.${endpointKey}.url`);
-		this._endpointMethod = ((options.method ?? '').trim() || config.getString(`endpoints.${endpointKey}.method`, 'POST')).toLowerCase();
+		this._endpointMethod = (options.method ?? 'POST').trim().toLowerCase();
 		this._endpointHeaders = this.generateEndpointHeaders(
 			config.getString(`endpoints.${endpointKey}.headers`),
 			this.generateEndpointHeaders(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers`)));
@@ -86,7 +87,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 				throw e;
 			}
 		});
-		this._bodyUsed = config.getBoolean(`endpoints.${endpointKey}.body.used`, true);
+		this._bodyUsed = options.bodyUsed;
 		this._bodyGenerateSnippet = options.bodyGenerate;
 		this._bodyGenerateFunc = Utils.createSyncFunction(this.getBodyGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -212,7 +213,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return ['$factor', '$request', ...this.getHelpersVariableNames()];
 	}
 
-	protected isBodyUsed(): boolean {
+	protected isBodyUsed(): boolean | undefined {
 		return this._bodyUsed;
 	}
 
@@ -249,7 +250,8 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 			const headers = this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			let body: any;
-			if (this.isBodyUsed()) {
+			const bodyUsed = this.isBodyUsed();
+			if (bodyUsed === true || (bodyUsed == null && method !== 'get')) {
 				body = this._bodyGenerateFunc(data, request, $helpers, $helpers);
 			} else {
 				body = (void 0);

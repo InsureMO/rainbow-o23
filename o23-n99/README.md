@@ -624,18 +624,19 @@ For example,
 
 Use `node-fetch` to call remote service APIs. Execute after `from-input`.
 
-| Attribute                    | Type      | Mandatory | Description                                            |
-|------------------------------|-----------|-----------|--------------------------------------------------------|
-| `system`                     | `string`  | Yes       | Code of remote service.                                |
-| `endpoint`                   | `string`  | Yes       | Name of remote service endpoint.                       |
-| `decorate-url`               | `snippet` | No        | Decorate url, which loaded from environment variables. |
-| `method`                     | `string`  | No        | Http method.                                           |
-| `timeout`                    | `number`  | No        | Request timeout.                                       |
-| `generate-headers`           | `snippet` | No        | Generate request headers, for remote service endpoint. |
-| `generate-body`              | `snippet` | No        | Generate request body, for remote service endpoint.    |
-| `read-response`              | `snippet` | No        | Generate response body, from remote service endpoint.  |
-| `response-error-handles`     | `map`     | No        | Error handlers for response.                           |
-| `response-error-handles.400` | `snippet` | No        | Error handler for 400.                                 |
+| Attribute                    | Type      | Mandatory | Description                                                                                                          |
+|------------------------------|-----------|-----------|----------------------------------------------------------------------------------------------------------------------|
+| `system`                     | `string`  | Yes       | Code of remote service.                                                                                              |
+| `endpoint`                   | `string`  | Yes       | Name of remote service endpoint.                                                                                     |
+| `decorate-url`               | `snippet` | No        | Decorate url, which loaded from environment variables.                                                               |
+| `method`                     | `string`  | No        | Http method.                                                                                                         |
+| `timeout`                    | `number`  | No        | Request timeout, in seconds.                                                                                         |
+| `generate-headers`           | `snippet` | No        | Generate request headers, for remote service endpoint.                                                               |
+| `body-used`                  | `boolean` | No        | Send request with body or not, or automatically disregards the body when sending a `get` request when not specified. |
+| `generate-body`              | `snippet` | No        | Generate request body, for remote service endpoint.                                                                  |
+| `read-response`              | `snippet` | No        | Generate response body, from remote service endpoint.                                                                |
+| `response-error-handles`     | `map`     | No        | Error handlers for response.                                                                                         |
+| `response-error-handles.400` | `snippet` | No        | Error handler for 400.                                                                                               |
 
 For example,
 
@@ -656,7 +657,7 @@ For example,
 `string`, system code is used to look up the corresponding configuration information when executing the fetch step, as follows:
 
 - `endpoints.{system}.global.headers`: request headers for all endpoints of the system,
-- `endpoints.{system}.global.timeout`: request timeout for all endpoints of the system.
+- `endpoints.{system}.global.timeout`: request timeout for all endpoints of the system, in seconds.
 
 ### `endpoint`
 
@@ -664,10 +665,13 @@ For example,
 follows:
 
 - `endpoints.{system}.{endpoint}.url`: request url,
-- `endpoints.{system}.{endpoint}.method`: request method, default is `post`,
 - `endpoints.{system}.{endpoint}.headers`: request headers, for this endpoint only. Will overwrite global headers if with same name,
-- `endpoints.{system}.{endpoint}.timeout`: request timeout, for this endpoint only. Will overwrite global timeout if defined,
-- `endpoints.{system}.{endpoint}.body.used`: whether to use request body, default is `true`.
+- `endpoints.{system}.{endpoint}.timeout`: request timeout, in seconds, for this endpoint only. Will overwrite global timeout if defined.
+
+> In most cases, environment variables for an endpoint can be defined for a group of APIs, and then the `decorate-url` step in constructing
+> parameters is used to process the endpoint definition to obtain the actual API URL. Of course, an endpoint can also be understood as a
+> microservice in a sense, where all APIs of this microservice share the same base definition, with additional definitions made only when
+> necessary for certain remote calls.
 
 ### `decorate-url`
 

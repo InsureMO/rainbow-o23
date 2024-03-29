@@ -11,7 +11,7 @@ steps:
     check: ($factor.host || '').toLowerCase() === 'baidu'
     steps:
       - name: Return OK
-        use: http-fetch
+        use: http-get
         system: baidu
         endpoint: home
         decorate-url: |-

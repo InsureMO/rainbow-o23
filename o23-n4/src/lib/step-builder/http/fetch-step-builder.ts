@@ -14,6 +14,7 @@ export type FetchPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOpti
 	method?: FetchPipelineStepOptions['method'];
 	timeout?: FetchPipelineStepOptions['timeout'];
 	generateHeaders?: FetchPipelineStepOptions['headersGenerate'];
+	bodyUsed?: FetchPipelineStepOptions['bodyUsed'];
 	generateBody?: FetchPipelineStepOptions['bodyGenerate'];
 	readResponse?: FetchPipelineStepOptions['responseGenerate'];
 	responseErrorHandles?: FetchPipelineStepOptions['responseErrorHandles'];
@@ -39,6 +40,7 @@ export class FetchPipelineStepBuilder
 		transformed.method = redressString(given.method);
 		transformed.timeout = given.timeout;
 		transformed.headersGenerate = redressSnippet(given.generateHeaders);
+		transformed.bodyUsed = given.bodyUsed;
 		transformed.bodyGenerate = redressSnippet(given.generateBody);
 		transformed.responseGenerate = redressSnippet(given.readResponse);
 		if (given.responseErrorHandles != null) {
