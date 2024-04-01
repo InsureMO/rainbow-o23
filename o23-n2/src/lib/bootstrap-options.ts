@@ -127,8 +127,8 @@ export class BootstrapOptions {
 								level: this.getEnvAsString('logger.error.level', 'error'),
 								format: format.combine(customized, this.getEnvAsBoolean('logger.error.json', true) ? format.json() : this.getLoggerFormat()),
 								zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),
-								maxFiles: this.getEnvAsNumber('logger.combined.max.files', 10),
-								maxsize: this.getEnvAsNumber('logger.combined.max.size', 10 * 1024 * 1024 * 1024)
+								maxFiles: this.getEnvAsNumber('logger.combined.max.files'),
+								maxsize: this.getEnvAsNumber('logger.combined.max.size')
 							})
 							: null,
 						this._config.getBoolean('logger.file.enabled', false)
@@ -137,8 +137,8 @@ export class BootstrapOptions {
 								level: this.getEnvAsString('logger.combined.level', 'log'),
 								format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
 								zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
-								maxFiles: this.getEnvAsNumber('logger.error.max.files', 10),
-								maxsize: this.getEnvAsNumber('logger.error.max.size', 10 * 1024 * 1024 * 1024)
+								maxFiles: this.getEnvAsNumber('logger.error.max.files'),
+								maxsize: this.getEnvAsNumber('logger.error.max.size')
 							})
 							: null,
 						// let's log errors into its own file
