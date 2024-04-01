@@ -121,26 +121,50 @@ export class BootstrapOptions {
 				})();
 				return {
 					transports: [
+						this._config.getBoolean('logger.file.enabled', false)
+							? new transports.File({
+								filename: this.getEnvAsString('logger.error.file', 'logs/error.log'),
+								level: this.getEnvAsString('logger.error.level', 'error'),
+								format: format.combine(customized, this.getEnvAsBoolean('logger.error.json', true) ? format.json() : this.getLoggerFormat()),
+								zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),
+								maxFiles: this.getEnvAsNumber('logger.combined.max.files', 10),
+								maxsize: this.getEnvAsNumber('logger.combined.max.size', 10 * 1024 * 1024 * 1024)
+							})
+							: null,
+						this._config.getBoolean('logger.file.enabled', false)
+							? new transports.File({
+								filename: this.getEnvAsString('logger.combined.file', 'logs/combined.log'),
+								level: this.getEnvAsString('logger.combined.level', 'log'),
+								format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
+								zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
+								maxFiles: this.getEnvAsNumber('logger.error.max.files', 10),
+								maxsize: this.getEnvAsNumber('logger.error.max.size', 10 * 1024 * 1024 * 1024)
+							})
+							: null,
 						// let's log errors into its own file
-						new transports.DailyRotateFile({
-							filename: this.getEnvAsString('logger.error.file', 'logs/error-%DATE%.log'),
-							level: this.getEnvAsString('logger.error.level', 'error'),
-							format: format.combine(customized, this.getEnvAsBoolean('logger.error.json', true) ? format.json() : this.getLoggerFormat()),
-							datePattern: this.getEnvAsString('logger.error.date.pattern', 'YYYY-MM-DD'),
-							zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
-							maxFiles: this.getEnvAsString('logger.error.max.files', '30d'),
-							maxSize: this.getEnvAsString('logger.error.max.size', '10m')
-						}),
+						this._config.getBoolean('logger.file.rotate.enabled', true)
+							? new transports.DailyRotateFile({
+								filename: this.getEnvAsString('logger.error.file', 'logs/error-%DATE%.log'),
+								level: this.getEnvAsString('logger.error.level', 'error'),
+								format: format.combine(customized, this.getEnvAsBoolean('logger.error.json', true) ? format.json() : this.getLoggerFormat()),
+								datePattern: this.getEnvAsString('logger.error.date.pattern', 'YYYY-MM-DD'),
+								zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
+								maxFiles: this.getEnvAsString('logger.error.max.files', '30d'),
+								maxSize: this.getEnvAsString('logger.error.max.size', '10m')
+							})
+							: null,
 						// logging all level
-						new transports.DailyRotateFile({
-							filename: this.getEnvAsString('logger.combined.file', 'logs/combined-%DATE%.log'),
-							level: this.getEnvAsString('logger.combined.level', 'log'),
-							format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
-							datePattern: this.getEnvAsString('logger.combined.date.pattern', 'YYYY-MM-DD'),
-							zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),
-							maxFiles: this.getEnvAsString('logger.combined.max.files', '7d'),
-							maxSize: this.getEnvAsString('logger.combined.max.size', '10m')
-						}),
+						this._config.getBoolean('logger.file.rotate.enabled', true)
+							? new transports.DailyRotateFile({
+								filename: this.getEnvAsString('logger.combined.file', 'logs/combined-%DATE%.log'),
+								level: this.getEnvAsString('logger.combined.level', 'log'),
+								format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
+								datePattern: this.getEnvAsString('logger.combined.date.pattern', 'YYYY-MM-DD'),
+								zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),
+								maxFiles: this.getEnvAsString('logger.combined.max.files', '7d'),
+								maxSize: this.getEnvAsString('logger.combined.max.size', '10m')
+							})
+							: null,
 						// also want to see logs in our console
 						this._config.getBoolean('logger.console.enabled', false)
 							? new transports.Console({

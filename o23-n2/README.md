@@ -90,6 +90,8 @@ Support response outputs as following:
 | `app.body.urlencoded.max.size`   | string  | 50mb                     | Request maximum body size, for urlencoded body. |
 | `app.cors.enabled`               | boolean | false                    | Enable cors.                                    |
 | `app.cors.options`               | json    |                          | `CorsOptions` of `@nestjs/common`.              |
+| `logger.file.enabled`            | boolean | false                    | Enable file log.                                |
+| `logger.file.rotate.enabled`     | boolean | true                     | Enable rotate file log.                         |
 | `logger.error.file`              | string  | logs/error-%DATE%.log    | Error log file.                                 |
 | `logger.error.level`             | string  | error                    | Logger level for error log file.                |
 | `logger.error.json`              | boolean | true                     | Use json format.                                |
