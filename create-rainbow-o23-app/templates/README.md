@@ -1341,6 +1341,7 @@ Print the CSV file using a predefined template.
 | `delimiter`     | `string`  | No        | Column delimiter, default `,`.                |
 | `escape`        | `string`  | No        | Column content escape character, default `"`. |
 | `use-temp-file` | `boolean` | No        |                                               |
+| `lines-fresh`   | `number`  | No        | How many lines to fresh to temporary file.    |
 
 This step requires the input data structure as follows:
 

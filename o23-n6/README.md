@@ -17,11 +17,12 @@
 
 ### Environment Parameters
 
-| Name                            | Type    | Default Value          | Comments                                             |
-|---------------------------------|---------|------------------------|------------------------------------------------------|
-| `print.csv.temporary.file.keep` | boolean | false                  | Only for debug purpose, never turn on in production. |
-| `print.csv.temporary.file.use`  | boolean | false                  | Use temporary file or not.                           |
-| `print.csv.temporary.dir`       | string  | `.csv-temporary-files` | Temporary file directory.                            |
+| Name                              | Type    | Default Value          | Comments                                             |
+|-----------------------------------|---------|------------------------|------------------------------------------------------|
+| `print.csv.temporary.file.keep`   | boolean | false                  | Only for debug purpose, never turn on in production. |
+| `print.csv.temporary.file.use`    | boolean | false                  | Use temporary file or not.                           |
+| `print.csv.temporary.lines.fresh` | number  | 100                    | How many lines to fresh to temporary file.           |
+| `print.csv.temporary.dir`         | string  | `.csv-temporary-files` | Temporary file directory.                            |
 
 ### Constructor Parameters
 

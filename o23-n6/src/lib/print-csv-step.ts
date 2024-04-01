@@ -19,6 +19,7 @@ export interface PrintCsvPipelineStepOptions<In = PipelineStepPayload, Out = Pip
 	delimiter?: string;
 	escapeChar?: string;
 	useTempFile?: boolean;
+	linesFreshToFile?: number;
 }
 
 export interface PrintCsvPipelineStepInFragment {
@@ -92,6 +93,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	private readonly _delimiter: Undefinable<string>;
 	private readonly _escapeChar: Undefinable<string>;
 	private readonly _useTempFile: boolean;
+	private readonly _linesFreshToFile: number;
 
 	public constructor(options: PrintCsvPipelineStepOptions<In, Out, PrintCsvPipelineStepInFragment, PrintCsvPipelineStepOutFragment>) {
 		super(options);
@@ -100,6 +102,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		const config = this.getConfig();
 		this._keepTempFile = config.getBoolean('print.csv.temporary.file.keep', false);
 		this._useTempFile = options.useTempFile ?? config.getBoolean('print.csv.temporary.file.use', false);
+		this._linesFreshToFile = options.linesFreshToFile ?? config.getNumber('print.csv.temporary.lines.fresh', 100);
 	}
 
 	protected getDelimiter(): Undefinable<string> {
@@ -116,6 +119,10 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 
 	protected useTempFile(): boolean {
 		return this._useTempFile;
+	}
+
+	protected getLinesFreshToFile(): number {
+		return this._linesFreshToFile;
 	}
 
 	protected getTemporaryDir(): string {
@@ -291,18 +298,32 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 
 	protected createPrintedRowsForTempFile(): PrintedCsvSheet {
 		const tempFileName = path.resolve(this.getTemporaryDir(), `${nanoid(16)}-${Date.now()}.temp.csv`);
+		const tempLines: Array<CsvRow> = [];
+
 		return {
 			push: (...rows: Array<CsvRow>) => {
-				fs.appendFileSync(tempFileName, stringify(rows, {
-					delimiter: this.getDelimiter(), escape: this.getEscapeChar()
-				}));
+				tempLines.push(...rows);
+				if (tempLines.length >= this.getLinesFreshToFile()) {
+					fs.appendFileSync(tempFileName, stringify(tempLines, {
+						delimiter: this.getDelimiter(), escape: this.getEscapeChar()
+					}));
+					// clear
+					tempLines.length = 0;
+				}
 			},
 			csv: (): string => {
 				const content = fs.readFileSync(tempFileName, 'utf8');
 				if (!this.shouldKeepTempFile()) {
-					fs.unlinkSync(tempFileName);
+					// fs.unlinkSync(tempFileName);
 				}
-				return content;
+				if (tempLines.length !== 0) {
+					return content + stringify(tempLines, {
+						delimiter: this.getDelimiter(),
+						escape: this.getEscapeChar()
+					});
+				} else {
+					return content;
+				}
 			}
 		};
 	}

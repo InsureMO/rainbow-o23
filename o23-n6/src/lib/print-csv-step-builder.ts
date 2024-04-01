@@ -6,6 +6,7 @@ export type PrintCsvPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderO
 	delimiter?: string;
 	escape?: string;
 	useTempFile?: boolean;
+	linesFresh?: number;
 }
 
 export class PrintCsvPipelineStepBuilder
@@ -19,6 +20,7 @@ export class PrintCsvPipelineStepBuilder
 		transformed.delimiter = given.delimiter;
 		transformed.escapeChar = given.escape;
 		transformed.useTempFile = given.useTempFile;
+		transformed.linesFreshToFile = given.linesFresh;
 		return transformed;
 	}
 }
