@@ -1,18 +1,13 @@
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const path = require('path');
-const {getDatasourceOptions, writeDatasourceFiles, writeDatasourceOptions} = require('./datasources');
-const {
-	checkVersions,
-	checkYarnVersion,
-	getPackageManagerOption,
-	PackageManager,
-	install
-} = require('./package-manager');
-const {getPluginOptions, writePluginFiles, writePluginOptions} = require('./plugins');
-const {createPackageDirectory, createPackageJson, getStandardOption, validateName} = require('./standard');
+import chalk from 'chalk';
+import fs from 'fs-extra';
+import path from 'path';
+import {DatasourceOptions, getDatasourceOptions, writeDatasourceFiles, writeDatasourceOptions} from './datasources';
+import {checkVersions, checkYarnVersion, getPackageManagerOption, install} from './package-manager';
+import {getPluginOptions, PluginOptions, writePluginFiles, writePluginOptions} from './plugins';
+import {createPackageDirectory, createPackageJson, getStandardOption, StdOptions, validateName} from './standard';
+import {PackageManager} from './types';
 
-const generatePackageJson = async (stdOptions, datasourceOptions, pluginOptions, directory) => {
+const generatePackageJson = async (stdOptions: StdOptions, datasourceOptions: DatasourceOptions, pluginOptions: PluginOptions, directory: string) => {
 	const json = createPackageJson(stdOptions, directory);
 	writeDatasourceOptions(json, datasourceOptions);
 	writePluginOptions(json, pluginOptions);
@@ -20,28 +15,21 @@ const generatePackageJson = async (stdOptions, datasourceOptions, pluginOptions,
 	fs.writeFileSync(packageFile, JSON.stringify(json, null, 2) + '\n');
 };
 
-const generateReadme = async (packageName, directory) => {
+const generateReadme = async (packageName: string, directory: string) => {
 	const readmeFile = path.resolve(directory, 'README.md');
 	let content = fs.readFileSync(readmeFile).toString();
-	content.replace(/o23\/n99/, packageName);
+	content = content.replace(/o23\/n99/, packageName);
 	fs.writeFileSync(readmeFile, content);
-}
+};
 
-const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
+const generateFiles = async (datasourceOptions: DatasourceOptions, pluginOptions: PluginOptions, directory: string) => {
 	writeDatasourceFiles(datasourceOptions, pluginOptions, directory);
 	writePluginFiles(pluginOptions, directory);
 	fs.mkdirSync(path.resolve(directory, 'scripts'));
 	fs.mkdirSync(path.resolve(directory, 'server'));
 };
 
-// const cleanPluginSrcFolder = async (directory) => {
-// 	const files = fs.readdirSync(path.resolve(directory, 'src', 'plugins'));
-// 	if (files.length === 0) {
-// 		fs.rmdirSync(path.resolve(directory, 'src', 'plugins'));
-// 	}
-// }
-
-exports.createApp = async () => {
+export const createApp = async () => {
 	const packageName = process.argv[2];
 	validateName(packageName);
 	checkVersions();

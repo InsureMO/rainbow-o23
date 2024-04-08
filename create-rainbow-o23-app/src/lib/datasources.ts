@@ -1,14 +1,24 @@
-const fs = require('fs-extra');
-const path = require('path');
-const prompts = require('prompts');
-const {Plugins} = require('./plugins');
+import fs from 'fs-extra';
+import path from 'path';
+import prompts from 'prompts';
+import {PluginOptions} from './plugins';
+import {DatasourceTypes, Plugins} from './types';
 
-let DatasourceTypes = {
-	MySQL: 'mysql', MSSQL: 'mssql', PgSQL: 'pgsql', Oracle: 'oracle'
+export interface DatasourceOptions {
+	configDataSourceName: string;
+	configDataSourceType: DatasourceTypes;
+	mysqlDataSourceNames: Array<string>;
+	pgsqlDataSourceNames: Array<string>;
+	oracleDataSourceNames: Array<string>;
+	mssqlDataSourceNames: Array<string>;
+}
+
+type DatasourceEnvsForType = Array<string | [string, string]>;
+type DatasourceEnvs = {
+	[key in DatasourceTypes]?: DatasourceEnvsForType;
 };
-exports.DatasourceTypes = DatasourceTypes;
 
-exports.getDatasourceOptions = async () => {
+export const getDatasourceOptions = async () => {
 	return prompts([
 		{
 			name: 'configDataSourceName',
@@ -47,20 +57,21 @@ exports.getDatasourceOptions = async () => {
 	]);
 };
 
-const computeDatasourceTypes = (options) => {
+const computeDatasourceTypes = (options: DatasourceOptions) => {
 	const {
 		configDataSourceType,
 		mysqlDataSourceNames, pgsqlDataSourceNames, oracleDataSourceNames, mssqlDataSourceNames
 	} = options;
 	const dataSourceTypes = [configDataSourceType];
-	[
+	([
 		[mysqlDataSourceNames, DatasourceTypes.MySQL],
 		[pgsqlDataSourceNames, DatasourceTypes.PgSQL],
 		[oracleDataSourceNames, DatasourceTypes.Oracle],
 		[mssqlDataSourceNames, DatasourceTypes.MSSQL]
-	].map(([names, type]) => {
-		return [(names ?? []).filter(name => name != null && name.trim().length !== 0), type];
-	}).filter(([names]) => {
+	] as Array<[Array<string>, DatasourceTypes]>)
+		.map<[Array<string>, DatasourceTypes]>(([names, type]) => {
+			return [(names ?? []).filter(name => name != null && name.trim().length !== 0), type];
+		}).filter(([names]) => {
 		return names.length !== 0;
 	}).forEach(([names, type]) => {
 		if (names != null && names.length !== 0) {
@@ -70,20 +81,21 @@ const computeDatasourceTypes = (options) => {
 	return [...new Set(dataSourceTypes)];
 };
 
-exports.writeDatasourceOptions = (json, options) => {
+export const writeDatasourceOptions = (json, options) => {
 	const dataSourceTypes = computeDatasourceTypes(options);
 	([
 		[DatasourceTypes.Oracle, ['oracledb']],
 		[DatasourceTypes.PgSQL, ['pg', 'pg-query-stream']],
 		[DatasourceTypes.MSSQL, ['mssql']],
 		[DatasourceTypes.MySQL, ['mysql2']]
-	]).forEach(([type, dependencies]) => {
-		if (!dataSourceTypes.includes(type)) {
-			dependencies.forEach(dependency => {
-				delete json.dependencies[dependency];
-			});
-		}
-	});
+	] as Array<[DatasourceTypes, Array<string>]>)
+		.forEach(([type, dependencies]) => {
+			if (!dataSourceTypes.includes(type)) {
+				dependencies.forEach(dependency => {
+					delete json.dependencies[dependency];
+				});
+			}
+		});
 	[
 		'start:mssql', 'start:pgsql', 'start:oracle',
 		'dev:standalone:start:mssql', 'dev:standalone:start:pgsql', 'dev:standalone:start:oracle',
@@ -100,7 +112,7 @@ exports.writeDatasourceOptions = (json, options) => {
 	});
 };
 
-const datasourceNameToConfigKey = (name) => {
+const datasourceNameToConfigKey = (name: string) => {
 	return name
 		.split('.')
 		.filter(s => s.trim().length !== 0)
@@ -108,7 +120,7 @@ const datasourceNameToConfigKey = (name) => {
 		.join('_');
 };
 
-const createDatasourceProperties = (baseProperties, datasourceName) => {
+const createDatasourceProperties = (baseProperties: DatasourceEnvsForType, datasourceName: string): string => {
 	return baseProperties.map(line => {
 		if (typeof line === 'string') {
 			return line.replace('_O23_', `_${datasourceNameToConfigKey(datasourceName)}_`);
@@ -119,8 +131,8 @@ const createDatasourceProperties = (baseProperties, datasourceName) => {
 	}).join('\n');
 };
 
-const readDatasourceEnvs = (directory, configDataSourceType) => {
-	const envs = {};
+const readDatasourceEnvs = (directory: string, configDataSourceType: DatasourceTypes) => {
+	const envs: DatasourceEnvs = {};
 	Object.values(DatasourceTypes).forEach(type => {
 		// read env file
 		const content = fs.readFileSync(path.resolve(directory, 'envs', 'dev', `.${type}.basic`)).toString();
@@ -135,7 +147,7 @@ const readDatasourceEnvs = (directory, configDataSourceType) => {
 					return line;
 				} else {
 					const [key, value] = line.split('=');
-					return [key, value];
+					return [key, value] as [string, string];
 				}
 			}).filter(line => line != null);
 		// remove datasource env file
@@ -148,7 +160,7 @@ const readDatasourceEnvs = (directory, configDataSourceType) => {
 	return envs;
 };
 
-const buildDatasourceEnvFile = (options, directory) => {
+const buildDatasourceEnvFile = (options: DatasourceOptions, directory: string) => {
 	const {
 		configDataSourceName, configDataSourceType,
 		mysqlDataSourceNames, pgsqlDataSourceNames, oracleDataSourceNames, mssqlDataSourceNames
@@ -161,30 +173,31 @@ CFG_APP_DATASOURCE_DEFAULT=${configDataSourceName}
 CFG_APP_DATASOURCE_CONFIG=${configDataSourceName}
 
 `;
-	const properties = [
+	const properties = ([
 		[configDataSourceType, [configDataSourceName]],
 		[DatasourceTypes.MySQL, Array.isArray(mysqlDataSourceNames) ? mysqlDataSourceNames : [mysqlDataSourceNames]],
 		[DatasourceTypes.PgSQL, Array.isArray(pgsqlDataSourceNames) ? pgsqlDataSourceNames : [pgsqlDataSourceNames]],
 		[DatasourceTypes.Oracle, Array.isArray(oracleDataSourceNames) ? oracleDataSourceNames : [oracleDataSourceNames]],
 		[DatasourceTypes.MSSQL, Array.isArray(mssqlDataSourceNames) ? mssqlDataSourceNames : [mssqlDataSourceNames]]
-	].map(([type, names]) => {
-		return [type, (names ?? []).filter(name => name != null && name.trim().length !== 0)];
-	}).filter(([, names]) => {
-		return names.length !== 0;
-	}).map(([type, names]) => {
-		// console.log(dataSourceNames);
-		return (names)
-			.filter(name => name != null && name.trim().length !== 0)
-			.map(name => {
-				return `# Datasource ${name}
+	] as Array<[DatasourceTypes, Array<string>]>)
+		.map<[DatasourceTypes, Array<string>]>(([type, names]) => {
+			return [type, (names ?? []).filter(name => name != null && name.trim().length !== 0)];
+		}).filter(([, names]) => {
+			return names.length !== 0;
+		}).map(([type, names]) => {
+			// console.log(dataSourceNames);
+			return (names)
+				.filter(name => name != null && name.trim().length !== 0)
+				.map(name => {
+					return `# Datasource ${name}
 ${createDatasourceProperties(envs[type], name)}`;
-			}).join('\n');
-	}).join('\n');
+				}).join('\n');
+		}).join('\n');
 	content = content + properties;
 	fs.writeFileSync(path.resolve(directory, 'envs', 'dev', '.datasources'), content);
 };
 
-exports.writeDatasourceFiles = (options, pluginOptions, directory) => {
+export const writeDatasourceFiles = (options: DatasourceOptions, pluginOptions: PluginOptions, directory: string) => {
 	const {configDataSourceType} = options;
 	const {plugins} = pluginOptions;
 

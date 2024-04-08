@@ -1,14 +1,13 @@
-const fs = require('fs-extra');
-const path = require('path');
-const prompts = require('prompts');
+import fs from 'fs-extra';
+import path from 'path';
+import prompts from 'prompts';
+import {PackageJson, Plugins} from './types';
 
-let Plugins = {
-	PRINT: 'print',
-	AWS_S3: 'aws-s3'
+export interface PluginOptions {
+	plugins: Array<Plugins>;
 }
-exports.Plugins = Plugins;
 
-exports.getPluginOptions = async () => {
+export const getPluginOptions = async () => {
 	return prompts([
 		{
 			name: 'plugins',
@@ -22,7 +21,7 @@ exports.getPluginOptions = async () => {
 	]);
 };
 
-exports.writePluginOptions = (json, options) => {
+export const writePluginOptions = (json: PackageJson, options: PluginOptions) => {
 	const {plugins} = options;
 	if (!plugins.includes(Plugins.PRINT)) {
 		delete json.dependencies['@rainbow-o23/n91'];
@@ -35,21 +34,21 @@ exports.writePluginOptions = (json, options) => {
 	}
 };
 
-exports.writePluginFiles = (options, directory) => {
+export const writePluginFiles = (options: PluginOptions, directory: string) => {
 	const {plugins} = options;
 	const pluginIndexTsFile = path.resolve(directory, 'src', 'plugins', 'index.ts');
 	let content = fs.readFileSync(pluginIndexTsFile).toString();
 	if (!plugins.includes(Plugins.PRINT)) {
 		fs.rmSync(path.resolve(directory, 'envs', 'common', '.print'));
 		fs.rmSync(path.resolve(directory, 'server', '03-print'), {recursive: true, force: true});
-		fs.rmSync(path.resolve(directory, 'src', 'plugins', 'print.ts'))
+		fs.rmSync(path.resolve(directory, 'src', 'plugins', 'print.ts'));
 		fs.rmSync(path.resolve(directory, '.puppeteerrc'));
 		// remove print part
 		content = content.replace('import {usePdfSubTemplates} from \'./print\';\n', '')
 			.replace('\tusePdfSubTemplates(options);\n', '');
 	}
 	if (!plugins.includes(Plugins.AWS_S3)) {
-		fs.rmSync(path.resolve(directory, 'src', 'plugins', 'aws.ts'))
+		fs.rmSync(path.resolve(directory, 'src', 'plugins', 'aws.ts'));
 		// remove aws s3 part
 		content = content.replace('import \'./aws\';\n', '');
 	}
