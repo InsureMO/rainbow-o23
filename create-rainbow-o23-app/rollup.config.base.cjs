@@ -8,7 +8,7 @@ exports.buildConfig = (lint) => {
 	return {
 		input: './src/index.ts',
 		output: [
-			{format: 'cjs', dir: '.'}
+			{format: 'cjs', dir: '.', banner: '#!/usr/bin/env node'}
 		],
 		plugins: [
 			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
