@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import prompts from 'prompts';
+import prompts, {PromptObject} from 'prompts';
 import validate from 'validate-npm-package-name';
 
 export interface StdOptions {
@@ -58,21 +58,41 @@ export const createPackageDirectory = (packageName: string) => {
 	return dir;
 };
 
-export const getStandardOption = async (packageName: string) => {
-	return prompts([
-		{
+const isNameFixed = (): boolean => {
+	return process.argv.slice(3).includes('--fix-name');
+};
+const isDescDefault = (): boolean => {
+	return process.argv.slice(3).includes('--default-desc');
+};
+
+export const getStandardOption = async (packageName: string): Promise<StdOptions> => {
+	const nameFixed = isNameFixed();
+	const useDefaultDescription = isDescDefault();
+	if (nameFixed && useDefaultDescription) {
+		return {
+			name: packageName,
+			description: 'An application created based on Rainbow-O23, powered by InsureMO.'
+		};
+	}
+	const result = await prompts([
+		nameFixed ? null : {
 			name: 'name',
 			type: 'text',
 			message: 'Package name:',
 			initial: packageName
 		},
-		{
+		useDefaultDescription ? null : {
 			name: 'description',
 			type: 'text',
 			message: 'Package description:',
 			initial: 'An application created based on Rainbow-O23, powered by InsureMO.'
 		}
-	]);
+	].filter(x => x != null) as Array<PromptObject>);
+	return {
+		name: packageName,
+		description: 'An application created based on Rainbow-O23, powered by InsureMO.',
+		...result
+	};
 };
 
 export const createPackageJson = (options: StdOptions, directory: string) => {

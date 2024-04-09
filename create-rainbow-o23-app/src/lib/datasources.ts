@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import prompts from 'prompts';
+import prompts, {PromptObject} from 'prompts';
 import {PluginOptions} from './plugins';
 import {DatasourceTypes, Plugins} from './types';
 
@@ -18,15 +18,57 @@ type DatasourceEnvs = {
 	[key in DatasourceTypes]?: DatasourceEnvsForType;
 };
 
-export const getDatasourceOptions = async () => {
-	return prompts([
-		{
+const findDataSources = (): Partial<DatasourceOptions> | undefined => {
+	const options: Partial<DatasourceOptions> = {};
+	process.argv.slice(3)
+		.map(arg => arg.split('='))
+		.forEach(([key, value]) => {
+			switch (key) {
+				case '--config-ds-name':
+					options.configDataSourceName = value;
+					break;
+				case '--config-ds-type':
+					if (Object.values(DatasourceTypes).includes(value as DatasourceTypes)) {
+						options.configDataSourceType = value as DatasourceTypes;
+					}
+					break;
+				case '--mysql-ds-names':
+					options.mysqlDataSourceNames = value.split(',');
+					break;
+				case '--pgsql-ds-names':
+					options.pgsqlDataSourceNames = value.split(',');
+					break;
+				case '--oracle-ds-names':
+					options.oracleDataSourceNames = value.split(',');
+					break;
+				case '--mssql-ds-names':
+					options.mssqlDataSourceNames = value.split(',');
+					break;
+				case '--use-ds-defaults':
+					// fill default values
+					options.configDataSourceName = options.configDataSourceName ?? 'o23';
+					options.configDataSourceType = options.configDataSourceType ?? DatasourceTypes.MySQL;
+					options.mysqlDataSourceNames = options.mysqlDataSourceNames ?? [];
+					options.pgsqlDataSourceNames = options.pgsqlDataSourceNames ?? [];
+					options.oracleDataSourceNames = options.oracleDataSourceNames ?? [];
+					options.mssqlDataSourceNames = options.mssqlDataSourceNames ?? [];
+					break;
+			}
+		});
+
+	return options;
+};
+
+export const getDatasourceOptions = async (): Promise<DatasourceOptions> => {
+	const options = findDataSources();
+	const result = await prompts([
+		(options.configDataSourceName ?? '').trim().length !== 0 ? null : {
 			name: 'configDataSourceName',
 			type: 'text',
 			message: 'Configuration datasource name:',
 			initial: 'o23'
 		},
-		{
+		options.configDataSourceType != null ? null : {
 			name: 'configDataSourceType',
 			type: 'select',
 			message: 'Configuration datasource type:',
@@ -34,27 +76,29 @@ export const getDatasourceOptions = async () => {
 				DatasourceTypes.MySQL, DatasourceTypes.PgSQL, DatasourceTypes.MSSQL, DatasourceTypes.Oracle
 			].map((i) => ({title: i, value: i}))
 		},
-		{
+		options.mysqlDataSourceNames != null ? null : {
 			name: 'mysqlDataSourceNames',
 			type: 'list',
 			message: 'More MySQL datasource names, separated by ",":'
 		},
-		{
+		options.pgsqlDataSourceNames != null ? null : {
 			name: 'pgsqlDataSourceNames',
 			type: 'list',
 			message: 'More PostgreSQL datasource names, separated by ",":'
 		},
-		{
+		options.oracleDataSourceNames != null ? null : {
 			name: 'oracleDataSourceNames',
 			type: 'list',
 			message: 'More Oracle datasource names, separated by ",":'
 		},
-		{
+		options.mssqlDataSourceNames != null ? null : {
 			name: 'mssqlDataSourceNames',
 			type: 'list',
 			message: 'More SQL Server datasource names, separated by ",":'
 		}
-	]);
+	].filter(x => x != null) as Array<PromptObject>);
+
+	return {...options, ...result} as DatasourceOptions;
 };
 
 const computeDatasourceTypes = (options: DatasourceOptions) => {

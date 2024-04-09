@@ -3,6 +3,10 @@ import {execSync} from 'child_process';
 import prompts from 'prompts';
 import {PackageManager} from './types';
 
+export interface PackageManagerOptions {
+	packageManager: PackageManager;
+}
+
 const checkNodeVersion = () => {
 	const version = process.versions.node;
 	const [major, minor] = version.split('.').map(Number);
@@ -26,7 +30,21 @@ export const checkVersions = () => {
 	checkNpmVersion();
 };
 
-export const getPackageManagerOption = async () => {
+const findPackageManger = (): PackageManager | undefined => {
+	const [, packageManager] = process.argv.slice(3)
+		.find(arg => arg.startsWith('--package-manager='))?.split('=') ?? ['--package-manager', ''];
+	if (Object.values(PackageManager).includes(packageManager as PackageManager)) {
+		return packageManager as PackageManager;
+	} else {
+		return (void 0);
+	}
+};
+
+export const getPackageManagerOption = async (): Promise<PackageManagerOptions> => {
+	const packageManager = findPackageManger();
+	if (packageManager != null) {
+		return {packageManager};
+	}
 	return prompts([
 		{
 			name: 'packageManager',
@@ -46,19 +64,33 @@ export const checkYarnVersion = () => {
 	}
 };
 
-export const install = async (manager: PackageManager, directory: string) => {
-	const {should} = await prompts([
-		{
-			name: 'should',
-			type: 'toggle',
-			message: 'Do you want to install all the dependencies directly?',
-			initial: false,
-			active: 'yes',
-			inactive: 'no'
-		}
-	]);
+const shouldInstall = (): boolean | undefined => {
+	if (process.argv.slice(3).includes('--install')) {
+		return true;
+	} else if (process.argv.slice(3).includes('--ignore-install')) {
+		return false;
+	} else {
+		return (void 0);
+	}
+};
+
+export const install = async (manager: PackageManager, directory: string): Promise<void> => {
+	let should = shouldInstall();
+	if (should == null) {
+		const answer = await prompts([
+			{
+				name: 'should',
+				type: 'toggle',
+				message: 'Do you want to install all the dependencies directly?',
+				initial: false,
+				active: 'yes',
+				inactive: 'no'
+			}
+		]);
+		should = answer.should;
+	}
 	if (should) {
-		const cmd = manager === 'yarn' ? 'yarn' : manager + ' i';
+		const cmd = manager === 'yarn' ? 'yarn' : (manager + ' i');
 		execSync(cmd, {stdio: 'inherit', cwd: directory});
 	}
 };

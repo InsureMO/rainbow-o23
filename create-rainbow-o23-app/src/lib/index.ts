@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import {DatasourceOptions, getDatasourceOptions, writeDatasourceFiles, writeDatasourceOptions} from './datasources';
+import {help} from './help';
 import {checkVersions, checkYarnVersion, getPackageManagerOption, install} from './package-manager';
 import {getPluginOptions, PluginOptions, writePluginFiles, writePluginOptions} from './plugins';
 import {createPackageDirectory, createPackageJson, getStandardOption, StdOptions, validateName} from './standard';
@@ -29,7 +30,7 @@ const generateFiles = async (datasourceOptions: DatasourceOptions, pluginOptions
 	fs.mkdirSync(path.resolve(directory, 'server'));
 };
 
-export const createApp = async () => {
+const create = async () => {
 	const packageName = process.argv[2];
 	validateName(packageName);
 	checkVersions();
@@ -53,5 +54,14 @@ export const createApp = async () => {
 	console.log(`${chalk.green('✔')} Success! Created ${chalk.cyan.underline(packageName)}.`);
 	console.log(`${chalk.green('✔')} Check /envs/dev/.datasources to setup datasources.`);
 	console.log();
+};
+
+export const createApp = async () => {
+	if (process.argv.includes('--help')) {
+		help();
+	} else {
+		await create();
+	}
+
 	process.exit(0);
 };

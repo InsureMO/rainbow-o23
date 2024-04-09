@@ -7,18 +7,41 @@ export interface PluginOptions {
 	plugins: Array<Plugins>;
 }
 
-export const getPluginOptions = async () => {
-	return prompts([
-		{
-			name: 'plugins',
-			type: 'multiselect',
-			message: 'Plugins:',
-			choices: [
-				Plugins.PRINT,
-				Plugins.AWS_S3
-			].map((i) => ({title: i, value: i}))
-		}
-	]);
+const findPlugins = (): Array<Plugins> | undefined => {
+	const plugins: Array<Plugins> = [];
+	process.argv.slice(3)
+		.forEach(arg => {
+			switch (arg) {
+				case '--plugin-print':
+					plugins.push(Plugins.PRINT);
+					break;
+				case '--plugin-aws-s3':
+					plugins.push(Plugins.AWS_S3);
+					break;
+				default:
+					break;
+			}
+		});
+	return plugins.length === 0 ? (void 0) : plugins;
+};
+
+export const getPluginOptions = async (): Promise<PluginOptions> => {
+	const plugins = findPlugins();
+	if (plugins != null) {
+		return {plugins};
+	} else {
+		return prompts([
+			{
+				name: 'plugins',
+				type: 'multiselect',
+				message: 'Plugins:',
+				choices: [
+					Plugins.PRINT,
+					Plugins.AWS_S3
+				].map((i) => ({title: i, value: i}))
+			}
+		]);
+	}
 };
 
 export const writePluginOptions = (json: PackageJson, options: PluginOptions) => {

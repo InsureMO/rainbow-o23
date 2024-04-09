@@ -7,8 +7,11 @@
 	},
 	"scripts": {
 		"build": "rollup -c",
+
 		"build:ci": "rollup -c rollup.config.ci.cjs",
-		"test": "node index.js test"
+		"test": "yarn build && node index.js test",
+		"test-mute": "yarn build && node index.js test --fix-name --default-desc --package-manager=yarn --use-ds-defaults --plugin-print --plugin-aws-s3",
+		"help": "yarn build && node index.js --help"
 	},
 	"keywords": [
 		"rainbow",

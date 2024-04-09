@@ -26,15 +26,54 @@ var PackageManager;
     PackageManager["YARN"] = "yarn";
 })(PackageManager || (PackageManager = {}));
 
+const findDataSources = () => {
+    const options = {};
+    process.argv.slice(3)
+        .map(arg => arg.split('='))
+        .forEach(([key, value]) => {
+        switch (key) {
+            case '--config-ds-name':
+                options.configDataSourceName = value;
+                break;
+            case '--config-ds-type':
+                if (Object.values(DatasourceTypes).includes(value)) {
+                    options.configDataSourceType = value;
+                }
+                break;
+            case '--mysql-ds-names':
+                options.mysqlDataSourceNames = value.split(',');
+                break;
+            case '--pgsql-ds-names':
+                options.pgsqlDataSourceNames = value.split(',');
+                break;
+            case '--oracle-ds-names':
+                options.oracleDataSourceNames = value.split(',');
+                break;
+            case '--mssql-ds-names':
+                options.mssqlDataSourceNames = value.split(',');
+                break;
+            case '--use-ds-defaults':
+                options.configDataSourceName = options.configDataSourceName ?? 'o23';
+                options.configDataSourceType = options.configDataSourceType ?? DatasourceTypes.MySQL;
+                options.mysqlDataSourceNames = options.mysqlDataSourceNames ?? [];
+                options.pgsqlDataSourceNames = options.pgsqlDataSourceNames ?? [];
+                options.oracleDataSourceNames = options.oracleDataSourceNames ?? [];
+                options.mssqlDataSourceNames = options.mssqlDataSourceNames ?? [];
+                break;
+        }
+    });
+    return options;
+};
 const getDatasourceOptions = async () => {
-    return prompts([
-        {
+    const options = findDataSources();
+    const result = await prompts([
+        (options.configDataSourceName ?? '').trim().length !== 0 ? null : {
             name: 'configDataSourceName',
             type: 'text',
             message: 'Configuration datasource name:',
             initial: 'o23'
         },
-        {
+        options.configDataSourceType != null ? null : {
             name: 'configDataSourceType',
             type: 'select',
             message: 'Configuration datasource type:',
@@ -42,27 +81,28 @@ const getDatasourceOptions = async () => {
                 DatasourceTypes.MySQL, DatasourceTypes.PgSQL, DatasourceTypes.MSSQL, DatasourceTypes.Oracle
             ].map((i) => ({ title: i, value: i }))
         },
-        {
+        options.mysqlDataSourceNames != null ? null : {
             name: 'mysqlDataSourceNames',
             type: 'list',
             message: 'More MySQL datasource names, separated by ",":'
         },
-        {
+        options.pgsqlDataSourceNames != null ? null : {
             name: 'pgsqlDataSourceNames',
             type: 'list',
             message: 'More PostgreSQL datasource names, separated by ",":'
         },
-        {
+        options.oracleDataSourceNames != null ? null : {
             name: 'oracleDataSourceNames',
             type: 'list',
             message: 'More Oracle datasource names, separated by ",":'
         },
-        {
+        options.mssqlDataSourceNames != null ? null : {
             name: 'mssqlDataSourceNames',
             type: 'list',
             message: 'More SQL Server datasource names, separated by ",":'
         }
-    ]);
+    ].filter(x => x != null));
+    return { ...options, ...result };
 };
 const computeDatasourceTypes = (options) => {
     const { configDataSourceType, mysqlDataSourceNames, pgsqlDataSourceNames, oracleDataSourceNames, mssqlDataSourceNames } = options;
@@ -199,6 +239,29 @@ const writeDatasourceFiles = (options, pluginOptions, directory) => {
     }
 };
 
+const help = () => {
+    console.log(`${chalk.green('Usage: ')} npx create-rainbow-o23-app my-app [options]`);
+    console.log(`${chalk.green('       ')} yarn create rainbow-o23-app my-app [options]`);
+    console.log();
+    console.log(`${chalk.green('Options:')}`);
+    console.log(`  --help                                                      Show help`);
+    console.log(`  --fix-name                                                  Use the given package name without asking for confirmation`);
+    console.log(`  --default-desc                                              Use the default description without asking for confirmation`);
+    console.log(`  --package-manager=<${chalk.yellow('yarn')}/${chalk.yellow('npm')}/${chalk.yellow('pnpm')}>                           Use the specified package manager`);
+    console.log(`  --plugin-print                                              Include the print plugin`);
+    console.log(`  --plugin-aws-s3                                             Include the AWS S3 plugin`);
+    console.log(`  --use-ds-defaults                                           Use the default datasource values, if not provided. Which are: config datasource name: o23, config datasource type: MySQL`);
+    console.log(`  --config-ds-name=<name>                                     Configuration datasource name`);
+    console.log(`  --config-ds-type=<${chalk.yellow('mysql')}/${chalk.yellow('pgsql')}/${chalk.yellow('oracle')}/${chalk.yellow('mssql')}>                 Configuration datasource type`);
+    console.log(`  --mysql-ds-names=<names>                                    More MySQL datasource names, separated by ","`);
+    console.log(`  --pgsql-ds-names=<names>                                    More PgSQL datasource names, separated by ","`);
+    console.log(`  --oracle-ds-names=<names>                                   More Oracle datasource names, separated by ","`);
+    console.log(`  --mssql-ds-names=<names>                                    More MSSQL datasource names, separated by ","`);
+    console.log(`  --install                                                   Install dependencies after creating the application`);
+    console.log(`  --ignore-install                                            Do not install dependencies after creating the application`);
+    console.log();
+};
+
 const checkNodeVersion = () => {
     const version = process.versions.node;
     const [major, minor] = version.split('.').map(Number);
@@ -219,7 +282,21 @@ const checkVersions = () => {
     checkNodeVersion();
     checkNpmVersion();
 };
+const findPackageManger = () => {
+    const [, packageManager] = process.argv.slice(3)
+        .find(arg => arg.startsWith('--package-manager='))?.split('=') ?? ['--package-manager', ''];
+    if (Object.values(PackageManager).includes(packageManager)) {
+        return packageManager;
+    }
+    else {
+        return (void 0);
+    }
+};
 const getPackageManagerOption = async () => {
+    const packageManager = findPackageManger();
+    if (packageManager != null) {
+        return { packageManager };
+    }
     return prompts([
         {
             name: 'packageManager',
@@ -237,35 +314,71 @@ const checkYarnVersion = () => {
         process.exit(1);
     }
 };
+const shouldInstall = () => {
+    if (process.argv.slice(3).includes('--install')) {
+        return true;
+    }
+    else if (process.argv.slice(3).includes('--ignore-install')) {
+        return false;
+    }
+    else {
+        return (void 0);
+    }
+};
 const install = async (manager, directory) => {
-    const { should } = await prompts([
-        {
-            name: 'should',
-            type: 'toggle',
-            message: 'Do you want to install all the dependencies directly?',
-            initial: false,
-            active: 'yes',
-            inactive: 'no'
-        }
-    ]);
+    let should = shouldInstall();
+    if (should == null) {
+        const answer = await prompts([
+            {
+                name: 'should',
+                type: 'toggle',
+                message: 'Do you want to install all the dependencies directly?',
+                initial: false,
+                active: 'yes',
+                inactive: 'no'
+            }
+        ]);
+        should = answer.should;
+    }
     if (should) {
-        const cmd = manager === 'yarn' ? 'yarn' : manager + ' i';
+        const cmd = manager === 'yarn' ? 'yarn' : (manager + ' i');
         child_process.execSync(cmd, { stdio: 'inherit', cwd: directory });
     }
 };
 
-const getPluginOptions = async () => {
-    return prompts([
-        {
-            name: 'plugins',
-            type: 'multiselect',
-            message: 'Plugins:',
-            choices: [
-                Plugins.PRINT,
-                Plugins.AWS_S3
-            ].map((i) => ({ title: i, value: i }))
+const findPlugins = () => {
+    const plugins = [];
+    process.argv.slice(3)
+        .forEach(arg => {
+        switch (arg) {
+            case '--plugin-print':
+                plugins.push(Plugins.PRINT);
+                break;
+            case '--plugin-aws-s3':
+                plugins.push(Plugins.AWS_S3);
+                break;
         }
-    ]);
+    });
+    return plugins.length === 0 ? (void 0) : plugins;
+};
+const getPluginOptions = async () => {
+    const plugins = findPlugins();
+    if (plugins != null) {
+        return { plugins };
+    }
+    else {
+        return prompts([
+            {
+                name: 'plugins',
+                type: 'multiselect',
+                message: 'Plugins:',
+                choices: [
+                    Plugins.PRINT,
+                    Plugins.AWS_S3
+                ].map((i) => ({ title: i, value: i }))
+            }
+        ]);
+    }
 };
 const writePluginOptions = (json, options) => {
     const { plugins } = options;
@@ -340,21 +453,40 @@ const createPackageDirectory = (packageName) => {
     }
     return dir;
 };
+const isNameFixed = () => {
+    return process.argv.slice(3).includes('--fix-name');
+};
+const isDescDefault = () => {
+    return process.argv.slice(3).includes('--default-desc');
+};
 const getStandardOption = async (packageName) => {
-    return prompts([
-        {
+    const nameFixed = isNameFixed();
+    const useDefaultDescription = isDescDefault();
+    if (nameFixed && useDefaultDescription) {
+        return {
+            name: packageName,
+            description: 'An application created based on Rainbow-O23, powered by InsureMO.'
+        };
+    }
+    const result = await prompts([
+        nameFixed ? null : {
             name: 'name',
             type: 'text',
             message: 'Package name:',
             initial: packageName
         },
-        {
+        useDefaultDescription ? null : {
             name: 'description',
             type: 'text',
             message: 'Package description:',
             initial: 'An application created based on Rainbow-O23, powered by InsureMO.'
         }
-    ]);
+    ].filter(x => x != null));
+    return {
+        name: packageName,
+        description: 'An application created based on Rainbow-O23, powered by InsureMO.',
+        ...result
+    };
 };
 const createPackageJson = (options, directory) => {
     const { name, description } = options;
@@ -392,7 +524,7 @@ const generateFiles = async (datasourceOptions, pluginOptions, directory) => {
     fs.mkdirSync(path.resolve(directory, 'scripts'));
     fs.mkdirSync(path.resolve(directory, 'server'));
 };
-const createApp = async () => {
+const create = async () => {
     const packageName = process.argv[2];
     validateName(packageName);
     checkVersions();
@@ -412,6 +544,14 @@ const createApp = async () => {
     console.log(`${chalk.green('✔')} Success! Created ${chalk.cyan.underline(packageName)}.`);
     console.log(`${chalk.green('✔')} Check /envs/dev/.datasources to setup datasources.`);
     console.log();
+};
+const createApp = async () => {
+    if (process.argv.includes('--help')) {
+        help();
+    }
+    else {
+        await create();
+    }
     process.exit(0);
 };
 

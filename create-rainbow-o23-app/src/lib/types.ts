@@ -1,6 +1,5 @@
 export enum Plugins {
-	PRINT = 'print',
-	AWS_S3 = 'aws-s3'
+	PRINT = 'print', AWS_S3 = 'aws-s3'
 }
 
 export enum DatasourceTypes {
