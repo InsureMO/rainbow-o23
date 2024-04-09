@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n7",
-	"version": "1.0.30",
+	"version": "1.0.31",
 	"description": "o23 word print",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -21,8 +21,8 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n3": "1.0.30",
-		"@rainbow-o23/n4": "1.0.30",
+		"@rainbow-o23/n3": "1.0.31",
+		"@rainbow-o23/n4": "1.0.31",
 		"docx-templates": "^4.11.4"
 	},
 	"devDependencies": {
