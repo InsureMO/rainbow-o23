@@ -8,20 +8,27 @@ export interface PluginOptions {
 }
 
 const findPlugins = (): Array<Plugins> | undefined => {
+	const args = process.argv.slice(3);
+
+	if (args.includes('--plugin-free')) {
+		return [];
+	} else if (args.includes('--plugin-all-packed')) {
+		return Object.values(Plugins);
+	}
+
 	const plugins: Array<Plugins> = [];
-	process.argv.slice(3)
-		.forEach(arg => {
-			switch (arg) {
-				case '--plugin-print':
-					plugins.push(Plugins.PRINT);
-					break;
-				case '--plugin-aws-s3':
-					plugins.push(Plugins.AWS_S3);
-					break;
-				default:
-					break;
-			}
-		});
+	args.forEach(arg => {
+		switch (arg) {
+			case '--plugin-print':
+				plugins.push(Plugins.PRINT);
+				break;
+			case '--plugin-aws-s3':
+				plugins.push(Plugins.AWS_S3);
+				break;
+			default:
+				break;
+		}
+	});
 	return plugins.length === 0 ? (void 0) : plugins;
 };
 

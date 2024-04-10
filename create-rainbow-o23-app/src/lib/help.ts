@@ -11,6 +11,8 @@ export const help = () => {
 	console.log(`  --package-manager=<${chalk.yellow('yarn')}/${chalk.yellow('npm')}/${chalk.yellow('pnpm')}>                           Use the specified package manager`);
 	console.log(`  --plugin-print                                              Include the print plugin`);
 	console.log(`  --plugin-aws-s3                                             Include the AWS S3 plugin`);
+	console.log(`  --plugin-all-packed                                         Include all plugins without asking for confirmation`);
+	console.log(`  --plugin-free                                               Do not include any plugin without asking for confirmation`);
 	console.log(`  --use-ds-defaults                                           Use the default datasource values, if not provided. Which are: config datasource name: o23, config datasource type: MySQL`);
 	console.log(`  --config-ds-name=<name>                                     Configuration datasource name`);
 	console.log(`  --config-ds-type=<${chalk.yellow('mysql')}/${chalk.yellow('pgsql')}/${chalk.yellow('oracle')}/${chalk.yellow('mssql')}>                 Configuration datasource type`);
