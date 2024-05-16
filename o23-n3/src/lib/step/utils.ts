@@ -39,15 +39,6 @@ const AvoidProxyObjects = [
 	createGlobalProxy(() => {
 		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_FUNCTION, 'Cannot use Function in dynamic snippet.');
 	})
-	// createGlobalProxy(() => {
-	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_REQUIRE, 'Cannot use require in dynamic snippet.');
-	// }),
-	// createGlobalProxy(() => {
-	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_MODULE, 'Cannot use module in dynamic snippet.');
-	// }),
-	// createGlobalProxy(() => {
-	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_EXPORTS, 'Cannot use exports in dynamic snippet.');
-	// })
 ];
 
 export class Utils {
