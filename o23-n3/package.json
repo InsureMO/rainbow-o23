@@ -41,7 +41,7 @@
 		"better-sqlite3": "^9.0.0",
 		"eslint": "^8.29.0",
 		"mssql": "^10.0.1",
-		"mysql2": "^3.9.4",
+		"mysql2": "^3.9.7",
 		"oracledb": "^6.2.0",
 		"pg": "^8.11.3",
 		"pg-query-stream": "^4.5.3",
