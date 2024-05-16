@@ -25,7 +25,7 @@ const createGlobalProxy = (ex: () => never) => {
 		}
 	});
 };
-const AvoidNames = ['global', 'process', 'eval', 'Function', 'require', 'module', 'exports'];
+const AvoidNames = ['global', 'process', 'eval', 'Function'];
 const AvoidProxyObjects = [
 	createGlobalProxy(() => {
 		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
