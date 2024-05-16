@@ -24,7 +24,7 @@ export class Config {
 			.filter(s => s.trim().length !== 0)
 			.map(s => s.toUpperCase())
 			.join('_');
-		return `CFG_${key}`;
+		return key.startsWith('CFG_') ? key : `CFG_${key}`;
 	}
 
 	protected getFromCache<T>(name: string, read: () => Undefinable<T>, defaultValue?: T): Undefinable<T> {
