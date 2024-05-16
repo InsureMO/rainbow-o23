@@ -71,8 +71,14 @@ export abstract class AbstractReader<C> implements Reader <C> {
 				return redressed;
 			}, {});
 		} else if (typeof given === 'string' && given.trim().startsWith('env:')) {
-			const value = given.trim().substring(4);
-			return this.getConfig().getString(value);
+			const keys = given.trim().substring(4).trim().split(',').map(key => key.trim());
+			for (const key of keys) {
+				const value = this.getConfig().getString(key);
+				if (`${value ?? ''}`.trim().length !== 0) {
+					return value;
+				}
+			}
+			return (void 0);
 		} else {
 			return given;
 		}

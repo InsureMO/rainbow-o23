@@ -57,7 +57,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Create Definition
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           INSERT INTO T_O23_PIPELINE_DEFS
@@ -67,7 +67,7 @@ steps:
     otherwise:
       - name: Find Existing Definition
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor.data}"
         sql: SELECT DEF_CODE AS "DEF_CODE", TENANT_CODE AS "TENANT_CODE" FROM T_O23_PIPELINE_DEFS WHERE DEF_ID = $defId
         merge: existing
@@ -95,7 +95,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Update Definition
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           UPDATE T_O23_PIPELINE_DEFS SET

@@ -33,7 +33,7 @@ steps:
         steps:
           - name: Load Template By Id
             use: typeorm-load-one
-            datasource: "env:app.datasource.config"
+            datasource: "env:app.datasource.config,app.datasource.default"
             from-input: "{params: $factor.body}"
             sql: |-
               SELECT TEMPLATE_TYPE AS "templateType", TEMPLATE_FILE_NAME AS "templateFileName", TEMPLATE_FILE AS "templateFile" 
@@ -43,7 +43,7 @@ steps:
         steps:
           - name: Load Template By Code
             use: typeorm-load-one
-            datasource: "env:app.datasource.config"
+            datasource: "env:app.datasource.config,app.datasource.default"
             from-input: "{params: $factor.body}"
             sql: |-
               SELECT TEMPLATE_TYPE AS "templateType", TEMPLATE_FILE_NAME AS "templateFileName", TEMPLATE_FILE AS "templateFile" 
@@ -52,7 +52,7 @@ steps:
     otherwise:
       - name: Load Template
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor.body}"
         sql: |-
           SELECT TEMPLATE_TYPE AS "templateType", TEMPLATE_FILE_NAME AS "templateFileName", TEMPLATE_FILE AS "templateFile" 

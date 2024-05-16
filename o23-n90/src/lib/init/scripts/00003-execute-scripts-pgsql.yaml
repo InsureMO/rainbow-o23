@@ -5,7 +5,7 @@ use: sets
 steps:
   - name: Check Existing
     use: typeorm-snippet
-    datasource: "env:app.datasource.config"
+    datasource: "env:app.datasource.config,app.datasource.default"
     snippet: |-
       try {
         const [rows] = await $runner.query('SELECT COUNT(1) AS "ROWS_COUNT" FROM T_O23_DB_CHANGE_LOCK');
@@ -22,7 +22,7 @@ steps:
     steps:
       - name: Create Lock
         use: typeorm-snippet
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         snippet: |-
           await $runner.query(`CREATE TABLE T_O23_DB_CHANGE_LOCK(
             ID DECIMAL(3) NOT NULL PRIMARY KEY,
@@ -42,7 +42,7 @@ steps:
           $.$logger.log('O23 scripts def tables created.', 'ScriptsPipelineInitializer');
   - name: Try to Lock
     use: typeorm-snippet
-    datasource: "env:app.datasource.config"
+    datasource: "env:app.datasource.config,app.datasource.default"
     snippet: |-
       const [, changedRows] = await $runner.query("UPDATE T_O23_DB_CHANGE_LOCK SET LOCKED = 1, LOCKED_AT = NOW(), LOCKED_BY = 'SCRIPTS-PIPELINE' WHERE ID = 1 AND LOCKED != 1");
       // console.log('Changed rows', changedRows, 'ScriptsPipelineInitializer');
@@ -73,7 +73,7 @@ steps:
         steps:
           - name: Execute Script
             use: typeorm-snippet
-            datasource: "env:app.datasource.config"
+            datasource: "env:app.datasource.config,app.datasource.default"
             snippet: |-
               const $item = $factor.$item;
               const rst = await $runner.query('SELECT MD5_SUM AS "MD5_SUM" FROM T_O23_DB_CHANGE_LOG WHERE FILE_NAME = $1', [$item.filename]);
@@ -114,7 +114,7 @@ steps:
               }
       - name: Unlock
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         # no params for sql
         from-input: "null"
         sql: UPDATE T_O23_DB_CHANGE_LOCK SET LOCKED = 0 WHERE ID = 1

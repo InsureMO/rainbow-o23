@@ -51,7 +51,7 @@ steps:
         merge: task
       - name: Save Print Task
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.task}"
         sql: |-
           INSERT INTO T_O23_PRINT_TASKS 

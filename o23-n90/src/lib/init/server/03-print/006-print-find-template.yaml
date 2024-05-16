@@ -33,7 +33,7 @@ steps:
     steps:
       - name: Load Template By Id
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor}"
         sql: |-
           SELECT 
@@ -51,7 +51,7 @@ steps:
     otherwise:
       - name: Load Template By Code
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor}"
         sql: |-
           SELECT 

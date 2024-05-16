@@ -42,7 +42,7 @@ steps:
         steps:
           - name: Load Template By Id
             use: typeorm-load-one
-            datasource: "env:app.datasource.config"
+            datasource: "env:app.datasource.config,app.datasource.default"
             from-input: "{params: $factor.body}"
             sql: |-
               SELECT TEMPLATE_ID AS "templateId", TEMPLATE_TYPE AS "templateType", VERSION AS "version" 
@@ -52,7 +52,7 @@ steps:
         steps:
           - name: Load Template By Code
             use: typeorm-load-one
-            datasource: "env:app.datasource.config"
+            datasource: "env:app.datasource.config,app.datasource.default"
             from-input: "{params: $factor.body}"
             sql: |-
               SELECT TEMPLATE_ID AS "templateId", TEMPLATE_TYPE AS "templateType", VERSION AS "version"
@@ -61,7 +61,7 @@ steps:
     otherwise:
       - name: Load Template
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor.body}"
         sql: |-
           SELECT TEMPLATE_ID AS "templateId", TEMPLATE_TYPE AS "templateType", VERSION AS "version" 
@@ -104,7 +104,7 @@ steps:
       $factor.body.lastModifiedBy = currentUser;
   - name: Save
     use: typeorm-save
-    datasource: "env:app.datasource.config"
+    datasource: "env:app.datasource.config,app.datasource.default"
     from-input: "{values: $factor}"
     sql: |-
       UPDATE T_O23_PRINT_TEMPLATES SET

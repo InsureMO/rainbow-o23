@@ -10,7 +10,8 @@ follows:
 
 - For single-line snippet, a prefix `return ` will be automatically added to ensure that data can be returned,
 - Automatic conversion between camel case and kebab case property names,
-- If a property value starts with `env:`, it will be automatically replaced with the corresponding environment variable value.
+- If a property value starts with `env:`, it will be automatically replaced with the corresponding environment variable value,
+- The prefix `env:` supports multiple environment variables, separated by commas, with the first one having a value taking precedence.
 
 When writing YAML configurations, the following syntax rules should also be noted:
 

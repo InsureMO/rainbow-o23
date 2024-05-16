@@ -65,7 +65,7 @@ steps:
     merge: countSQL
   - name: Get Items Count
     use: typeorm-load-one
-    datasource: "env:app.datasource.config"
+    datasource: "env:app.datasource.config,app.datasource.default"
     sql: "@ignore"
     from-input: "{sql: $factor.countSQL, params: $factor.built.params}"
     to-output: "$result.itemCount"
@@ -115,7 +115,7 @@ steps:
         merge: dataSQL
       - name: Load Templates
         use: typeorm-load-many
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         sql: "@ignore"
         from-input: "{sql: $factor.dataSQL, params: $factor.built.params}"
         merge: data

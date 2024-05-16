@@ -18,7 +18,7 @@ steps:
     merge: defCode
   - name: Load Definition
     use: typeorm-load-one
-    datasource: "env:app.datasource.config"
+    datasource: "env:app.datasource.config,app.datasource.default"
     from-input: "{params: $factor}"
     sql: |-
       SELECT 

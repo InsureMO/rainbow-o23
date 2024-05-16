@@ -59,7 +59,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Create Template
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           INSERT INTO T_O23_PRINT_TEMPLATES
@@ -69,7 +69,7 @@ steps:
     otherwise:
       - name: Find Existing Template
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor.data}"
         sql: SELECT TEMPLATE_CODE AS "TEMPLATE_CODE", TENANT_CODE AS "TENANT_CODE" FROM T_O23_PRINT_TEMPLATES WHERE TEMPLATE_ID = $templateId
         merge: existing
@@ -97,7 +97,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Update Template
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           UPDATE T_O23_PRINT_TEMPLATES SET

@@ -59,7 +59,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Create Configuration
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           INSERT INTO T_O23_D9_CONFIG
@@ -69,7 +69,7 @@ steps:
     otherwise:
       - name: Find Existing Config
         use: typeorm-load-one
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{params: $factor.data}"
         sql: SELECT CONFIG_CODE AS "CONFIG_CODE", TENANT_CODE AS "TENANT_CODE" FROM T_O23_D9_CONFIG WHERE CONFIG_ID = $configId
         merge: existing
@@ -97,7 +97,7 @@ steps:
           $factor.lastModifiedAt = currentTime;
       - name: Update Configuration
         use: typeorm-save
-        datasource: "env:app.datasource.config"
+        datasource: "env:app.datasource.config,app.datasource.default"
         from-input: "{values: $factor.data}"
         sql: |-
           UPDATE T_O23_D9_CONFIG SET
