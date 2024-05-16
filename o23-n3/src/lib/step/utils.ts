@@ -1,5 +1,10 @@
 import {Nullable, UncatchableError, Undefinable} from '@rainbow-o23/n1';
-import {ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL} from '../error-codes';
+import {
+	ERR_PIPELINE_SNIPPET_CANNOT_USE_EVAL,
+	ERR_PIPELINE_SNIPPET_CANNOT_USE_FUNCTION,
+	ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL,
+	ERR_PIPELINE_SNIPPET_CANNOT_USE_PROCESS
+} from '../error-codes';
 import {ScriptFuncOrBody} from './types';
 
 // get async function constructor, to create the dynamic function
@@ -7,17 +12,43 @@ const AsyncFunction = Object.getPrototypeOf(async function () {
 	// nothing, since this purpose is get the constructor, body is not concerned
 }).constructor;
 
-const AvoidGlobal = new Proxy({}, {
-	get() {
+const createGlobalProxy = (ex: () => never) => {
+	return new Proxy({}, {
+		get() {
+			ex();
+		},
+		set() {
+			ex();
+		},
+		apply() {
+			ex();
+		}
+	});
+};
+const AvoidNames = ['global', 'process', 'eval', 'Function', 'require', 'module', 'exports'];
+const AvoidProxyObjects = [
+	createGlobalProxy(() => {
 		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
-	},
-	set() {
-		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
-	},
-	apply() {
-		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
-	}
-});
+	}),
+	createGlobalProxy(() => {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_PROCESS, 'Cannot use process in dynamic snippet.');
+	}),
+	createGlobalProxy(() => {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_EVAL, 'Cannot use eval in dynamic snippet.');
+	}),
+	createGlobalProxy(() => {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_FUNCTION, 'Cannot use Function in dynamic snippet.');
+	})
+	// createGlobalProxy(() => {
+	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_REQUIRE, 'Cannot use require in dynamic snippet.');
+	// }),
+	// createGlobalProxy(() => {
+	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_MODULE, 'Cannot use module in dynamic snippet.');
+	// }),
+	// createGlobalProxy(() => {
+	// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_EXPORTS, 'Cannot use exports in dynamic snippet.');
+	// })
+];
 
 export class Utils {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -37,24 +68,24 @@ export class Utils {
 				// }
 				const variableNames = creators.getVariableNames() ?? [];
 				if (creators.async) {
-					const func = new AsyncFunction(...variableNames, 'global', snippet);
+					const func = new AsyncFunction(...variableNames, ...AvoidNames, snippet);
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					return (async (...args: Array<any>) => {
 						const availableArgs = [...args];
 						availableArgs.length = variableNames.length;
 						// Pass specified length of parameters,
 						// along with an additional global object to prevent internal access to the actual global object.
-						return await func(...availableArgs, AvoidGlobal);
+						return await func(...availableArgs, ...AvoidProxyObjects);
 					}) as F;
 				} else {
-					const func = new Function(...variableNames, 'global', snippet);
+					const func = new Function(...variableNames, ...AvoidNames, snippet);
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					return ((...args: Array<any>) => {
 						const availableArgs = [...args];
 						availableArgs.length = variableNames.length;
 						// Pass specified length of parameters,
 						// along with an additional global object to prevent internal access to the actual global object.
-						return func(...availableArgs, AvoidGlobal);
+						return func(...availableArgs, ...AvoidProxyObjects);
 					}) as F;
 				}
 			} else {
