@@ -264,8 +264,8 @@ When `typeorm.DB.type=mysql`:
 | `typeorm.DB.trace`                  | boolean |                     |                                                                                                                       |
 | `typeorm.DB.multiple.statements`    | boolean | false               |                                                                                                                       |
 | `typeorm.DB.legacy.spatial.support` | boolean |                     |                                                                                                                       |
-| `typeorm.DB.timestamp.format.write` | string  | %Y-%m-%d %H:%k:%s   | PgSQL timestamp write format, should compatible with `format.datetime`, which default value is `YYYY-MM-DD HH:mm:ss`. |
-| `typeorm.DB.timestamp.format.read`  | string  | YYYY-MM-DD HH:mm:ss | PgSQL timestamp read format.                                                                                          |
+| `typeorm.DB.timestamp.format.write` | string  | %Y-%m-%d %H:%k:%s   | MySQL timestamp write format, should compatible with `format.datetime`, which default value is `YYYY-MM-DD HH:mm:ss`. |
+| `typeorm.DB.timestamp.format.read`  | string  | YYYY-MM-DD HH:mm:ss | MySQL timestamp read format.                                                                                          |
 
 > Mysql driver read `DateTime` column to javascript `string`.
 
@@ -598,7 +598,8 @@ CFG_ENDPOINTS_ORDER_PURCHASE_URL=https://order.com/purchase
 CFG_ENDPOINTS_ORDER_PAYMENT_URL=https://order.com/payment
 ```
 
-> 
+>
+
 #### Constructor Parameters
 
 | Name                 | Type                                                       | Default Value | Comments                                                                                                             |
