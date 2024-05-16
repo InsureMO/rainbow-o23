@@ -1,10 +1,23 @@
-import {Nullable, Undefinable} from '@rainbow-o23/n1';
+import {Nullable, UncatchableError, Undefinable} from '@rainbow-o23/n1';
+import {ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL} from '../error-codes';
 import {ScriptFuncOrBody} from './types';
 
 // get async function constructor, to create the dynamic function
 const AsyncFunction = Object.getPrototypeOf(async function () {
 	// nothing, since this purpose is get the constructor, body is not concerned
 }).constructor;
+
+const AvoidGlobal = new Proxy({}, {
+	get() {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
+	},
+	set() {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
+	},
+	apply() {
+		throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, 'Cannot use global in dynamic snippet.');
+	}
+});
 
 export class Utils {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -18,8 +31,32 @@ export class Utils {
 			if (snippet == null || (typeof snippet === 'string' && snippet.trim().length === 0)) {
 				return creators.createDefault();
 			} else if (typeof snippet === 'string') {
-				const F = creators.async ? AsyncFunction : Function;
-				return new F(...creators.getVariableNames(), snippet) as F;
+				// if (snippet.includes('global')) {
+				// 	// noinspection ExceptionCaughtLocallyJS
+				// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, '"global" is not allowed in dynamic snippet.');
+				// }
+				const variableNames = creators.getVariableNames() ?? [];
+				if (creators.async) {
+					const func = new AsyncFunction(...variableNames, 'global', snippet);
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return (async (...args: Array<any>) => {
+						const availableArgs = [...args];
+						availableArgs.length = variableNames.length;
+						// Pass specified length of parameters,
+						// along with an additional global object to prevent internal access to the actual global object.
+						return await func(...availableArgs, AvoidGlobal);
+					}) as F;
+				} else {
+					const func = new Function(...variableNames, 'global', snippet);
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return ((...args: Array<any>) => {
+						const availableArgs = [...args];
+						availableArgs.length = variableNames.length;
+						// Pass specified length of parameters,
+						// along with an additional global object to prevent internal access to the actual global object.
+						return func(...availableArgs, AvoidGlobal);
+					}) as F;
+				}
 			} else {
 				return snippet;
 			}

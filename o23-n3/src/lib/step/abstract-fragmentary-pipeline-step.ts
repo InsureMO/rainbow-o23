@@ -10,6 +10,7 @@ import {
 	PipelineStepPayload,
 	UncatchableError
 } from '@rainbow-o23/n1';
+import {ERR_PIPELINE_STEP_SNIPPET_NOT_EMPTY} from '../error-codes';
 import {PipelineStepSetsContext} from './step-sets';
 import {
 	HandleAnyError,
@@ -210,7 +211,17 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 				};
 			}
 		} else if (typeof funcOrSnippet === 'string') {
-			const func = new Function(...this.generateToResponseVariableNames(), funcOrSnippet);
+			// eslint-disable-next-line @typescript-eslint/ban-types
+			const func: Function = Utils.createSyncFunction(funcOrSnippet, {
+				createDefault: (): never => {
+					throw new UncatchableError(ERR_PIPELINE_STEP_SNIPPET_NOT_EMPTY, 'Cannot create perform func on empty snippet.');
+				},
+				getVariableNames: () => this.generateToResponseVariableNames(),
+				error: (e: Error) => {
+					this.getLogger().error(`Failed on create function for snippet[${funcOrSnippet}].`);
+					throw e;
+				}
+			});
 			if (this.useUnboxMerging()) {
 				return ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Out => {
 					const r = func($result, $request, $helpers, $);

@@ -16,3 +16,4 @@ export const ERR_PIPELINE_STEP_REF_NOT_EMPTY: O23ReservedErrorCode = 'O03-00013'
 export const ERR_PIPELINE_STEP_REF_NOT_FOUND: O23ReservedErrorCode = 'O03-00014';
 export const ERR_PIPELINE_REF_NOT_EMPTY: O23ReservedErrorCode = 'O03-00015';
 export const ERR_PIPELINE_REF_NOT_FOUND: O23ReservedErrorCode = 'O03-00016';
+export const ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL: O23ReservedErrorCode = 'O03-00017';
