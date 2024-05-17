@@ -588,8 +588,8 @@ step set. Additionally, nested transactions are also supported, which means Tran
 | `endpoints.SYSTEM.ENDPOINT.url`     | string |               | Endpoint URL.                                                                                                                     |
 | `endpoints.SYSTEM.ENDPOINT.headers` | string |               | Endpoint request headers, use global headers if this parameter doesn't present.<br>Format follows `name=value[;name=value[...]]`. |
 | `endpoints.SYSTEM.global.headers`   | string |               | Endpoint system global request headers.<br>Format follows `name=value[;name=value[...]]`.                                         |
-| `endpoints.SYSTEM.ENDPOINT.timeout` | string |               | Endpoint request timeout, in seconds, use global timeout if this parameter doesn't present.                                       |
-| `endpoints.SYSTEM.global.timeout`   | string | -1            | Endpoint system global timeout, in seconds, `-1` represents no timeout.                                                           |
+| `endpoints.SYSTEM.ENDPOINT.timeout` | number |               | Endpoint request timeout, in seconds, use global timeout if this parameter doesn't present.                                       |
+| `endpoints.SYSTEM.global.timeout`   | number | -1            | Endpoint system global timeout, in seconds, `-1` represents no timeout.                                                           |
 
 `SYSTEM` represents endpoint system, `ENDPOINT` represents endpoint url. For example:
 
