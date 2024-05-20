@@ -146,7 +146,7 @@ export const writeDatasourceOptions = (json, options) => {
 		'scripts:mssql', 'scripts:pgsql', 'scripts:oracle'
 	].forEach(key => delete json.scripts[key]);
 	Object.keys(json.scripts).forEach(key => {
-		if (key.endsWith(':mysql')) {
+		if (key.endsWith(':mysql') || key === 'debug:start') {
 			const newKey = key.replace(/:mysql$/, '');
 			json.scripts[newKey] = json.scripts[key]
 				.replace(':mysql', '')
