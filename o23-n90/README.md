@@ -46,11 +46,14 @@ The environment files is defined in `CFG_ENV_FILE`, such as in `package.json`:
 
 ### Environment Parameters
 
-| Name                          | Type    | Default Value | Comments                                                                |
-|-------------------------------|---------|---------------|-------------------------------------------------------------------------|
-| `app.api.test`                | boolean | false         | Enable the api test rest ports.                                         |
-| `app.init.pipelines.dir`      | string  |               | Entry point pipelines directory.                                        |
-| `app.excluded.pipelines.dirs` | string  |               | Exclude directories, connected by `,`, relative to pipelines directory. |
+| Name                          | Type    | Default Value | Comments                                                                                                                                                                         |
+|-------------------------------|---------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `app.api.test`                | boolean | false         | Enable the api test rest ports.                                                                                                                                                  |
+| `app.plugins.print`           | boolean | false         | Enable database-based print templates and tasks related rest ports.                                                                                                              |
+| `app.pipelines.db`            | boolean | true          | Enable database-based pipeline configuration initializing and related rest ports.                                                                                                |
+| `app.d9.db`                   | boolean | true          | Enable database-based d9 configurations related rest ports.                                                                                                                      |
+| `app.init.pipelines.dir`      | string  |               | Entry point pipelines directories, connected by `,`.                                                                                                                             |
+| `app.excluded.pipelines.dirs` | string  |               | Exclude directories, connected by `,`, relative to pipelines directory. <br/>If multiple pipeline loading directories are defined, then "exclude" will apply to all directories. |
 
 ## Database Configuration
 

@@ -10,8 +10,8 @@ export class ScriptsPipelineInitializer extends AbstractPipelineInitializer {
 		StepBuilders.register('scripts-load-files', createScriptsLoadFilesStepBuilder(options));
 	}
 
-	protected getScanDir(options: BootstrapOptions): string {
-		return options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINES_DIR, ConfigConstants.APP_SCRIPTS_INIT_PIPELINES_DEFAULT_DIR);
+	protected getDefaultScanDir(): string {
+		return ConfigConstants.APP_SCRIPTS_INIT_PIPELINES_DEFAULT_DIR;
 	}
 
 	public async load(options: BootstrapOptions): Promise<void> {

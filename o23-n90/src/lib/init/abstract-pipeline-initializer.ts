@@ -4,7 +4,7 @@ import {ParsedDef, ParsedPipelineDef, ParsedPipelineStepDef, registerDefaults} f
 import * as fs from 'fs';
 import {glob} from 'glob';
 import * as path from 'path';
-import {ConfigUtils} from '../config';
+import {ConfigConstants, ConfigUtils} from '../config';
 
 export abstract class AbstractPipelineInitializer {
 	public constructor() {
@@ -20,22 +20,32 @@ export abstract class AbstractPipelineInitializer {
 		// do nothing
 	}
 
-	protected abstract getScanDir(options: BootstrapOptions): string;
+	protected getScanDir(options: BootstrapOptions): Array<string> {
+		const dirs = options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINES_DIR, this.getDefaultScanDir())
+			.split(',')
+			.map(dir => dir.trim())
+			.filter(dir => dir.length !== 0)
+			.map(dir => dir.endsWith(path.sep) ? dir.slice(0, -1) : dir);
+		return [...new Set(dirs)];
+	}
+
+	protected abstract getDefaultScanDir(): string;
 
 	protected async scanDefFiles(options: BootstrapOptions): Promise<Array<string>> {
-		let dir = this.getScanDir(options);
-		// noinspection TypeScriptValidateJSTypes
-		dir = dir.startsWith('/') ? dir : path.resolve(process.cwd(), dir);
-		return glob(`${dir}/**/*.{yaml,yml}`);
+		return (await Promise.all(this.getScanDir(options)
+			.map(dir => path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir))
+			.map(dir => glob(path.resolve(dir, '**', '*.{yaml,yml}')))))
+			.flat();
 	}
 
 	protected getExcludedDirs(options: BootstrapOptions): Array<string> {
-		const scanDir = this.getScanDir(options);
+		const scanDirs = this.getScanDir(options);
 		return options.getEnvAsString('app.excluded.pipelines.dirs', '')
 			.split(',')
 			.map(dir => dir.trim())
 			.filter(dir => dir.length !== 0)
-			.map(dir => path.resolve(process.cwd(), scanDir, dir));
+			.map(dir => scanDirs.map(scanDir => path.resolve(process.cwd(), scanDir, dir)))
+			.flat();
 	}
 
 	private parseDef(options: {

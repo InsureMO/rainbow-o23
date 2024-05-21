@@ -27,8 +27,8 @@ export class ServerPipelineInitializer extends AbstractPipelineInitializer {
 		ServerPipelineStepRegistrar.registerAll(options);
 	}
 
-	protected getScanDir(options: BootstrapOptions): string {
-		return options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINES_DIR, ConfigConstants.APP_SERVER_INIT_PIPELINES_DEFAULT_DIR);
+	protected getDefaultScanDir(): string {
+		return ConfigConstants.APP_SERVER_INIT_PIPELINES_DEFAULT_DIR;
 	}
 
 	protected isInitOnly(def: ParsedPipelineDef): def is InitOnlyPipelineDef {
@@ -68,11 +68,14 @@ export class ServerPipelineInitializer extends AbstractPipelineInitializer {
 				} = prebuilt;
 				const apiTestEnabled = options.getEnvAsBoolean('app.api.test', false);
 				const printEnabled = options.getEnvAsBoolean('app.plugins.print', false);
+				const d9ConfigInDBEnabled = options.getEnvAsBoolean('app.d9.db', true);
+				const pipelinesInDBEnabled = options.getEnvAsBoolean('app.pipelines.db', true);
 				return [
-					...initServer,
+					...(pipelinesInDBEnabled ? initServer : []),
 					...(apiTestEnabled ? apiTest : []),
 					...(printEnabled ? print : []),
-					...d9Config, ...pipelineDef
+					...(d9ConfigInDBEnabled ? d9Config : []),
+					...(pipelinesInDBEnabled ? pipelineDef : [])
 				];
 			});
 		// startup pipelines
