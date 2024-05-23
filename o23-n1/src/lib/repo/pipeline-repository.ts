@@ -17,7 +17,7 @@ export class PipelineRepository {
 	}
 
 	public static async findPipeline(code: PipelineCode, options: PipelineOptions): Promise<Undefinable<Pipeline>> {
-		const builder = this.PIPELINE_BUILDERS[code];
+		const builder = PipelineRepository.PIPELINE_BUILDERS[code];
 		if (builder == null) {
 			return (void 0);
 		} else {
