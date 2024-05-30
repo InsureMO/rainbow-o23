@@ -34,7 +34,7 @@ export abstract class AbstractPipelineInitializer {
 	protected async scanDefFiles(options: BootstrapOptions): Promise<Array<string>> {
 		return (await Promise.all(this.getScanDir(options)
 			.map(dir => path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir))
-			.map(dir => glob(path.resolve(dir, '**', '*.{yaml,yml}')))))
+			.map(dir => glob(path.resolve(dir, '**', '*.{yaml,yml}').replace(/\\/g, '/')))))
 			.flat();
 	}
 

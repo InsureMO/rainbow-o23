@@ -108,7 +108,7 @@ export class ScriptsLoadFilesPipelineStep
 		const cwd = process.cwd();
 		const cwdLength = cwd.length;
 		dir = dir.startsWith('/') ? dir : path.resolve(cwd, dir, dataSourceType);
-		const files = await glob(`${dir}/**/*.{ddl,dml}.sql`);
+		const files = await glob(`${dir}/**/*.{ddl,dml}.sql`.replace(/\\/g,'/'));
 		return files.sort().map(file => {
 			const script = this.readFile(file);
 			script.filename = file.substring(cwdLength);
