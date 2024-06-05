@@ -68,10 +68,10 @@ export class DynamicModuleController {
 				} else if (count === 1 && parameterDecorators[0].type === ParameterType.RESPONSE) {
 					return (void 0);
 				} else if (count === 1) {
-					// only one, returns first
+					// only one, return it
 					return args[0];
 				} else if (count === 2 && parameterDecorators[1].type === ParameterType.RESPONSE) {
-					// two args, and second one is response, ignored
+					// two args, and second one is response. Ignore second one, return first directly
 					return args[0];
 				}
 
