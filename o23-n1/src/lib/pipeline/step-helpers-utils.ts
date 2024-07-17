@@ -46,18 +46,21 @@ export class StepHelpersUtils {
 	public static createCatchableError = (options: Omit<PipelineStepErrorOptions, 'status'>): never => {
 		throw new CatchableError(options.code, options.reason);
 	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isCatchableError = (e: any): e is CatchableError => {
 		return e != null && e instanceof CatchableError;
 	};
 	public static createExposedUncatchableError = (options: PipelineStepErrorOptions): never => {
 		throw new ExposedUncatchableError(options.status, options.code, options.reason);
 	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isExposedUncatchableError = (e: any): e is ExposedUncatchableError => {
 		return e != null && e instanceof ExposedUncatchableError;
 	};
 	public static createUncatchableError = (options: Omit<PipelineStepErrorOptions, 'status'>): never => {
 		throw new UncatchableError(options.code, options.reason);
 	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isUncatchableError = (e: any): e is UncatchableError => {
 		return e != null && e instanceof UncatchableError;
 	};

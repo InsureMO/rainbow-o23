@@ -620,9 +620,6 @@ For example,
   merge: id
 ```
 
-> Use snowflake.shard.id to configure the shard ID of the Snowflake generator in a multi-node environment. Each node should have a different
-> shard ID to avoid Snowflake ID conflicts. 0 - 1023 is the valid range of shard ID, default is 1.
-
 ## FetchPipelineStep, extends AbstractFragmentaryPipelineStep
 
 Use `node-fetch` to call remote service APIs. Execute after `from-input`.

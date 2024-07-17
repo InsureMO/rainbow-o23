@@ -6,7 +6,7 @@ export class Snowflake {
 	private static EPOCH: number = Date.UTC(1970, 0, 1).valueOf();
 
 	/** The id of the shard running this generator. Defaults to "1". */
-	private static SHARD_ID: number = 1;
+	private static SHARD_ID = 1;
 
 	/**
 	 * Max sequence, 2^12 - 1
@@ -41,7 +41,7 @@ export class Snowflake {
 
 		Snowflake.lastTimestamp = timestamp;
 
-		let result = (BigInt(timestamp - Snowflake.EPOCH) << BigInt(22)) |
+		const result = (BigInt(timestamp - Snowflake.EPOCH) << BigInt(22)) |
 			(BigInt(shardId % 1024) << BigInt(12)) |
 			BigInt(Snowflake.sequence);
 

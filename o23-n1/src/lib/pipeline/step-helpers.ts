@@ -38,10 +38,13 @@ export interface PipelineStepHelpers {
 	$error: (options: PipelineStepErrorOptions) => never;
 	$errors: {
 		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		isCatchable: (e: any) => e is CatchableError;
 		exposed: (options: PipelineStepErrorOptions) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		isExposed: (e: any) => e is ExposedUncatchableError;
 		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		isUncatchable: (e: any) => e is UncatchableError;
 	};
 	/** create a file */
