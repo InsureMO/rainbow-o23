@@ -57,10 +57,20 @@ export interface PipelineStepHelpers {
 	isNotBlank: (value: any) => boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	trim: (value: any) => string;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
 }
+
+const RegisteredHelpers = {helpers: {}};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const registerToStepHelpers = (helpers: Record<string, any>) => {
+	RegisteredHelpers.helpers = helpers ?? {};
+};
 
 export const createStepHelpers = (config: Config, logger: Logger): PipelineStepHelpers => {
 	return {
+		...RegisteredHelpers.helpers,
 		$config: config, $logger: logger,
 		// date
 		$date: new PipelineStepDateHelper(config),
