@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {Config, DateTime, Logger} from '../utils';
+import {CatchableError, Config, DateTime, ExposedUncatchableError, Logger, UncatchableError} from '../utils';
 import {
 	PIPELINE_STEP_RETURN_NULL,
 	PipelineStepErrorOptions,
@@ -38,8 +38,11 @@ export interface PipelineStepHelpers {
 	$error: (options: PipelineStepErrorOptions) => never;
 	$errors: {
 		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		isCatchable: (e: any) => e is CatchableError;
 		exposed: (options: PipelineStepErrorOptions) => never;
+		isExposed: (e: any) => e is ExposedUncatchableError;
 		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		isUncatchable: (e: any) => e is UncatchableError;
 	};
 	/** create a file */
 	$file: (options: PipelineStepFileOptions) => PipelineStepFile;
