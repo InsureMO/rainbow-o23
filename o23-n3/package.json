@@ -22,7 +22,6 @@
 	},
 	"dependencies": {
 		"@rainbow-o23/n1": "1.0.37",
-		"@theinternetfolks/snowflake": "^1.3.0",
 		"node-fetch": "2.6.7",
 		"typeorm": "^0.3.17"
 	},

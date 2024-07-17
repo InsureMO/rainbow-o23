@@ -25,8 +25,7 @@ export const buildConfig = (lint) => {
 		external(id) {
 			return ["@rainbow-o23/", "typeorm/"].some(scope => id.startsWith(scope))
 				|| [
-					"typeorm", "reflect-metadata",
-					"@theinternetfolks/snowflake", "node-fetch"
+					"typeorm", "reflect-metadata", "node-fetch"
 				].includes(id);
 		}
 	};

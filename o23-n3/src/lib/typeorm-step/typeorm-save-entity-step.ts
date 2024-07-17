@@ -5,9 +5,9 @@ import {
 	PipelineStepPayload,
 	Undefinable
 } from '@rainbow-o23/n1';
-import {Snowflake} from '@theinternetfolks/snowflake';
 import {DeepPartial, ObjectLiteral} from 'typeorm';
 import {ScriptFuncOrBody, Utils} from '../step';
+import {Snowflake} from '../utils';
 import {AbstractTypeOrmPipelineStep, TypeOrmPipelineStepOptions} from './abstract-typeorm-step';
 import {TypeOrmEntityName} from './types';
 
@@ -33,13 +33,16 @@ export class TypeOrmSaveEntityPipelineStep<In = PipelineStepPayload, Out = Pipel
 	extends AbstractTypeOrmPipelineStep<In, Out, InFragment, OutFragment> {
 	private readonly _entityName: TypeOrmEntityName;
 	private readonly _fillIdBySnowflake: boolean;
+	private readonly _snowflakeShardId: number;
 	private readonly _uniquenessCheckSnippet?: ScriptFuncOrBody<UniquenessCheckFunc<InFragment>>;
 	private readonly _uniquenessCheckFunc?: UniquenessCheckFunc<InFragment>;
 
 	public constructor(options: TypeOrmSaveEntityPipelineStepOptions<In, Out, InFragment, OutFragment>) {
 		super(options);
+		const config = this.getConfig();
 		this._entityName = options.entityName;
 		this._fillIdBySnowflake = options.fillIdBySnowflake ?? false;
+		this._snowflakeShardId = config.getNumber(`snowflake.shard.id`);
 		this._uniquenessCheckSnippet = options.uniquenessCheckSnippet;
 		this._uniquenessCheckFunc = Utils.createSyncFunction(this.getUniquenessCheckSnippet(), {
 			createDefault: () => (void 0),
@@ -100,7 +103,7 @@ export class TypeOrmSaveEntityPipelineStep<In = PipelineStepPayload, Out = Pipel
 			// fill id if not exists
 			const id = entity[column.propertyName];
 			if (id == null || `${id ?? ''}`.trim().length === 0) {
-				entity[column.propertyName] = Snowflake.generate() as unknown as number;
+				entity[column.propertyName] = Snowflake.generate({shardId: this._snowflakeShardId}) as unknown as number;
 			}
 		}
 
