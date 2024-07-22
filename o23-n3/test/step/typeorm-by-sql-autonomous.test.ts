@@ -36,7 +36,7 @@ describe('TypeORM SQL Autonomous Suite', () => {
 		await new TypeOrmDataSourceHelper(config).create({
 			'TEST': [TestTable]
 		});
-		const repo = (await TypeOrmDataSourceManager.findDataSource('TEST')).getDataSource().getRepository(TestTable);
+		const repo = (await TypeOrmDataSourceManager.findDataSource('TEST', config)).getDataSource().getRepository(TestTable);
 		await repo.insert({id: 1, content: 'hello world!'});
 		await repo.insert({id: 2, content: 'good-bye world!'});
 	});

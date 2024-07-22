@@ -28,7 +28,7 @@ describe('TypeORM Entity Suite', () => {
 		await new TypeOrmDataSourceHelper(config).create({
 			'TEST': [TestTable]
 		});
-		const repo = (await TypeOrmDataSourceManager.findDataSource('TEST')).getDataSource().getRepository(TestTable);
+		const repo = (await TypeOrmDataSourceManager.findDataSource('TEST', config)).getDataSource().getRepository(TestTable);
 		await repo.insert({id: 1, content: 'hello world!'});
 	});
 
