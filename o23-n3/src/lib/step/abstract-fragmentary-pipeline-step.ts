@@ -365,14 +365,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (e: any) {
 			const result = await this.handleError(fragment, request, e);
-			try {
-				return this.setToOutput(result, request);
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			} catch (e: any) {
-				// since exception raised during set to output,
-				// therefore never call this function on error handling
-				return (await this.handleError(fragment, request, e)) as PipelineStepData<Out>;
-			}
+			return this.setToOutput(result, request);
 		}
 	}
 
