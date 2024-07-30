@@ -18,6 +18,28 @@ import {
 	ParameterType
 } from './types';
 
+interface GivenFile {
+	mimetype: string;
+	size: number;
+}
+
+type GivenFiles = GivenFile | Array<GivenFile> | Record<string, Array<GivenFile>>;
+
+const flatGivenFiles = (files?: GivenFiles): Array<GivenFile> => {
+	if (files == null) {
+		return [];
+	} else if (Array.isArray(files)) {
+		return files;
+	}
+	const file = files as GivenFile;
+	if (file.size != null) {
+		if (Array.isArray(file.size)) {
+			return Object.values(files as Record<string, Array<GivenFile>>).flat();
+		}
+	}
+	return [file];
+};
+
 export class MaxFileSizeValidator extends FileValidator<MaxFileSizeValidatorOptions> {
 	public buildErrorMessage(): string {
 		if ('message' in this.validationOptions) {
@@ -29,11 +51,11 @@ export class MaxFileSizeValidator extends FileValidator<MaxFileSizeValidatorOpti
 		return `Validation failed (expected size should be less than or equal to ${this.validationOptions.maxSize}).`;
 	}
 
-	public isValid(file: { size: number }) {
+	public isValid(file: GivenFiles) {
 		if (!this.validationOptions) {
 			return true;
 		}
-		return file.size <= this.validationOptions.maxSize;
+		return flatGivenFiles(file).every(file => file.size <= this.validationOptions.maxSize);
 	}
 }
 
@@ -48,18 +70,11 @@ export class MultiFilesMaxFileSizeValidator extends FileValidator<MaxFileSizeVal
 		return `Validation failed (expected size should be less than or equal to ${this.validationOptions.maxSize})`;
 	}
 
-	public isValid(file: Record<string, { size: number } | Array<{ size: number }>>) {
+	public isValid(file: GivenFiles) {
 		if (!this.validationOptions) {
 			return true;
 		}
-		return Object.keys(file).every(name => {
-			const files = file[name];
-			if (Array.isArray(files)) {
-				return files.every(file => file.size < this.validationOptions.maxSize);
-			} else {
-				return files.size <= this.validationOptions.maxSize;
-			}
-		});
+		return flatGivenFiles(file).every(file => file.size <= this.validationOptions.maxSize);
 	}
 }
 
@@ -76,14 +91,13 @@ export class FileTypeValidator extends FileValidator<FileTypeValidatorOptions & 
 		return `Validation failed (expected mime-type should be ${this.validationOptions.fileType}).`;
 	}
 
-	public isValid(file: { mimetype?: string }) {
+	public isValid(file: GivenFiles) {
 		if (!this.validationOptions) {
 			return true;
 		}
-		if (!file.mimetype) {
-			return false;
-		}
-		return Boolean(file.mimetype.match(this.validationOptions.fileType));
+		return flatGivenFiles(file).every(file => {
+			return file.mimetype != null && Boolean(file.mimetype.match(this.validationOptions.fileType));
+		});
 	}
 }
 
@@ -100,21 +114,12 @@ export class MultiFilesFileTypeValidator extends FileValidator<FileTypeValidator
 		return `Validation failed (expected mime-type should be ${this.validationOptions.fileType}).`;
 	}
 
-	public isValid(file: Record<string, { mimetype?: string } | Array<{ mimetype?: string }>>) {
+	public isValid(file: GivenFiles) {
 		if (!this.validationOptions) {
 			return true;
 		}
-		return Object.keys(file).every(name => {
-			const files = file[name];
-			if (Array.isArray(files)) {
-				return files.every(file => {
-					return file.mimetype != null && Boolean(file.mimetype.match(this.validationOptions.fileType));
-				});
-			} else if (files.mimetype == null) {
-				return false;
-			} else {
-				return Boolean(files.mimetype.match(this.validationOptions.fileType));
-			}
+		return flatGivenFiles(file).every(file => {
+			return file.mimetype != null && Boolean(file.mimetype.match(this.validationOptions.fileType));
 		});
 	}
 }
