@@ -44,10 +44,14 @@ export class FetchPipelineStepBuilder
 		transformed.bodyGenerate = redressSnippet(given.generateBody);
 		transformed.responseGenerate = redressSnippet(given.readResponse);
 		if (given.responseErrorHandles != null) {
-			transformed.responseErrorHandles = Object.keys(given.responseErrorHandles).reduce((handlers, status) => {
-				handlers[status] = redressSnippet(given.responseErrorHandles[status]);
-				return handlers;
-			}, {});
+			if (typeof given.responseErrorHandles === 'string') {
+				transformed.responseErrorHandles = redressSnippet(given.responseErrorHandles);
+			} else {
+				transformed.responseErrorHandles = Object.keys(given.responseErrorHandles).reduce((handlers, status) => {
+					handlers[status] = redressSnippet(given.responseErrorHandles[status]);
+					return handlers;
+				}, {});
+			}
 		}
 
 		return transformed;

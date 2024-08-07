@@ -602,18 +602,18 @@ CFG_ENDPOINTS_ORDER_PAYMENT_URL=https://order.com/payment
 
 #### Constructor Parameters
 
-| Name                 | Type                                                       | Default Value | Comments                                                                                                             |
-|----------------------|------------------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
-| endpointSystemCode   | string                                                     |               | Endpoint system code.                                                                                                |
-| endpointName         | string                                                     |               | Endpoint name.                                                                                                       |
-| urlGenerate          | ScriptFuncOrBody\<HttpGenerateUrl>                         |               | Endpoint url generator, `$endpointUrl`.                                                                              |
-| method               | string                                                     |               | Http method, default `post`.                                                                                         |
-| timeout              | number                                                     |               | Endpoint timeout, in seconds.                                                                                        |
-| headersGenerate      | ScriptFuncOrBody\<HttpGenerateHeaders>                     |               | Endpoint request headers generator.                                                                                  |
-| bodyUsed             | boolean                                                    |               | Send request with body or not, or automatically disregards the body when sending a `get` request when not specified. |
-| bodyGenerate         | ScriptFuncOrBody\<HttpGenerateBody>                        |               | Endpoint request body generator.                                                                                     |
-| responseGenerate     | ScriptFuncOrBody\<HttpGenerateResponse>                    |               | Endpoint response body generator, `$response`.                                                                       |
-| responseErrorHandles | {[key: HttpErrorCode]: ScriptFuncOrBody\<HttpHandleError>} |               | Endpoint response error handlers.                                                                                    |
+| Name                 | Type                                                                                                   | Default Value | Comments                                                                                                             |
+|----------------------|--------------------------------------------------------------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
+| endpointSystemCode   | string                                                                                                 |               | Endpoint system code.                                                                                                |
+| endpointName         | string                                                                                                 |               | Endpoint name.                                                                                                       |
+| urlGenerate          | ScriptFuncOrBody\<HttpGenerateUrl>                                                                     |               | Endpoint url generator, `$endpointUrl`.                                                                              |
+| method               | string                                                                                                 |               | Http method, default `post`.                                                                                         |
+| timeout              | number                                                                                                 |               | Endpoint timeout, in seconds.                                                                                        |
+| headersGenerate      | ScriptFuncOrBody\<HttpGenerateHeaders>                                                                 |               | Endpoint request headers generator.                                                                                  |
+| bodyUsed             | boolean                                                                                                |               | Send request with body or not, or automatically disregards the body when sending a `get` request when not specified. |
+| bodyGenerate         | ScriptFuncOrBody\<HttpGenerateBody>                                                                    |               | Endpoint request body generator.                                                                                     |
+| responseGenerate     | ScriptFuncOrBody\<HttpGenerateResponse>                                                                |               | Endpoint response body generator, `$response`.                                                                       |
+| responseErrorHandles | ScriptFuncOrBody\<HttpHandleError><br>or<br>{[key: HttpErrorCode]: ScriptFuncOrBody\<HttpHandleError>} |               | Endpoint response error handlers.                                                                                    |
 
 ## Installation
 

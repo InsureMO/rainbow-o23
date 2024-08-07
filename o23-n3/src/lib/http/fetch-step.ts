@@ -26,9 +26,8 @@ export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = Pipeli
 	bodyUsed?: boolean;
 	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment>>;
 	responseGenerate?: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>>;
-	responseErrorHandles?: {
-		[key: HttpErrorCode]: ScriptFuncOrBody<HttpHandleError<In, InFragment, OutFragment>>;
-	};
+	responseErrorHandles?: ScriptFuncOrBody<HttpHandleError<In, InFragment, OutFragment>>
+		| { [key: HttpErrorCode]: ScriptFuncOrBody<HttpHandleError<In, InFragment, OutFragment>>; };
 }
 
 export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
@@ -112,13 +111,21 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 				throw e;
 			}
 		});
-		if (options.responseErrorHandles) {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const defaultHandler = async (options: HttpErrorHandleOptions<In, InFragment>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<OutFragment> | never => {
-				throw new UncatchableError(ERR_FETCH_ERROR, `Error[${options.$errorCode}] caught when fetch data from remote[${options.$url}].`);
-			};
-			const createDefaultHandler = () => defaultHandler;
-			const getVariableNames = () => this.getErrorHandlerVariableName();
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const defaultHandler = async (options: HttpErrorHandleOptions<In, InFragment>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<OutFragment> | never => {
+			throw new UncatchableError(ERR_FETCH_ERROR, `Error[${options.$errorCode}] caught when fetch data from remote[${options.$url}].`);
+		};
+		const createDefaultHandler = () => defaultHandler;
+		const getVariableNames = () => this.getErrorHandlerVariableName();
+		if (typeof options.responseErrorHandles === 'string' || typeof options.responseErrorHandles === 'function') {
+			this._responseErrorHandleFunc = Utils.createAsyncFunction(options.responseErrorHandles, {
+				createDefault: createDefaultHandler, getVariableNames,
+				error: (e: Error) => {
+					this.getLogger().error(`Failed on create function for response error handler, snippet is [${options.responseErrorHandles}].`);
+					throw e;
+				}
+			});
+		} else if (options.responseErrorHandles != null) {
 			const handlers: Record<HttpErrorCode, HttpHandleError<In, InFragment, OutFragment>> = Object.keys(options.responseErrorHandles).reduce((handlers, status) => {
 				handlers[status] = Utils.createAsyncFunction(options.responseErrorHandles[status], {
 					createDefault: createDefaultHandler, getVariableNames,
