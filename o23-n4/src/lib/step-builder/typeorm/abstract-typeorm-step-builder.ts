@@ -21,9 +21,7 @@ export abstract class AbstractTypeOrmPipelineStepBuilder<G extends TypeOrmPipeli
 		transformed.transactionName = redressString(given.transaction);
 		transformed.autonomous = given.autonomous;
 		if (transformed.transactionName == null && !transformed.autonomous) {
-			if (transformed.dataSourceName == null) {
-				throw new UncatchableError(ERR_PIPELINE_STEP_TRANSACTION_NOT_DEFINED, `Transaction[transaction, autonomous] not defined for typeorm pipeline step[${given.name}] when autonomous is false.`);
-			}
+			throw new UncatchableError(ERR_PIPELINE_STEP_TRANSACTION_NOT_DEFINED, `Transaction[transaction] not defined for typeorm pipeline step[${given.name}] when autonomous is false.`);
 		}
 		return transformed;
 	}
