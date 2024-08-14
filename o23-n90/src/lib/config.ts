@@ -1,5 +1,5 @@
 import {BootstrapOptions} from '@rainbow-o23/n2';
-import {TypeOrmDataSourceName, TypeOrmTransactionName} from '@rainbow-o23/n3';
+import {DEFAULT_TRANSACTION_NAME, TypeOrmDataSourceName, TypeOrmTransactionName} from '@rainbow-o23/n3';
 import {Reader, YmlReader} from '@rainbow-o23/n4';
 
 export enum ConfigConstants {
@@ -54,7 +54,7 @@ const createTypeOrmTransactionInstall: CreatePipelineDefInstall = (options: Boot
 				if (context.typeorm.datasources[datasource] == null) {
 					context.typeorm.datasources[datasource] = {};
 				}
-				const transaction = (given.transaction || '$default').trim();
+				const transaction = (given.transaction || DEFAULT_TRANSACTION_NAME).trim();
 				if (context.typeorm.datasources[datasource][transaction] == null) {
 					// no transaction declared for this datasource
 					context.typeorm.datasources[datasource][transaction] = true;
@@ -78,7 +78,7 @@ const createTypeOrmTransactionInstall: CreatePipelineDefInstall = (options: Boot
 					const hasTransaction = given.transaction != null && given.transaction.trim().length !== 0;
 					if (Object.keys(transactions).length === 1) {
 						// only one transaction declared
-						const transaction = (given.transaction || '$default').trim();
+						const transaction = (given.transaction || DEFAULT_TRANSACTION_NAME).trim();
 						if (transaction === Object.keys(transactions)[0]) {
 							// fix transaction if no declared
 							given.transaction = transaction;
@@ -89,10 +89,9 @@ const createTypeOrmTransactionInstall: CreatePipelineDefInstall = (options: Boot
 						// no transaction declared
 						if (Object.keys(transactions).length === 0) {
 							// not within transaction
-							// set as autonomous
-							given.autonomous = true;
+							// TODO TRANSACTION NOT FOUND, NEED REPORT
 						}
-					} else if (transactions[(given.transaction || '$default').trim()] == null) {
+					} else if (transactions[(given.transaction || DEFAULT_TRANSACTION_NAME).trim()] == null) {
 						// TODO DECLARED TRANSACTION NOT FOUND, NEED REPORT
 					}
 				}
