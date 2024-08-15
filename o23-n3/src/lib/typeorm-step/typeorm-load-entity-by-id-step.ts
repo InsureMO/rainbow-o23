@@ -9,6 +9,7 @@ export interface TypeOrmLoadEntityByIdPipelineStepOptions<In = PipelineStepPaylo
 
 /**
  * no transaction here
+ * @deprecated by entity is not recommended
  */
 export class TypeOrmLoadEntityByIdPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, OutFragment = TypeOrmEntityToLoad>
 	extends AbstractTypeOrmPipelineStep<In, Out, TypeOrmIdType, OutFragment> {

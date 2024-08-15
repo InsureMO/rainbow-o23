@@ -386,7 +386,7 @@ Autonomous transactions take precedence over the transaction name, meaning that 
 specified by the transaction name will be ignored. If you need to use the transaction name, you must nest the pipeline steps within
 transactional step sets, and ensure that the datasource name and transaction name remain the same.
 
-### By Entity
+### By Entity (Deprecated, not recommended)
 
 #### Load Entity by ID
 

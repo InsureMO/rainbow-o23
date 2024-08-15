@@ -28,6 +28,7 @@ export interface TypeOrmSaveEntityPipelineStepOptions<In = PipelineStepPayload, 
 
 /**
  * no transaction here
+ * @deprecated by entity is not recommended
  */
 export class TypeOrmSaveEntityPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = EntityToSave, OutFragment = EntityToSave>
 	extends AbstractTypeOrmPipelineStep<In, Out, InFragment, OutFragment> {
