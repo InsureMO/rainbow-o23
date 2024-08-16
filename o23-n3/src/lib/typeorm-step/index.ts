@@ -14,4 +14,4 @@ export * from './typeorm-load-many-by-sql-step';
 export * from './typeorm-save-by-sql-step';
 export * from './typeorm-bulk-save-by-sql-step';
 
-export * from './type-orm-transactional-step-sets';
+export * from './typeorm-transactional-step-sets';
