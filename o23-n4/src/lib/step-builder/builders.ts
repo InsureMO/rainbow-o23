@@ -58,8 +58,6 @@ export enum DefaultSteps {
 	ROUTES_SETS = 'routes',
 
 	TYPEORM_BY_SNIPPET = 'typeorm-snippet',
-	TYPEORM_LOAD_ENTITY_BY_ID = 'typeorm-load-entity',
-	TYPEORM_SAVE_ENTITY = 'typeorm-save-entity',
 	TYPEORM_LOAD_ONE_BY_SQL = 'typeorm-load-one',
 	TYPEORM_LOAD_MANY_BY_SQL = 'typeorm-load-many',
 	TYPEORM_SAVE_BY_SQL = 'typeorm-save',
