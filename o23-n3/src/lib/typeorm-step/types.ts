@@ -6,7 +6,6 @@ export type TypeOrmIdType = string | number | bigint;
 export type TypeOrmDataSourceName = string;
 export type TypeOrmTransactionName = string;
 export type TypeOrmTransactionKey = `${TypeOrmDataSourceName}.${TypeOrmTransactionName}`;
-export type TypeOrmEntityName = string;
 export type TypeOrmEntityValue = string | number | bigint | boolean | Date | null | undefined;
 export type TypeOrmEntityToLoad = DeepPartial<ObjectLiteral>;
 export type TypeOrmEntityToSave = DeepPartial<ObjectLiteral>;

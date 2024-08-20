@@ -1,17 +1,11 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
-import {DataSource, EntityMetadata, ObjectLiteral, QueryRunner, Repository} from 'typeorm';
-import {ColumnMetadata} from 'typeorm/metadata/ColumnMetadata.js';
-import {
-	ERR_TYPEORM_DATASOURCE_NOT_FOUND,
-	ERR_TYPEORM_ENTITY_NOT_FOUND,
-	ERR_TYPEORM_TRANSACTION_NOT_FOUND
-} from '../error-codes';
+import {QueryRunner} from 'typeorm';
+import {ERR_TYPEORM_DATASOURCE_NOT_FOUND, ERR_TYPEORM_TRANSACTION_NOT_FOUND} from '../error-codes';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '../step';
 import {DataSourceType, TypeOrmDataSource, TypeOrmDataSourceManager} from '../typeorm';
 import {
 	DEFAULT_TRANSACTION_NAME,
 	TypeOrmDataSourceName,
-	TypeOrmEntityName,
 	TypeOrmTransactionalContext,
 	TypeOrmTransactionKey,
 	TypeOrmTransactionName
@@ -221,21 +215,5 @@ export abstract class AbstractTypeOrmPipelineStep<In = PipelineStepPayload, Out 
 				}
 			}
 		}
-	}
-
-	/**
-	 * find metadata by given name. throw error when data source or metadata not found.
-	 */
-	protected async findMetadata<E extends ObjectLiteral>(name: TypeOrmEntityName, request: PipelineStepData<In>): Promise<[EntityMetadata, ColumnMetadata, Repository<E>, DataSource]> {
-		const runner = await this.createRunner(request);
-		const dataSource = runner.connection;
-		const metadata = (dataSource.entityMetadatas || []).find(metadata => metadata.name == name);
-		if (metadata == null) {
-			throw new UncatchableError(ERR_TYPEORM_ENTITY_NOT_FOUND,
-				`Entity[${name}] in data source[${this.getDataSourceName()}] not found.`);
-		}
-		const column = metadata.columns.find(column => column.isPrimary);
-		const repository = runner.manager.getRepository(metadata.target);
-		return [metadata, column, repository as Repository<E>, dataSource];
 	}
 }

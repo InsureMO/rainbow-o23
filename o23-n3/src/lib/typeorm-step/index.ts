@@ -1,8 +1,6 @@
 export * from './types';
 
 export * from './abstract-typeorm-step';
-export * from './typeorm-load-entity-by-id-step';
-export * from './typeorm-save-entity-step';
 
 export * from './typeorm-by-snippet-step';
 export * from './abstract-typeorm-by-sql-step';
