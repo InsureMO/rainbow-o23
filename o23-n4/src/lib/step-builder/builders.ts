@@ -17,11 +17,9 @@ import {FetchGetPipelineStepBuilder, FetchPipelineStepBuilder, FetchPostPipeline
 import {
 	TypeOrmBulkSaveBySQLPipelineStepBuilder,
 	TypeOrmBySnippetPipelineStepBuilder,
-	TypeOrmLoadEntityByIdPipelineStepBuilder,
 	TypeOrmLoadManyBySQLPipelineStepBuilder,
 	TypeOrmLoadOneBySQLPipelineStepBuilder,
 	TypeOrmSaveBySQLPipelineStepBuilder,
-	TypeOrmSaveEntityPipelineStepBuilder,
 	TypeOrmTransactionalPipelineStepSetsBuilder
 } from './typeorm';
 import {PipelineStepBuilderType, PipelineStepRegisterKey} from './types';
@@ -91,8 +89,6 @@ export const registerDefaults = () => {
 	StepBuilders.register(DefaultSteps.ROUTES_SETS, RoutesPipelineStepSetsBuilder);
 
 	StepBuilders.register(DefaultSteps.TYPEORM_BY_SNIPPET, TypeOrmBySnippetPipelineStepBuilder);
-	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_ENTITY_BY_ID, TypeOrmLoadEntityByIdPipelineStepBuilder);
-	StepBuilders.register(DefaultSteps.TYPEORM_SAVE_ENTITY, TypeOrmSaveEntityPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_ONE_BY_SQL, TypeOrmLoadOneBySQLPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_MANY_BY_SQL, TypeOrmLoadManyBySQLPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_SAVE_BY_SQL, TypeOrmSaveBySQLPipelineStepBuilder);
