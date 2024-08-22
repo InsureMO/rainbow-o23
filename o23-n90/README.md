@@ -53,6 +53,7 @@ The environment files is defined in `CFG_ENV_FILE`, such as in `package.json`:
 | `app.pipelines.db`            | boolean | true          | Enable database-based pipeline configuration initializing and related rest ports.                                                                                                |
 | `app.d9.db`                   | boolean | true          | Enable database-based d9 configurations related rest ports.                                                                                                                      |
 | `app.init.pipelines.dir`      | string  |               | Entry point pipelines directories, connected by `,`.                                                                                                                             |
+| `app.init.pipeline.file`      | string  | *.{yaml,yml}  | Entry point pipelines file pattern, follows glob.                                                                                                                                |
 | `app.excluded.pipelines.dirs` | string  |               | Exclude directories, connected by `,`, relative to pipelines directory. <br/>If multiple pipeline loading directories are defined, then "exclude" will apply to all directories. |
 
 ## Database Configuration
@@ -112,6 +113,7 @@ yarn scripts
 | Name                          | Type   | Default Value | Comments                                                                |
 |-------------------------------|--------|---------------|-------------------------------------------------------------------------|
 | `app.init.pipelines.dir`      | string | scripts       | Entry point pipelines directory.                                        |
+| `app.init.pipeline.file`      | string | *.{yaml,yml}  | Entry point pipelines file pattern.                                     |
 | `app.excluded.pipelines.dirs` | string |               | Exclude directories, connected by `,`, relative to pipelines directory. |
 
 > To scan the script directory, the script release entry registers a pipeline step called `scripts-load-files`. This step only takes effect
@@ -149,6 +151,7 @@ yarn start
 | Name                          | Type    | Default Value | Comments                                                                |
 |-------------------------------|---------|---------------|-------------------------------------------------------------------------|
 | `app.init.pipelines.dir`      | string  | server        | Entry point pipelines directory.                                        |
+| `app.init.pipeline.file`      | string  | *.{yaml,yml}  | Entry point pipelines file pattern.                                     |
 | `app.excluded.pipelines.dirs` | string  |               | Exclude directories, connected by `,`, relative to pipelines directory. |
 | `app.examples.enabled`        | boolean | false         | Enabled simple pipeline example.                                        |
 

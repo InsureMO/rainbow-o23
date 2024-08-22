@@ -34,13 +34,13 @@ export abstract class AbstractPipelineInitializer {
 	protected async scanDefFiles(options: BootstrapOptions): Promise<Array<string>> {
 		return (await Promise.all(this.getScanDir(options)
 			.map(dir => path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir))
-			.map(dir => glob(path.resolve(dir, '**', '*.{yaml,yml}').replace(/\\/g, '/')))))
+			.map(dir => glob(path.resolve(dir, '**', options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINE_FILE, '*.{yaml,yml}')).replace(/\\/g, '/')))))
 			.flat();
 	}
 
 	protected getExcludedDirs(options: BootstrapOptions): Array<string> {
 		const scanDirs = this.getScanDir(options);
-		return options.getEnvAsString('app.excluded.pipelines.dirs', '')
+		return options.getEnvAsString(ConfigConstants.APP_EXCLUDED_PIPELINE_DIR, '')
 			.split(',')
 			.map(dir => dir.trim())
 			.filter(dir => dir.length !== 0)

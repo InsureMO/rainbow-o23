@@ -11,6 +11,8 @@ export enum ConfigConstants {
 	CONFIG_DATASOURCE_DEFAULT_NAME = 'o23',
 	CONFIG_DATASOURCE_AUTO_SCAN = 'app.datasource.scan',
 	APP_INIT_PIPELINES_DIR = 'app.init.pipelines.dir',
+	APP_INIT_PIPELINE_FILE = 'app.init.pipeline.file',
+	APP_EXCLUDED_PIPELINE_DIR = 'app.excluded.pipelines.dirs',
 	APP_SERVER_INIT_PIPELINES_DEFAULT_DIR = 'server',
 	APP_SCRIPTS_INIT_PIPELINES_DEFAULT_DIR = 'scripts',
 	APP_SCRIPTS_DEFAULT_DIR = 'db-scripts'
