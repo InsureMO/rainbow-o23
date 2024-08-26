@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import {glob} from 'glob';
 import * as path from 'path';
 import {ConfigConstants, ConfigUtils} from '../config';
+import {ERR_DUPLICATED_PIPELINE, ERR_DUPLICATED_PIPELINE_STEP} from '../error-codes';
 
 export abstract class AbstractPipelineInitializer {
 	public constructor() {
@@ -66,7 +67,7 @@ export abstract class AbstractPipelineInitializer {
 				bootstrapOptions.getConfig().getLogger().warn(`Pipeline Step[${def.code}] is disabled, ignored.`);
 			} else {
 				if (stepMap[parsed.code] != null) {
-					throw new UncatchableError('', `Duplicated pipeline step definitions[code=${parsed.code}, first=${stepMap[parsed.code]}, second=${key}] detected.`);
+					throw new UncatchableError(ERR_DUPLICATED_PIPELINE_STEP, `Duplicated pipeline step definitions[code=${parsed.code}, first=${stepMap[parsed.code]}, second=${key}] detected.`);
 				}
 				PipelineRepository.putStep({[parsed.code]: parsed.def});
 				stepMap[parsed.code] = key;
@@ -74,7 +75,7 @@ export abstract class AbstractPipelineInitializer {
 		} else {
 			const parsed = def as ParsedPipelineDef;
 			if (pipelineMap[parsed.code] != null) {
-				throw new UncatchableError('', `Duplicated pipeline definitions[code=${parsed.code}, first=${pipelineMap[parsed.code]}, second=${key}] detected.`);
+				throw new UncatchableError(ERR_DUPLICATED_PIPELINE, `Duplicated pipeline definitions[code=${parsed.code}, first=${pipelineMap[parsed.code]}, second=${key}] detected.`);
 			}
 			add(parsed);
 			pipelineMap[parsed.code] = key;
