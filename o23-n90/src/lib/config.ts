@@ -91,7 +91,7 @@ const createTypeOrmTransactionInstall: CreatePipelineDefInstall = (options: Boot
 						// no transaction declared
 						if (Object.keys(transactions).length === 0) {
 							// not within transaction
-							// TODO TRANSACTION NOT FOUND, NEED REPORT
+							given.autonomous = true;
 						}
 					} else if (transactions[(given.transaction || DEFAULT_TRANSACTION_NAME).trim()] == null) {
 						// TODO DECLARED TRANSACTION NOT FOUND, NEED REPORT
