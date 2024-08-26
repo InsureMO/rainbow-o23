@@ -5,7 +5,11 @@ import {redressString} from '../utils';
 import {AbstractFragmentaryPipelineStepBuilder, FragmentaryPipelineStepBuilderOptions} from './index';
 
 export type RefStepPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOptions & {
-	code: PipelineStepCode;
+	ref?: PipelineStepCode;
+	/**
+	 * @deprecated use {#ref} instead
+	 */
+	code?: PipelineStepCode;
 };
 
 export class RefStepPipelineStepBuilder
@@ -16,7 +20,7 @@ export class RefStepPipelineStepBuilder
 
 	protected readMoreOptions(given: RefStepPipelineStepBuilderOptions, transformed: RefStepPipelineStepOptions): RefStepPipelineStepOptions {
 		transformed = super.readMoreOptions(given, transformed);
-		const code = redressString(given.code);
+		const code = redressString(given.ref) ?? redressString(given.code);
 		if (code == null) {
 			throw new UncatchableError(ERR_PIPELINE_STEP_REF_NOT_DEFINED, `Reference code[code] not defined for ref pipeline step[${given.name}].`);
 		}
