@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n3",
-	"version": "1.0.42",
+	"version": "1.0.43",
 	"description": "o23 pipelines",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -21,7 +21,7 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n1": "1.0.42",
+		"@rainbow-o23/n1": "1.0.43",
 		"node-fetch": "2.6.7",
 		"typeorm": "^0.3.17"
 	},
