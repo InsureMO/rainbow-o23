@@ -1,5 +1,13 @@
 import dayjs from 'dayjs';
-import {CatchableError, Config, DateTime, ExposedUncatchableError, Logger, UncatchableError} from '../utils';
+import {
+	CatchableError,
+	Config,
+	DateTime,
+	ErrorCodes,
+	ExposedUncatchableError,
+	Logger,
+	UncatchableError
+} from '../utils';
 import {
 	PIPELINE_STEP_RETURN_NULL,
 	PipelineStepErrorOptions,
@@ -36,6 +44,7 @@ export interface PipelineStepHelpers {
 	$ascii: (size?: number) => string;
 	/** create an exposed uncatchable error*/
 	$error: (options: PipelineStepErrorOptions) => never;
+	$errorCodes: Readonly<Record<string, string>>;
 	$errors: {
 		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +89,9 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		// nano
 		$nano: StepHelpersUtils.$nano, $ascii: StepHelpersUtils.$ascii,
 		// errors
-		$error: StepHelpersUtils.createExposedUncatchableError, $errors: StepHelpersUtils.$errors,
+		$error: StepHelpersUtils.createExposedUncatchableError,
+		$errorCodes: ErrorCodes,
+		$errors: StepHelpersUtils.$errors,
 		// file
 		$file: StepHelpersUtils.createFile,
 		// semaphore

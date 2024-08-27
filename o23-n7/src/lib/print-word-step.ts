@@ -2,7 +2,7 @@ import {PipelineStepData, PipelineStepPayload, UncatchableError} from '@rainbow-
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '@rainbow-o23/n3';
 import {createReport} from 'docx-templates';
 import {UserOptions} from 'docx-templates/lib/types';
-import {ERR_TEMPLATE_NOT_DEFINED} from './error-codes';
+import {ERR_N7_TEMPLATE_NOT_DEFINED} from './error-codes';
 
 export interface PrintWordPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
@@ -76,7 +76,7 @@ export class PrintWordPipelineStep<In = PipelineStepPayload, Out = PipelineStepP
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	protected async doPerform(data: PrintWordPipelineStepInFragment, _request: PipelineStepData<In>): Promise<PrintWordPipelineStepOutFragment> {
 		if (data.template == null) {
-			throw new UncatchableError(ERR_TEMPLATE_NOT_DEFINED, 'Print template cannot be null.');
+			throw new UncatchableError(ERR_N7_TEMPLATE_NOT_DEFINED, 'Print template cannot be null.');
 		}
 		const file = await this.printWord(data.template, data.data, data.jsContext);
 		return {file};

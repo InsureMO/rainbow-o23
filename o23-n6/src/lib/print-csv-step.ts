@@ -9,8 +9,8 @@ import {
 	ERR_INCORRECT_LOOP_END,
 	ERR_INCORRECT_LOOP_END_VARIABLE,
 	ERR_INCORRECT_LOOP_START,
+	ERR_N6_TEMPLATE_NOT_DEFINED,
 	ERR_NESTED_LOOP_ON_SAME_ARRAY_NOT_ALLOWED,
-	ERR_TEMPLATE_NOT_DEFINED,
 	ERR_UNDETECTABLE_ROW
 } from './error-codes';
 
@@ -354,7 +354,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	protected async doPerform(data: PrintCsvPipelineStepInFragment, _request: PipelineStepData<In>): Promise<PrintCsvPipelineStepOutFragment> {
 		if (data.template == null) {
-			throw new UncatchableError(ERR_TEMPLATE_NOT_DEFINED, 'Print template cannot be null.');
+			throw new UncatchableError(ERR_N6_TEMPLATE_NOT_DEFINED, 'Print template cannot be null.');
 		}
 		const file = await this.printCsv(data.template, data.data);
 		return {file};
