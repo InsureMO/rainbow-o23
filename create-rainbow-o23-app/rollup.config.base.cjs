@@ -22,8 +22,8 @@ exports.buildConfig = (lint) => {
 				targets: [
 					{src: '../o23-n99/db-scripts/*', dest: 'templates/db-scripts'},
 					{src: '../o23-n99/envs/*', dest: 'templates/envs'},
-					{src: '../o23-n99/scripts/*', dest: 'templates/scripts'},
-					{src: '../o23-n99/server/*', dest: 'templates/server'},
+					// {src: '../o23-n99/scripts/*', dest: 'templates/scripts'},
+					// {src: '../o23-n99/server/*', dest: 'templates/server'},
 					{src: '../o23-n99/src/*', dest: 'templates/src'},
 					{src: '../o23-n99/.babelrc', dest: 'templates'},
 					{src: '../o23-n99/.eslintrc', dest: 'templates'},
