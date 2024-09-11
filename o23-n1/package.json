@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"dayjs": "^1.11.8",
+		"mathjs": "^13.1.1",
 		"nanoid": "3.3.6"
 	},
 	"devDependencies": {

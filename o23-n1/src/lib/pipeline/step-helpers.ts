@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import math from 'mathjs';
 import {
 	CatchableError,
 	Config,
@@ -36,10 +37,13 @@ export class PipelineStepDateHelper {
 	}
 }
 
+export type PipelineStepMathHelper = typeof math;
+
 export interface PipelineStepHelpers {
 	$config?: Config;
 	$logger?: Logger;
 	$date: PipelineStepDateHelper;
+	$math: PipelineStepMathHelper;
 	$nano: (size?: number) => string;
 	$ascii: (size?: number) => string;
 	/** create an exposed uncatchable error*/
@@ -86,6 +90,7 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		$config: config, $logger: logger,
 		// date
 		$date: new PipelineStepDateHelper(config),
+		$math: math,
 		// nano
 		$nano: StepHelpersUtils.$nano, $ascii: StepHelpersUtils.$ascii,
 		// errors
