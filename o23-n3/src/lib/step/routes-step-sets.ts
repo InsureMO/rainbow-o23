@@ -98,7 +98,7 @@ export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStep
 							...this.buildStepOptions(), name: this.getName(), steps
 						});
 						const result = await sets.perform(request);
-						return this.setToOutput(result.content, request);
+						return await this.setToOutput(result.content, request);
 					}
 				}
 			}
@@ -110,7 +110,7 @@ export class RoutesPipelineStepSets<In = PipelineStepPayload, Out = PipelineStep
 					...this.buildStepOptions(), name: this.getName(), steps: otherwiseStepBuilders
 				});
 				const result = await sets.perform(request);
-				return this.setToOutput(result.content, request);
+				return await this.setToOutput(result.content, request);
 			} else {
 				// otherwise route not declared
 				return request as unknown as PipelineStepData<Out>;

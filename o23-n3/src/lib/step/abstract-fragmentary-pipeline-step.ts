@@ -43,11 +43,11 @@ export interface FragmentaryPipelineStepOptions<In = PipelineStepPayload, Out = 
 /**
  * parameter names could be change {@link AbstractFragmentaryPipelineStep#generateFromRequestVariableNames}
  */
-export type GetInFragmentFromRequestFunc<In, InFragment> = ($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => InFragment;
+export type GetInFragmentFromRequestFunc<In, InFragment> = ($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<InFragment>;
 /**
  * parameter names could be change {@link AbstractFragmentaryPipelineStep#generateToResponseVariableNames}
  */
-export type SetOutFragmentToResponseFunc<In, Out, OutFragment> = ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Out;
+export type SetOutFragmentToResponseFunc<In, Out, OutFragment> = ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<Out>;
 
 /**
  * deal with fragment data from request, and put result into response.
@@ -86,9 +86,11 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 		} else {
 			this._mergeRequest = options.mergeRequest ?? false;
 		}
-		this._fromRequestFunc = Utils.createSyncFunction(this.getFromRequestSnippet(), {
+		this._fromRequestFunc = Utils.createAsyncFunction(this.getFromRequestSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => ($factor: In, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): InFragment => $factor as unknown as InFragment,
+			createDefault: () => async ($factor: In, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<InFragment> => {
+				return $factor as unknown as InFragment;
+			},
 			getVariableNames: () => this.generateFromRequestVariableNames(),
 			error: (e: Error) => {
 				this.getLogger().error(`Failed on create function for from request transformer, snippet is [${this.getFromRequestSnippet()}].`);
@@ -196,24 +198,24 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 		if (funcOrSnippet == null || (typeof funcOrSnippet === 'string' && funcOrSnippet.trim().length === 0)) {
 			if (this.useUnboxMerging()) {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				return ($result: OutFragment, $request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Out => {
+				return async ($result: OutFragment, $request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<Out> => {
 					return {...$request.content, ...$result} as Out;
 				};
 			} else if (this.hasMergeKey()) {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				return ($result: OutFragment, $request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Out => {
+				return async ($result: OutFragment, $request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<Out> => {
 					return {...$request.content, [this.getMergeKey()]: $result} as Out;
 				};
 			} else {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				return ($result: OutFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Out => {
+				return async ($result: OutFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<Out> => {
 					return $result as unknown as Out;
 				};
 			}
 		} else if (typeof funcOrSnippet === 'string') {
 			// eslint-disable-next-line @typescript-eslint/ban-types
-			const func: Function = Utils.createSyncFunction(funcOrSnippet, {
-				createDefault: (): never => {
+			const func = Utils.createAsyncFunction(funcOrSnippet, {
+				createDefault: async () => {
 					throw new UncatchableError(ERR_PIPELINE_STEP_SNIPPET_NOT_EMPTY, 'Cannot create perform func on empty snippet.');
 				},
 				getVariableNames: () => this.generateToResponseVariableNames(),
@@ -221,14 +223,14 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 					this.getLogger().error(`Failed on create function for snippet[${funcOrSnippet}].`);
 					throw e;
 				}
-			});
+			}) as unknown as SetOutFragmentToResponseFunc<In, Out, OutFragment>;
 			if (this.useUnboxMerging()) {
-				return ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Out => {
-					const r = func($result, $request, $helpers, $);
+				return async ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Promise<Out> => {
+					const r = await func($result, $request, $helpers, $);
 					return {...$request.content, ...r};
 				};
 			} else if (this.hasMergeKey()) {
-				return ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Out => {
+				return async ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Promise<Out> => {
 					const r = func($result, $request, $helpers, $);
 					return {...$request.content, [this.getMergeKey()]: r} as Out;
 				};
@@ -236,12 +238,12 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 				return func as SetOutFragmentToResponseFunc<In, Out, OutFragment>;
 			}
 		} else if (this.useUnboxMerging()) {
-			return ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Out => {
+			return async ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Promise<Out> => {
 				const r = funcOrSnippet($result, $request, $helpers, $);
-				return {...$request.content, ...r};
+				return {...$request.content, ...r} as Out;
 			};
 		} else if (this.hasMergeKey()) {
-			return ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Out => {
+			return async ($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers): Promise<Out> => {
 				const r = funcOrSnippet($result, $request, $helpers, $);
 				return {...$request.content, [this.getMergeKey()]: r} as Out;
 			};
@@ -253,7 +255,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	/**
 	 * default get request content
 	 */
-	protected getFromInput($factor: In, $request: PipelineStepData<In>): InFragment {
+	protected async getFromInput($factor: In, $request: PipelineStepData<In>): Promise<InFragment> {
 		const $helpers = this.getHelpers();
 		return this._fromRequestFunc($factor, $request, $helpers, $helpers);
 	}
@@ -261,9 +263,9 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	/**
 	 * default set to response content
 	 */
-	protected setToOutput($result: OutFragment, $request: PipelineStepData<In>): PipelineStepData<Out> {
+	protected async setToOutput($result: OutFragment, $request: PipelineStepData<In>): Promise<PipelineStepData<Out>> {
 		const $helpers = this.getHelpers();
-		return {content: this._toResponseFunc($result, $request, $helpers, $helpers)};
+		return {content: await this._toResponseFunc($result, $request, $helpers, $helpers)};
 	}
 
 	/**
@@ -360,19 +362,19 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	public async performAndCatch(request: PipelineStepData<In>, perform: (data: InFragment) => Promise<PipelineStepData<Out>>): Promise<PipelineStepData<Out>> {
 		let fragment = null;
 		try {
-			fragment = this.getFromInput(request.content, request);
+			fragment = await this.getFromInput(request.content, request);
 			return await perform(fragment);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (e: any) {
 			const result = await this.handleError(fragment, request, e);
-			return this.setToOutput(result, request);
+			return await this.setToOutput(result, request);
 		}
 	}
 
 	public async perform(request: PipelineStepData<In>): Promise<PipelineStepData<Out>> {
 		return await this.performAndCatch(request, async (fragment) => {
 			const result = await this.doPerform(fragment, request);
-			return this.setToOutput(result, request);
+			return await this.setToOutput(result, request);
 		});
 	}
 }

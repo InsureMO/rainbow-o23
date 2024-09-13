@@ -67,9 +67,9 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		// to millisecond
 		this._endpointTimeout = this._endpointTimeout > 0 ? this._endpointTimeout * 1000 : -1;
 		this._urlGenerateSnippet = options.urlGenerate;
-		this._urlGenerateFunc = Utils.createSyncFunction(this.getUrlGenerateSnippet(), {
+		this._urlGenerateFunc = Utils.createAsyncFunction(this.getUrlGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => ($endpointUrl: string, _$factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => $endpointUrl,
+			createDefault: () => async ($endpointUrl: string, _$factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => $endpointUrl,
 			getVariableNames: () => this.getUrlGenerateVariableName(),
 			error: (e: Error) => {
 				this.getLogger().error(`Failed on create function for url generate, snippet is [${this.getUrlGenerateSnippet()}].`);
@@ -77,9 +77,9 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 			}
 		});
 		this._headersGenerateSnippet = options.headersGenerate;
-		this._headersGenerateFunc = Utils.createSyncFunction(this.getHeadersGenerateSnippet(), {
+		this._headersGenerateFunc = Utils.createAsyncFunction(this.getHeadersGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => (_$factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => (void 0),
+			createDefault: () => async (_$factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => (void 0),
 			getVariableNames: () => this.getHeadersGenerateVariableNames(),
 			error: (e: Error) => {
 				this.getLogger().error(`Failed on create function for request headers generate, snippet is [${this.getHeadersGenerateSnippet()}].`);
@@ -88,9 +88,9 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		});
 		this._bodyUsed = options.bodyUsed;
 		this._bodyGenerateSnippet = options.bodyGenerate;
-		this._bodyGenerateFunc = Utils.createSyncFunction(this.getBodyGenerateSnippet(), {
+		this._bodyGenerateFunc = Utils.createAsyncFunction(this.getBodyGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => ($factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => {
+			createDefault: () => async ($factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => {
 				return ($factor == null || (typeof $factor === 'string' && $factor.length === 0)) ? (void 0) : JSON.stringify($factor);
 			},
 			getVariableNames: () => this.getBodyGenerateVariableNames(),
@@ -251,15 +251,15 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		const $helpers = this.getHelpers();
 		let url = '';
 		try {
-			url = this._urlGenerateFunc(this.getEndpointUrl(), data, request, $helpers, $helpers);
+			url = await this._urlGenerateFunc(this.getEndpointUrl(), data, request, $helpers, $helpers);
 			const method = this.getEndpointMethod();
 			const staticHeaders = this.getEndpointHeaders() ?? {};
-			const headers = this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
+			const headers = await this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			let body: any;
 			const bodyUsed = this.isBodyUsed();
 			if (bodyUsed === true || (bodyUsed == null && method !== 'get')) {
-				body = this._bodyGenerateFunc(data, request, $helpers, $helpers);
+				body = await this._bodyGenerateFunc(data, request, $helpers, $helpers);
 			} else {
 				body = (void 0);
 			}

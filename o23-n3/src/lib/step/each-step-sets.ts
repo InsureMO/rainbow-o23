@@ -74,7 +74,7 @@ export class EachPipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPa
 				results.push(result);
 			}
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			return this.setToOutput(results as any, request);
+			return await this.setToOutput(results as any, request);
 		});
 	}
 }

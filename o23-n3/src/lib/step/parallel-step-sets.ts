@@ -3,7 +3,7 @@ import {PipelineStepSets, PipelineStepSetsContext, PipelineStepSetsOptions} from
 import {ScriptFuncOrBody} from './types';
 import {Utils} from './utils';
 
-export type CloneDataFunc<In, InFragment, EachInFragment = InFragment> = ($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => EachInFragment;
+export type CloneDataFunc<In, InFragment, EachInFragment = InFragment> = ($factor: InFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<EachInFragment>;
 
 export interface ParallelPipelineStepSetsOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out, EachInFragment = InFragment>
 	extends PipelineStepSetsOptions<In, Out, InFragment, OutFragment> {
@@ -23,9 +23,9 @@ export class ParallelPipelineStepSets<In = PipelineStepPayload, Out = PipelineSt
 	public constructor(options: ParallelPipelineStepSetsOptions<In, Out, InFragment, OutFragment, EachInFragment>) {
 		super(options);
 		this._cloneDataSnippet = options.cloneData;
-		this._cloneData = Utils.createSyncFunction(this.getCloneDataSnippet(), {
+		this._cloneData = Utils.createAsyncFunction(this.getCloneDataSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => ($factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): EachInFragment => {
+			createDefault: () => async ($factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers): Promise<EachInFragment> => {
 				return $factor as unknown as EachInFragment;
 			},
 			getVariableNames: () => ['$factor', '$request', ...this.getHelpersVariableNames()], //this.generateFromRequestVariableNames(),
@@ -51,7 +51,7 @@ export class ParallelPipelineStepSets<In = PipelineStepPayload, Out = PipelineSt
 	/**
 	 * default get request content
 	 */
-	protected cloneDataForEach($factor: InFragment, $request: PipelineStepData<In>): EachInFragment {
+	protected async cloneDataForEach($factor: InFragment, $request: PipelineStepData<In>): Promise<EachInFragment> {
 		if ($factor == null) {
 			return null;
 		}
@@ -68,7 +68,7 @@ export class ParallelPipelineStepSets<In = PipelineStepPayload, Out = PipelineSt
 					return steps.map(async step => {
 						return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 							.execute(async () => {
-								const eachData = this.cloneDataForEach(data, request);
+								const eachData = await this.cloneDataForEach(data, request);
 								const eachRequest = {content: eachData, $context: {...context, traceId}};
 								this.traceStepIn(traceId, step, request);
 								const response = await step.perform(eachRequest);

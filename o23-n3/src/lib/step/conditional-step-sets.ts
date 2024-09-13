@@ -67,7 +67,7 @@ export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = Pipelin
 			const checked = await this.check(fragment, request);
 			if (checked) {
 				const result = await this.doPerform(request.content as unknown as InFragment, request);
-				return this.setToOutput(result, request);
+				return await this.setToOutput(result, request);
 			}
 			// noinspection DuplicatedCode
 			const otherwiseStepBuilders = this.getOtherwiseStepBuilders();
@@ -77,7 +77,7 @@ export class ConditionalPipelineStepSets<In = PipelineStepPayload, Out = Pipelin
 					...this.buildStepOptions(), name: this.getName(), steps: otherwiseStepBuilders
 				});
 				const result = await sets.perform(request);
-				return this.setToOutput(result.content, request);
+				return await this.setToOutput(result.content, request);
 			} else {
 				// otherwise route not declared
 				return request as unknown as PipelineStepData<Out>;
