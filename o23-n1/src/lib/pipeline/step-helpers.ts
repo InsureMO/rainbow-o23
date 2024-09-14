@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import math from 'mathjs';
+import * as math from 'mathjs';
 import {
 	CatchableError,
 	Config,
