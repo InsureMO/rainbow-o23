@@ -30,6 +30,18 @@ When using scripts, pay attention to the usage of variables. Typically:
 - `$helpers` represents function supporting and can be used in all snippets,
 - `$options` represents a set of data, usually in error handles.
 
+### Typescript support
+
+In dynamic snippet, TypeScript syntax can also be used. Currently, `o23/n3` is compiled using ES2022 syntax. It is important to note that
+dynamic script fragments are function bodies, so `import`/`export` syntax is not supported. Moreover, they are compiled in loose mode, and
+the compilation process does not report any errors. Additionally, for script security reasons, the following keywords or classes are also
+not supported.
+
+- `process`
+- `global`
+- `eval`
+- `Function`
+
 ## Basic Steps
 
 ### Fragmentary

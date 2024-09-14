@@ -1,6 +1,5 @@
 import {Nullable, UncatchableError, Undefinable} from '@rainbow-o23/n1';
-import * as ts from 'typescript';
-import {JsxEmit, ModuleKind, ModuleResolutionKind, ScriptTarget} from 'typescript';
+import ts, {JsxEmit, ModuleKind, ModuleResolutionKind, ScriptTarget} from 'typescript';
 import {
 	ERR_PIPELINE_SNIPPET_CANNOT_USE_EVAL,
 	ERR_PIPELINE_SNIPPET_CANNOT_USE_FUNCTION,
