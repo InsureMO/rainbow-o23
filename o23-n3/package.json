@@ -23,7 +23,8 @@
 	"dependencies": {
 		"@rainbow-o23/n1": "1.0.44",
 		"node-fetch": "2.6.7",
-		"typeorm": "^0.3.17"
+		"typeorm": "^0.3.17",
+		"typescript": "5.5.4"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
@@ -48,8 +49,7 @@
 		"rollup": "^3.7.0",
 		"rollup-plugin-tslint": "^0.2.2",
 		"rollup-plugin-typescript2": "^0.34.1",
-		"tslib": "^2.4.1",
-		"typescript": "5.5.4"
+		"tslib": "^2.4.1"
 	},
 	"jest": {
 		"moduleFileExtensions": [

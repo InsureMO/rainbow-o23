@@ -25,7 +25,7 @@ export const buildConfig = (lint) => {
 		external(id) {
 			return ["@rainbow-o23/", "typeorm/"].some(scope => id.startsWith(scope))
 				|| [
-					"typeorm", "reflect-metadata", "node-fetch"
+					"typescript", "typeorm", "reflect-metadata", "node-fetch"
 				].includes(id);
 		}
 	};

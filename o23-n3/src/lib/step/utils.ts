@@ -1,4 +1,6 @@
 import {Nullable, UncatchableError, Undefinable} from '@rainbow-o23/n1';
+import * as ts from 'typescript';
+import {JsxEmit, ModuleKind, ModuleResolutionKind, ScriptTarget} from 'typescript';
 import {
 	ERR_PIPELINE_SNIPPET_CANNOT_USE_EVAL,
 	ERR_PIPELINE_SNIPPET_CANNOT_USE_FUNCTION,
@@ -57,6 +59,23 @@ export class Utils {
 				// 	// noinspection ExceptionCaughtLocallyJS
 				// 	throw new UncatchableError(ERR_PIPELINE_SNIPPET_CANNOT_USE_GLOBAL, '"global" is not allowed in dynamic snippet.');
 				// }
+				// transpiled by typescript
+				const transpiled = ts.transpileModule(snippet, {
+					compilerOptions: {
+						target: ScriptTarget.ES2022,
+						jsx: JsxEmit.None,   // no jsx
+						strict: false,
+						noEmitOnError: true, // ignore errors
+						esModuleInterop: true,
+						module: ModuleKind.ES2022,
+						suppressOutputPathCheck: false,
+						skipLibCheck: true,
+						skipDefaultLibCheck: true,
+						moduleResolution: ModuleResolutionKind.Node16 // default use node 16
+					}
+				});
+				snippet = transpiled.outputText;
+				// build function
 				const variableNames = creators.getVariableNames() ?? [];
 				if (creators.async) {
 					const func = new AsyncFunction(...variableNames, ...AvoidNames, snippet);
