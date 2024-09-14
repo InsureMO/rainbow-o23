@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n2",
-	"version": "1.0.44",
+	"version": "1.0.45",
 	"description": "o23 application base",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -26,7 +26,7 @@
 		"@nestjs/platform-express": "^10.3.10",
 		"@nestjs/platform-socket.io": "^10.3.10",
 		"@nestjs/websockets": "^10.3.10",
-		"@rainbow-o23/n1": "1.0.44",
+		"@rainbow-o23/n1": "1.0.45",
 		"dayjs": "^1.11.12",
 		"nest-winston": "^1.9.7",
 		"reflect-metadata": "^0.2.2",
