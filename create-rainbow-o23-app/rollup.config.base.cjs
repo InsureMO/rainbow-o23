@@ -37,7 +37,7 @@ exports.buildConfig = (lint) => {
 					{src: '../o23-n99/tsconfig.json', dest: 'templates'},
 					{src: '../o23-n99/webpack.config.js', dest: 'templates'},
 					{src: '../o23-n99/README.md', dest: 'templates'}
-				], hook: 'buildEnd'
+				], hook: 'writeBundle'
 			})].filter(x => x != null),
 		// input: './lib/index.js',
 		// output: {file: './create-app.js', format: 'cjs'},
