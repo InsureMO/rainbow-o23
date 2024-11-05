@@ -56,10 +56,9 @@ export class RefPipelinePipelineStep<In = PipelineStepPayload, Out = PipelineSte
 	}
 
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
-		const {$context: {traceId} = {}} = request;
+		const {$context: {authorization, traceId} = {}} = request;
 		const pipeline = await this.getPipelineBuilder().create(this.buildPipelineOptions());
-		const result = await pipeline.perform({payload: data, traceId});
-		// const result = await step.perform({content: data, $context: request.$context});
+		const result = await pipeline.perform({payload: data, authorization, traceId});
 		return result.payload;
 	}
 }

@@ -1,4 +1,5 @@
 import {Config, Logger} from '../utils';
+import {PipelineRequestAuthorization} from './pipeline';
 import {AbstractPipelineExecution, PipelineExecutionOptions} from './pipeline-execution';
 import {createStepHelpers, PipelineStepHelpers} from './step-helpers';
 
@@ -8,6 +9,7 @@ export type PipelineStepCode = string;
 export type PipelineStepPayload = any;
 
 export interface PipelineStepContext {
+	authorization?: PipelineRequestAuthorization;
 	traceId?: string;
 }
 

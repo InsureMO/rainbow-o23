@@ -31,6 +31,7 @@ export interface PipelineDef extends Def {
 }
 
 export interface ExposedPipelineDef extends PipelineDef {
+	authorizations?: DynamicModulePipeline['authorizations'];
 	route: DynamicModulePipeline['route'];
 	method: DynamicModulePipeline['method'];
 	headers?: DynamicModulePipeline['headers'];

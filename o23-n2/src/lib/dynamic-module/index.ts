@@ -3,6 +3,7 @@ export * from './parameter-decorator';
 
 export * from './pipelines';
 
+export * from './request-auth-guard';
 export * from './request-method';
 export * from './request-body';
 export * from './request-header';

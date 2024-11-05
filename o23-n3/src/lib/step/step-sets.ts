@@ -50,7 +50,8 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 		if (context == null) {
 			return {};
 		} else {
-			return Utils.clone(context);
+			const {authorization, traceId, ...rest} = context;
+			return {authorization, traceId, ...Utils.clone(rest)};
 		}
 	}
 
@@ -79,14 +80,16 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.performWithContext(
 			request, async (request: PipelineStepData<In>, context: PipelineStepSetsContext): Promise<OutFragment> => {
-				const {$context: {traceId} = {}} = request;
+				const {$context: {authorization, traceId} = {}} = request;
 				const steps = await this.createSteps();
 				const response = await steps.reduce(async (promise, step) => {
 					const request = await promise;
 					return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
-							const response = await step.perform({...request, $context: {...context, traceId}});
+							const response = await step.perform({
+								...request, $context: {...context, authorization, traceId}
+							});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next
 							return this.returnOrContinueOrClear(request, response);

@@ -1,0 +1,14 @@
+code: Authenticate
+type: pipeline
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      $.$logger.log('Request headers ' + $factor.headers, 'Authenticate');
+      $.$logger.log('Authorization header ' + $factor.authorization, 'Authenticate');
+      return {
+        authentication: $factor.headers['authorization'],
+        roles: ($factor.headers['x-roles'] ?? '').split(',').map(role => role.trim()).filter(role => role.length !== 0)
+      };
+

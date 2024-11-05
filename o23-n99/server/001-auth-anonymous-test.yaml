@@ -1,0 +1,11 @@
+code: AnonymousAuthTest
+type: pipeline
+route: /api/auth/anonymous
+method: get
+authorizations: anonymous
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return 'Hello, anonymous user!';

@@ -5,6 +5,9 @@ export interface DynamicModule {
 	registerMyself(bootstrap: BootstrapOptions): void;
 }
 
+export type DynamicModuleVisitPermit = string;
+export type DynamicModuleAuthorization = 'anonymous' | 'authenticated' | DynamicModuleVisitPermit;
+
 export interface DynamicModuleFileValidator {
 	maxSize?: string | number;
 	mimeType?: string;
@@ -24,6 +27,7 @@ export type DynamicModuleMultipleNamedFiles = { names: Array<DynamicModuleNamedF
 export interface DynamicModulePipeline {
 	code: PipelineCode;
 	def: PipelineType | PipelineBuilder;
+	authorizations?: DynamicModuleAuthorization | Array<DynamicModuleAuthorization>;
 	route?: string;
 	method: 'get' | 'post' | 'patch' | 'delete' | 'put';
 	headers?: Array<string> | true;
@@ -52,7 +56,7 @@ export type ParameterDecoratorDelegate = (target: Object, key: string | symbol |
 
 export enum ParameterType {
 	BODY = 'body', FILE = 'file', HEADER = 'header', PATH = 'path', QUERY = 'query',
-	RESPONSE = 'response'
+	RESPONSE = 'response', REQUEST = 'request'
 }
 
 export interface ParameterDecoratorDelegateDef {

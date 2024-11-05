@@ -62,14 +62,14 @@ export class ParallelPipelineStepSets<In = PipelineStepPayload, Out = PipelineSt
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.performWithContext(
 			request, async (request: PipelineStepData<In>, context: PipelineStepSetsContext): Promise<OutFragment> => {
-				const {$context: {traceId} = {}} = request;
+				const {$context: {authorization, traceId} = {}} = request;
 				const steps = await this.createSteps();
 				const execute = () => {
 					return steps.map(async step => {
 						return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 							.execute(async () => {
 								const eachData = await this.cloneDataForEach(data, request);
-								const eachRequest = {content: eachData, $context: {...context, traceId}};
+								const eachRequest = {content: eachData, $context: {...context, authorization, traceId}};
 								this.traceStepIn(traceId, step, request);
 								const response = await step.perform(eachRequest);
 								this.traceStepOut(traceId, step, response);

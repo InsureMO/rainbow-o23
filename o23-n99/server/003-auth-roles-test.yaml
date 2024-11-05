@@ -1,0 +1,23 @@
+code: RolesAuthTest
+type: pipeline
+route: /api/auth/roles/:any
+method: post
+authorizations: authenticated, RoleA
+body: true
+path-params:
+  - any
+query-params:
+  - id
+headers:
+  - authorization
+  - x-roles
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return {
+        message: `Hello, authenticated user [${$request.$context?.authorization?.authentication}]!`,
+        roles: $request.$context?.authorization?.roles,
+        received: $factor
+      };

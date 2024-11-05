@@ -1,0 +1,15 @@
+code: AuthenticatedAuthTest
+type: pipeline
+route: /api/auth/authenticated
+method: post
+authorizations: authenticated
+body: true
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return {
+        message: `Hello, authenticated user [${$request.$context?.authorization?.authentication}]!`,
+        body: $factor
+      };

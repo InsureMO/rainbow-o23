@@ -1,18 +1,21 @@
-import {Controller, HttpCode, StreamableFile} from '@nestjs/common';
+import {Controller, ForbiddenException, HttpCode, StreamableFile, UnauthorizedException} from '@nestjs/common';
 import {
 	ERR_PIPELINE_NOT_FOUND,
 	PIPELINE_STEP_FILE_SYMBOL,
 	PIPELINE_STEP_RETURN_NULL,
 	PipelineRepository,
 	PipelineStepFile,
-	UncatchableError
+	UncatchableError,
+	Undefinable
 } from '@rainbow-o23/n1';
-import {Response} from 'express';
+import {PipelineRequestAuthorization} from '@rainbow-o23/n1/lib/pipeline/pipeline';
+import {Request, Response} from 'express';
 import {Readable} from 'stream';
 import {AbstractController} from '../abstract-controller';
-import {ERR_RESPONSE_NOT_FOUND} from '../error-codes';
+import {ERR_REQUEST_NOT_FOUND, ERR_RESPONSE_NOT_FOUND} from '../error-codes';
 import {handleException} from '../exception-handling';
 import {DynamicModuleRequest} from './request';
+import {AuthGuardMetadata, DynamicModuleRequestAuthGuard} from './request-auth-guard';
 import {DynamicModuleRequestBody} from './request-body';
 import {DynamicModuleRequestFile} from './request-file';
 import {DynamicModuleRequestHeader} from './request-header';
@@ -23,6 +26,7 @@ import {DynamicModuleResponseFile} from './response-file';
 import {DynamicModulePipeline, ParameterDecoratorDelegateDef, ParameterType} from './types';
 
 export class DynamicModuleController {
+	// noinspection JSUnusedLocalSymbols
 	private constructor() {
 		// avoid extend
 	}
@@ -53,11 +57,16 @@ export class DynamicModuleController {
 		if (responseDecorator != null) {
 			decorators.push(responseDecorator);
 		}
+		const authRequestDecorator = DynamicModuleRequestAuthGuard.create(def, decorators.length);
+		if (authRequestDecorator != null) {
+			decorators.push(authRequestDecorator);
+		}
 		return decorators;
 	}
 
 	public static createController(def: DynamicModulePipeline): typeof AbstractController {
 		const parameterDecorators = DynamicModuleController.createParameterDecorators(def);
+		const authorizationMetadata = new AuthGuardMetadata(def.authorizations);
 		const ControllerClass = class extends AbstractController {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			protected createRequest(...args: Array<any>): any {
@@ -66,6 +75,10 @@ export class DynamicModuleController {
 					// not declared
 					return (void 0);
 				} else if (count === 1 && parameterDecorators[0].type === ParameterType.RESPONSE) {
+					// only one is response, ignore it
+					return (void 0);
+				} else if (count === 1 && parameterDecorators[0].type === ParameterType.REQUEST) {
+					// only one is request, ignore it
 					return (void 0);
 				} else if (count === 1) {
 					// only one, return it
@@ -73,16 +86,36 @@ export class DynamicModuleController {
 				} else if (count === 2 && parameterDecorators[1].type === ParameterType.RESPONSE) {
 					// two args, and second one is response. Ignore second one, return first directly
 					return args[0];
+				} else if (count === 2 && parameterDecorators[1].type === ParameterType.REQUEST) {
+					// two args, and second one is request. Ignore second one, return first directly
+					return args[0];
+				} else if (count === 3
+					&& parameterDecorators[1].type === ParameterType.RESPONSE
+					&& parameterDecorators[2].type === ParameterType.REQUEST) {
+					// three args, and second one is response, third one is request. Ignore second/third, return first directly
+					return args[0];
 				}
 
 				// more than one parameter, need to be merged into one
 				return parameterDecorators
 					// always ignore response
 					.filter(decorator => decorator.type !== ParameterType.RESPONSE)
+					.filter(decorator => decorator.type !== ParameterType.REQUEST)
 					.reduce((data, {name}, index) => {
 						data[name] = args[index];
 						return data;
 					}, {});
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			protected findRequest(args: Array<any>) {
+				const requestArgIndex = parameterDecorators.findIndex(decorator => decorator.type === ParameterType.REQUEST);
+				if (requestArgIndex === -1) {
+					handleException(this.getLogger(),
+						new UncatchableError(ERR_REQUEST_NOT_FOUND, `Request is required for pipeline[code=${def.code}].`),
+						this.constructor.name);
+				}
+				return args[requestArgIndex] as Request;
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +130,43 @@ export class DynamicModuleController {
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			protected async authorize(...args: Array<any>): Promise<Undefinable<PipelineRequestAuthorization>> {
+				// do auth first, if needed
+				if (authorizationMetadata.isAnonymousAllowed()) {
+					// pass the auth anyway
+					return (void 0);
+				} else {
+					const authPipelineCode = this.getConfig().getString('app.auth.pipeline', 'Authenticate');
+					// need authorization, find request
+					const request = this.findRequest(args);
+					const headers = request.headers ?? {};
+					const authorizationToken = headers.authorization;
+					const pipeline = await PipelineRepository.findPipeline(authPipelineCode, this.buildPipelineOptions());
+					if (pipeline == null) {
+						handleException(this.getLogger(),
+							new UncatchableError(ERR_PIPELINE_NOT_FOUND, `Pipeline[code=${authPipelineCode}] not found.`),
+							this.constructor.name);
+					} else {
+						const result = await pipeline.perform({
+							payload: {request, headers, authorization: authorizationToken}
+						});
+						const {payload: {authentication, roles} = {authentication: (void 0), roles: []}} = result ?? {};
+						if (!authorizationMetadata.isFullyAuthenticated(authentication)) {
+							throw new UnauthorizedException('Unauthorized');
+						}
+						const {authorized, roles: matchedRoles} = authorizationMetadata.authorize({roles});
+						if (!authorized) {
+							throw new ForbiddenException('Access denied');
+						}
+						return {authorized: true, authentication, roles: matchedRoles};
+					}
+				}
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			public async invoke(...args: Array<any>): Promise<any> {
+				const authorization = await this.authorize(...args);
+				// perform pipeline
 				const pipeline = await PipelineRepository.findPipeline(def.code, this.buildPipelineOptions());
 				if (pipeline == null) {
 					handleException(this.getLogger(),
@@ -105,7 +174,7 @@ export class DynamicModuleController {
 						this.constructor.name);
 				} else {
 					try {
-						const result = await pipeline.perform({payload: this.createRequest(...args)});
+						const result = await pipeline.perform({payload: this.createRequest(...args), authorization});
 						const {payload} = result;
 						if (payload == null || payload === PIPELINE_STEP_RETURN_NULL) {
 							return null;

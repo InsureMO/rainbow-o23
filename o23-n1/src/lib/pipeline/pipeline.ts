@@ -13,8 +13,24 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PipelineRequestPayload = any;
 
+export interface PipelineRequestAuthorizationRole {
+	code?: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any | undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface PipelineRequestAuthorization<A = any> {
+	readonly authorized: boolean;
+	/** undefined when authorized is false */
+	readonly authentication?: A;
+	/** empty array when authorized is false */
+	readonly roles: Array<PipelineRequestAuthorizationRole>;
+}
+
 export interface PipelineRequest<C = PipelineRequestPayload> {
 	payload: C;
+	authorization?: PipelineRequestAuthorization;
 	traceId?: string;
 }
 
@@ -101,6 +117,7 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 	 */
 	public async perform(request: PipelineRequest<In>): Promise<PipelineResponse<Out>> {
 		const traceId = this.createTraceId(request);
+		const authorization = request.authorization;
 		const response = await this.measurePerformance(traceId, 'PIPELINE')
 			.execute(async () => {
 				this.traceRequest(traceId, request);
@@ -111,7 +128,7 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({
-								...request, $context: {...request.$context, traceId}
+								...request, $context: {...request.$context, authorization, traceId}
 							});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next

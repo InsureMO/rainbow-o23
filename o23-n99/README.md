@@ -154,6 +154,7 @@ and how to return an HTTP response. This would include various components of the
 
 | Attribute        | Type                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
 |------------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `authorizations` | `string`, `string array`     | Define whether authentication and authorization are required for the API.                                                                                                                                                                                                                                                                                                                                                  |
 | `route`          | `string`                     | Similar to the general definition of a REST API, this route does not include the host, port, and context parts. Additionally, the query string part is not required to be included.                                                                                                                                                                                                                                        |
 | `method`         | `string`                     | The HTTP method of the request, including `get`, `post`, `patch`, `delete`, `put`, please note that `options` is not included. Additionally, if it is a `get` request, the default behavior is not to include a request body. If it is necessary to parse the request body for `get` requests, `body: true` needs to be explicitly declared. For other methods, the parsing of the request body is automatically included. |
 | `body`           | `boolean`                    | Whether to parse the request body part or not. Typically, the system determines this based on the `method`, but if the actual requirement is different from the default behavior, this property can be explicitly declared.                                                                                                                                                                                                |
@@ -216,7 +217,7 @@ In the above example, we will get the following object structure:
 interface Request {
 	body: any;  // depends on request body structure
 	Connection: string | undefined;
-	hoSt: string | undefined;
+	host: string | undefined;
 	id: string | undefined;
 	name: string | undefined;
 	code: string | undefined;
@@ -271,6 +272,44 @@ promotion due to the absence of other parameters):
 - Name declared and multiple files for this name: file object array.
 
 The file object structure is [`Express.Multer.File`](https://www.npmjs.com/package/@types/multer?activeTab=code).
+
+### Authorization
+
+- If the API does not specify authorization, it allows access for all.
+- If the authorization specifies "anonymous", the API allows access for all.
+- If the authorization specifies "authenticated" and does not specify other permission codes, it is considered that access is allowed once
+  authenticated.
+- If the authorization specifies strings other than the above, they are considered specific permission codes, meaning that authentication is
+  required, and the user must have at least one permission code that matches the specified code.
+
+Authentication and authorization are also executed by pipeline, which receives parameters in the following format:
+
+```ts
+interface Factor {
+	request: Request;                           // Request from express
+	headers: Record<string, string>;            // All request headers
+	authorization?: string;                     // Value of header authorization
+}
+```
+
+The return of this authentication and authorization pipeline must conform to the following format:
+
+```ts
+interface Authenticated {
+	authentication?: any;                       // Authentication information
+	roles?: Array<string | { code: string }>;   // Role codes
+}
+```
+
+`authentication` is considered successful as long as it has a value (not null). If the API defines role codes, a comparison will be
+made, and authorization is considered successful when at least one role code matches.
+
+After authorization is successful, the authentication and roles will be placed into the context of the pipeline request data, where it can
+be accessed within the pipeline steps. It should be noted that only the matched roles data will be placed into the context.
+
+> The code for the authentication and authorization pipeline can be configured via the parameter `app.auth.pipeline`, with the default being
+> `Authenticate`.  
+> **Note that this pipeline is not provided by default.**
 
 # Pipeline Step Configuration
 
@@ -732,7 +771,8 @@ cases:
 However, it is important to note that if the exception is an `UncatchableError`, it will not be caught.
 
 For each handler, signature
-is `($options: HttpErrorHandleOptions<In, InFragment>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> | never`:
+is
+`($options: HttpErrorHandleOptions<In, InFragment>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> | never`:
 
 - `$options`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
   data under any circumstances,
