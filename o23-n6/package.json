@@ -70,7 +70,6 @@
 		"testEnvironment": "node"
 	},
 	"volta": {
-		"node": "20.17.0",
-		"yarn": "1.22.21"
+		"extends": "../package.json"
 	}
 }

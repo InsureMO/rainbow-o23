@@ -74,11 +74,12 @@
 		"yargs": "^17.7.2"
 	},
 	"resolutions": {
-		"wrap-ansi": "7.0.0",
-		"string-width": "4.1.0"
+		"body-parser": "1.20.3",
+		"string-width": "4.1.0",
+		"wrap-ansi": "7.0.0"
 	},
 	"volta": {
-		"node": "20.17.0",
+		"node": "22.11.0",
 		"yarn": "1.22.21"
 	}
 }

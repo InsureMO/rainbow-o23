@@ -57,7 +57,7 @@
 		"all:build:ci": "yarn modules:build:ci && yarn server:build:ci && yarn npx:build:ci"
 	},
 	"volta": {
-		"node": "20.17.0",
+		"node": "22.11.0",
 		"yarn": "1.22.21"
 	}
 }
