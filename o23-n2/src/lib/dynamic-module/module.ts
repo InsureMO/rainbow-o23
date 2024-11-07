@@ -1,5 +1,4 @@
 import {Module} from '@nestjs/common';
-import {ScheduleModule} from '@nestjs/schedule';
 import {PipelineRepository} from '@rainbow-o23/n1';
 import {BootstrapOptions} from '../bootstrap-options';
 import {DynamicModuleController} from './controllers';
@@ -28,7 +27,6 @@ export class DynamicModuleCreator {
 		});
 		// decorate module class with given pipelines
 		Reflect.decorate([Module({
-			imports: [ScheduleModule.forRoot()],
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			controllers: DynamicModuleController.createControllers(pipelines),

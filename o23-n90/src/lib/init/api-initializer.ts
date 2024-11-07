@@ -1,6 +1,6 @@
 import {EnhancedLogger} from '@rainbow-o23/n1';
 import {BootstrapOptions, DynamicModuleCreator} from '@rainbow-o23/n2';
-import {ExposedParsedPipelineDef, ParsedPipelineDef} from '@rainbow-o23/n4';
+import {ExposedParsedPipelineDef, ParsedPipelineDef, ScheduleParsedPipelineDef} from '@rainbow-o23/n4';
 
 export class ApiInitializer {
 	public constructor() {
@@ -30,7 +30,7 @@ export class ApiInitializer {
 		DynamicModuleCreator.create({
 			moduleName: 'DynamicModule',
 			pipelines: pipelines.map(pipeline => {
-				const p = pipeline as ExposedParsedPipelineDef;
+				const p = pipeline as (ExposedParsedPipelineDef & ScheduleParsedPipelineDef);
 				return {
 					// pipeline itself
 					code: p.code, def: p.def,
@@ -41,7 +41,9 @@ export class ApiInitializer {
 					headers: p.headers, pathParams: p.pathParams, queryParams: p.queryParams,
 					body: p.body, files: p.files,
 					// exposed as api, out
-					exposeHeaders: p.exposeHeaders, exposeFile: p.exposeFile
+					exposeHeaders: p.exposeHeaders, exposeFile: p.exposeFile,
+					// schedule
+					schedule: p.schedule
 				};
 			})
 		}).registerMyself(options);

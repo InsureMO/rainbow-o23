@@ -1,5 +1,5 @@
 import {PipelineBuilder, PipelineCode, PipelineStepBuilder, PipelineStepCode} from '@rainbow-o23/n1';
-import {DynamicModulePipeline} from '@rainbow-o23/n2';
+import {DynamicModulePipeline, ScheduledModulePipeline} from '@rainbow-o23/n2';
 import {PipelineStepRegisterKey} from '../step-builder';
 
 export type DefType = 'pipeline' | 'step-sets' | 'step';
@@ -43,6 +43,10 @@ export interface ExposedPipelineDef extends PipelineDef {
 	exposeFile?: DynamicModulePipeline['exposeFile'];
 }
 
+export interface SchedulePipelineDef extends PipelineDef {
+	schedule: ScheduledModulePipeline['schedule'];
+}
+
 export interface ParsedDef {
 	code: PipelineCode | PipelineStepCode;
 	type: DefType;
@@ -57,6 +61,9 @@ export interface ParsedPipelineDef extends ParsedDef {
 }
 
 export interface ExposedParsedPipelineDef extends ParsedPipelineDef, ExposedPipelineDef {
+}
+
+export interface ScheduleParsedPipelineDef extends ParsedPipelineDef, SchedulePipelineDef {
 }
 
 export interface ParsedPipelineStepDef extends ParsedDef {

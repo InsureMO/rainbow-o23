@@ -1,0 +1,9 @@
+code: CronJob
+type: pipeline
+schedule: '* * * * * *'
+
+steps:
+  - name: Return OK
+    use: snippet
+    snippet: |-
+      return 'success';
