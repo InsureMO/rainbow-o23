@@ -27,7 +27,7 @@ export const buildConfig = (lint) => {
 				|| [
 					'express', 'stream',
 					"winston", "nest-winston", "winston-daily-rotate-file",
-					"reflect-metadata", "rxjs",
+					"reflect-metadata", "rxjs", "cron",
 					"dayjs"
 				].includes(id);
 		}

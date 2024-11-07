@@ -13,6 +13,7 @@ import {
 	ERR_UNDETECTABLE_ROW
 } from './error-codes';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PrintExcelPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
 }

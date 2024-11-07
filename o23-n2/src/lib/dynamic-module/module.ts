@@ -1,8 +1,10 @@
 import {Module} from '@nestjs/common';
+import {ScheduleModule} from '@nestjs/schedule';
 import {PipelineRepository} from '@rainbow-o23/n1';
 import {BootstrapOptions} from '../bootstrap-options';
 import {DynamicModuleController} from './controllers';
 import {DynamicModulePipelines} from './pipelines';
+import {DynamicModuleScheduler} from './schedulers';
 import {DynamicModule, DynamicModuleOptions} from './types';
 
 export class DynamicModuleCreator {
@@ -25,9 +27,13 @@ export class DynamicModuleCreator {
 			}
 		});
 		// decorate module class with given pipelines
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		Reflect.decorate([Module({controllers: DynamicModuleController.createControllers(pipelines)})], ModuleClass, void 0, void 0);
+		Reflect.decorate([Module({
+			imports: [ScheduleModule.forRoot()],
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			controllers: DynamicModuleController.createControllers(pipelines),
+			providers: [DynamicModuleScheduler.createSchedulerProvider(pipelines)]
+		})], ModuleClass, void 0, void 0);
 
 		return ModuleClass as unknown as DynamicModule;
 	}

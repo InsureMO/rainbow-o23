@@ -115,8 +115,12 @@ export class BootstrapOptions {
 						info.level = `${info.level}`.toUpperCase();
 					}
 					info.level = info.level === 'VERBOSE' ? 'TRACE' : (info.level === 'LOG' ? 'INFO' : info.level);
-					provider && (info.provider = provider);
-					appName && (info.current_app_name = appName);
+					if (provider.trim().length !== 0) {
+						info.provider = provider
+					}
+					if (appName.trim().length !== 0) {
+						info.current_app_name = appName;
+					}
 					return info;
 				})();
 				return {

@@ -21,6 +21,7 @@ export interface AbstractS3PipelineStepInFragment extends AbstractRegionPipeline
 	Bucket?: string | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AbstractS3PipelineStepOutFragment extends AbstractRegionPipelineStepOutFragment {
 }
 

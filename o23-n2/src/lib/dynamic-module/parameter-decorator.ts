@@ -2,7 +2,7 @@ import {ParameterDecoratorDelegate, ParameterDecoratorDelegateDef, ParameterType
 
 export class DynamicModuleParameter {
 	public static createParameterDecorator(parameterIndex: number, decorator: ParameterDecorator): ParameterDecoratorDelegate {
-		// eslint-disable-next-line @typescript-eslint/ban-types
+		// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 		return function (target: Object, key: string | symbol | undefined) {
 			return decorator(target, key, parameterIndex);
 		};

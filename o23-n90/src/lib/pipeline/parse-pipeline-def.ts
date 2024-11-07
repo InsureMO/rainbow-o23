@@ -54,7 +54,7 @@ export class ParsePipelineDefPipelineStep
 						delete data.exposeRoute;
 					}
 				}
-			} catch (e) {
+			} catch {
 				// do nothing
 			}
 		}

@@ -23,10 +23,10 @@
 	"dependencies": {
 		"@rainbow-o23/n3": "1.0.46",
 		"@rainbow-o23/n4": "1.0.46",
-		"csv-parse": "^5.5.2",
-		"csv-stringify": "^6.4.4",
+		"csv-parse": "^5.5.6",
+		"csv-stringify": "^6.5.1",
 		"exceljs": "^4.4.0",
-		"nanoid": "3.3.6"
+		"nanoid": "3.3.7"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
@@ -36,8 +36,8 @@
 		"@rollup/plugin-eslint": "^9.0.3",
 		"@types/events": "^3.0.1",
 		"@types/node": "18.16.12",
-		"@typescript-eslint/eslint-plugin": "^7.18.0",
-		"@typescript-eslint/parser": "^7.18.0",
+		"@typescript-eslint/eslint-plugin": "^8.13.0",
+		"@typescript-eslint/parser": "^8.13.0",
 		"eslint": "^9.8.0",
 		"rollup": "^3.29.5",
 		"rollup-plugin-tslint": "^0.2.2",

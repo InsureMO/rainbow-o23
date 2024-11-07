@@ -12,9 +12,11 @@ export interface AbstractRegionPipelineStepOptions<In = PipelineStepPayload, Out
 	clientName: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AbstractRegionPipelineStepInFragment {
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AbstractRegionPipelineStepOutFragment {
 }
 

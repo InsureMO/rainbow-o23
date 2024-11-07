@@ -61,7 +61,7 @@ export interface PipelineOptions extends PipelineExecutionOptions {
 	logger?: Logger;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export interface PipelineType<P = Pipeline> extends Function {
 	new(options?: PipelineOptions): P;
 }

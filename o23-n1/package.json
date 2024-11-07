@@ -21,9 +21,9 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"dayjs": "^1.11.8",
-		"mathjs": "^13.1.1",
-		"nanoid": "3.3.6"
+		"dayjs": "^1.11.13",
+		"mathjs": "^13.2.1",
+		"nanoid": "3.3.7"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
@@ -33,8 +33,8 @@
 		"@rollup/plugin-eslint": "^9.0.3",
 		"@types/events": "^3.0.1",
 		"@types/node": "18.16.12",
-		"@typescript-eslint/eslint-plugin": "^7.18.0",
-		"@typescript-eslint/parser": "^7.18.0",
+		"@typescript-eslint/eslint-plugin": "^8.13.0",
+		"@typescript-eslint/parser": "^8.13.0",
 		"eslint": "^9.8.0",
 		"rollup": "^3.29.5",
 		"rollup-plugin-tslint": "^0.2.2",

@@ -43,7 +43,7 @@ const AvoidProxyObjects = [
 ];
 
 export class Utils {
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	public static createFunction<F = Function>(snippet: ScriptFuncOrBody<F>, creators: {
 		createDefault: () => Undefinable<F> | never;
 		getVariableNames: () => Array<string>;
@@ -105,7 +105,7 @@ export class Utils {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	public static createSyncFunction<F = Function>(snippet: ScriptFuncOrBody<F>, creators: {
 		createDefault: () => Undefinable<F> | never;
 		getVariableNames: () => Array<string>;
@@ -114,7 +114,7 @@ export class Utils {
 		return Utils.createFunction(snippet, {...creators});
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	public static createAsyncFunction<F = Function>(snippet: ScriptFuncOrBody<F>, creators: {
 		createDefault: () => Undefinable<F> | never;
 		getVariableNames: () => Array<string>;

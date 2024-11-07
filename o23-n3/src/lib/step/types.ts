@@ -7,7 +7,7 @@ import {
 } from '@rainbow-o23/n1';
 
 export type ScriptFunctionBody = string;
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export type ScriptFuncOrBody<F = Function> = F | ScriptFunctionBody;
 
 export interface ErrorHandleOptions<In, InFragment, E extends Error = Error> {

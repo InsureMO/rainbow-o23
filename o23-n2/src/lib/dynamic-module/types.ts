@@ -46,12 +46,18 @@ export interface DynamicModulePipeline {
 	exposeFile?: boolean;
 }
 
+export interface ScheduledModulePipeline {
+	code: PipelineCode;
+	def: PipelineType | PipelineBuilder;
+	schedule: string;
+}
+
 export interface DynamicModuleOptions {
 	moduleName: string;
 	pipelines?: Array<DynamicModulePipeline>;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 export type ParameterDecoratorDelegate = (target: Object, key: string | symbol | undefined) => void;
 
 export enum ParameterType {

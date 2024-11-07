@@ -292,7 +292,7 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		try {
 			await browser.close();
 		} catch (e) {
-			this.getLogger().error('Failed to close browser.', this.constructor.name);
+			this.getLogger().error('Failed to close browser.', e, this.constructor.name);
 		}
 	}
 
@@ -326,7 +326,7 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 			await page.setContent(templateHtml.toString());
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await page.exposeFunction('findSubTemplate', async (data: any, templateCode: string) => {
-				return this._findSubTemplateFunc(data, templateCode)
+				return this._findSubTemplateFunc(data, templateCode);
 			});
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await page.exposeFunction('getValue', (data: any, property: string) => Utils.getValue(data, property));
@@ -344,7 +344,7 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 					await page.close();
 				}
 			}
-			return pdf;
+			return Buffer.from(pdf);
 		} catch (e) {
 			// noinspection PointlessBooleanExpressionJS
 			if (browser != null) {

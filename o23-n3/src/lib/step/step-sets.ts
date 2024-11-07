@@ -8,6 +8,7 @@ import {
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from './abstract-fragmentary-pipeline-step';
 import {Utils} from './utils';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PipelineStepSetsContext {
 }
 

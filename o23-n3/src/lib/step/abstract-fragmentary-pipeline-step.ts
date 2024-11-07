@@ -213,7 +213,6 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 				};
 			}
 		} else if (typeof funcOrSnippet === 'string') {
-			// eslint-disable-next-line @typescript-eslint/ban-types
 			const func = Utils.createAsyncFunction(funcOrSnippet, {
 				createDefault: async () => {
 					throw new UncatchableError(ERR_PIPELINE_STEP_SNIPPET_NOT_EMPTY, 'Cannot create perform func on empty snippet.');
