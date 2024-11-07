@@ -78,34 +78,41 @@ Support response outputs as following:
 
 ## Environment Parameters
 
-| Name                             | Type    | Default Value            | Comments                                            |
-|----------------------------------|---------|--------------------------|-----------------------------------------------------|
-| `app.port`                       | number  | 3100                     | Application server port.                            |
-| `app.context`                    | string  | /o23                     | Application api context.                            |
-| `app.name`                       | string  | O23-N99                  | Application name.                                   |
-| `app.provider`                   | string  | Rainbow Team             | Application provider.                               |
-| `app.version`                    | string  | UNDOCUMENTED             | Application build version.                          |
-| `app.built.at`                   | string  | UNDOCUMENTED             | Application build time.                             |
-| `app.auth.pipeline`              | string  | Authenticate             | Pipeline code for authentication and authorization. |
-| `app.body.json.max.size`         | string  | 50mb                     | Request maximum body size, for json body.           |
-| `app.body.urlencoded.max.size`   | string  | 50mb                     | Request maximum body size, for urlencoded body.     |
-| `app.cors.enabled`               | boolean | false                    | Enable cors.                                        |
-| `app.cors.options`               | json    |                          | `CorsOptions` of `@nestjs/common`.                  |
-| `logger.file.enabled`            | boolean | false                    | Enable file log.                                    |
-| `logger.file.rotate.enabled`     | boolean | true                     | Enable rotate file log.                             |
-| `logger.error.file`              | string  | logs/error-%DATE%.log    | Error log file.                                     |
-| `logger.error.level`             | string  | error                    | Logger level for error log file.                    |
-| `logger.error.json`              | boolean | true                     | Use json format.                                    |
-| `logger.error.date.pattern`      | string  | YYYY-MM-DD               | Error log file date pattern.                        |
-| `logger.error.zipped.archive`    | boolean | false                    | Enabled zip for error log file.                     |
-| `logger.error.max.files`         | string  | 30d                      | Error log file keeping time.                        |
-| `logger.error.max.size`          | string  | 10m                      | Error log file maximum size.                        |
-| `logger.combined.file`           | string  | logs/combined-%DATE%.log | Standard log file.                                  |
-| `logger.combined.level`          | string  | log                      | Logger level for standard log file.                 |
-| `logger.combined.json`           | boolean | true                     | Use json format.                                    |
-| `logger.combined.date.pattern`   | string  | YYYY-MM-DD               | Standard log file date pattern.                     |
-| `logger.combined.zipped.archive` | boolean | false                    | Enabled zip for standard log file.                  |
-| `logger.combined.max.files`      | string  | 7d                       | Standard log file keeping time.                     |
-| `logger.combined.max.size`       | string  | 10m                      | Standard log file maximum size.                     |
-| `logger.console.enabled`         | boolean | false                    | Enable console log.                                 |
-| `logger.console.level`           | string  | debug                    | Logger level for console log.                       |
+| Name                                                  | Type    | Default Value                      | Comments                                            |
+|-------------------------------------------------------|---------|------------------------------------|-----------------------------------------------------|
+| `app.port`                                            | number  | 3100                               | Application server port.                            |
+| `app.context`                                         | string  | /o23                               | Application api context.                            |
+| `app.name`                                            | string  | O23-N99                            | Application name.                                   |
+| `app.provider`                                        | string  | Rainbow Team                       | Application provider.                               |
+| `app.version`                                         | string  | UNDOCUMENTED                       | Application build version.                          |
+| `app.built.at`                                        | string  | UNDOCUMENTED                       | Application build time.                             |
+| `app.auth.pipeline`                                   | string  | Authenticate                       | Pipeline code for authentication and authorization. |
+| `app.body.json.max.size`                              | string  | 50mb                               | Request maximum body size, for json body.           |
+| `app.body.urlencoded.max.size`                        | string  | 50mb                               | Request maximum body size, for urlencoded body.     |
+| `app.cors.enabled`                                    | boolean | false                              | Enable cors.                                        |
+| `app.cors.options`                                    | json    |                                    | `CorsOptions` of `@nestjs/common`.                  |
+| `logger.file.enabled`                                 | boolean | false                              | Enable file log.                                    |
+| `logger.file.rotate.enabled`                          | boolean | true                               | Enable rotate file log.                             |
+| `logger.error.file`                                   | string  | logs/error-%DATE%.log              | Error log file.                                     |
+| `logger.error.level`                                  | string  | error                              | Logger level for error log file.                    |
+| `logger.error.json`                                   | boolean | true                               | Use json format.                                    |
+| `logger.error.date.pattern`                           | string  | YYYY-MM-DD                         | Error log file date pattern.                        |
+| `logger.error.zipped.archive`                         | boolean | false                              | Enabled zip for error log file.                     |
+| `logger.error.max.files`                              | string  | 30d                                | Error log file keeping time.                        |
+| `logger.error.max.size`                               | string  | 10m                                | Error log file maximum size.                        |
+| `logger.combined.file`                                | string  | logs/combined-%DATE%.log           | Standard log file.                                  |
+| `logger.combined.level`                               | string  | log                                | Logger level for standard log file.                 |
+| `logger.combined.json`                                | boolean | true                               | Use json format.                                    |
+| `logger.combined.date.pattern`                        | string  | YYYY-MM-DD                         | Standard log file date pattern.                     |
+| `logger.combined.zipped.archive`                      | boolean | false                              | Enabled zip for standard log file.                  |
+| `logger.combined.max.files`                           | string  | 7d                                 | Standard log file keeping time.                     |
+| `logger.combined.max.size`                            | string  | 10m                                | Standard log file maximum size.                     |
+| `logger.console.enabled`                              | boolean | false                              | Enable console log.                                 |
+| `logger.console.level`                                | string  | debug                              | Logger level for console log.                       |
+| `app.schedule.enabled`                                | boolean | false                              | Enable schedule.                                    |
+| `app.schedule.on.cluster`                             | boolean | false                              | Enable schedule on cluster, usually on production.  |
+| `app.schedule.max.interval.no.cluster.lock`           | number  | 3600                               | Maximum interval for schedule without cluster lock. |
+| `app.schedule.obtain.cluster.execution.lock.pipeline` | string  | ScheduleObtainClusterExecutionLock | Pipeline code for obtaining cluster execution lock. |
+| `app.schedule.job.log.persist`                        | boolean | false                              | Enable scheduled job log persist.                   |
+| `app.schedule.job.create.pipeline`                    | string  | ScheduleCreateJob                  | Pipeline code for creating scheduled job log.       |
+| `app.schedule.job.result.write.pipeline`              | string  | ScheduleWriteJobResult             | Pipeline code for writing scheduled job result.     |

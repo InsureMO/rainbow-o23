@@ -104,13 +104,13 @@ export abstract class ScheduleService {
 
 	constructor(@Inject(WINSTON_MODULE_NEST_PROVIDER) protected readonly logger: LoggerService) {
 		this.registry = new SchedulerRegistry(logger);
-		this.enabled = this.getConfig().getBoolean('app.schedule.enabled', true);
+		this.enabled = this.getConfig().getBoolean('app.schedule.enabled', false);
 		this.onCluster = this.getConfig().getBoolean('app.schedule.on.cluster', false);
 		this.maxIntervalNoClusterLock = this.getConfig().getNumber('app.schedule.max.interval.no.cluster.lock', 3600);
-		this.obtainClusterExecutionLockPipelineCode = this.getConfig().getString('app.schedule.obtain.cluster.execution.lock', 'ScheduleObtainClusterExecutionLock');
+		this.obtainClusterExecutionLockPipelineCode = this.getConfig().getString('app.schedule.obtain.cluster.execution.lock.pipeline', 'ScheduleObtainClusterExecutionLock');
 		this.persistJobLog = this.getConfig().getBoolean('app.schedule.job.log.persist', false);
-		this.createJobPipelineCode = this.getConfig().getString('app.schedule.job.create', 'ScheduleCreateJob');
-		this.writeJobResultPipelineCode = this.getConfig().getString('app.schedule.job.result.write.pipeline', 'ScheduleJobResultWrite');
+		this.createJobPipelineCode = this.getConfig().getString('app.schedule.job.create.pipeline', 'ScheduleCreateJob');
+		this.writeJobResultPipelineCode = this.getConfig().getString('app.schedule.job.result.write.pipeline', 'ScheduleWriteJobResult');
 		if (this.enabled) {
 			this.initialize();
 		}
