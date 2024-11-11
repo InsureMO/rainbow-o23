@@ -70,7 +70,7 @@ export class Utils {
 						suppressOutputPathCheck: false,
 						skipLibCheck: true,
 						skipDefaultLibCheck: true,
-						moduleResolution: ModuleResolutionKind.Node16 // default use node 16
+						moduleResolution: ModuleResolutionKind.NodeNext // default use node next
 					}
 				});
 				snippet = transpiled.outputText;
