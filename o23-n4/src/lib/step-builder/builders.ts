@@ -18,6 +18,7 @@ import {
 	TypeOrmBulkSaveBySQLPipelineStepBuilder,
 	TypeOrmBySnippetPipelineStepBuilder,
 	TypeOrmLoadManyBySQLPipelineStepBuilder,
+	TypeOrmLoadManyBySQLUseCursorPipelineStepBuilder,
 	TypeOrmLoadOneBySQLPipelineStepBuilder,
 	TypeOrmSaveBySQLPipelineStepBuilder,
 	TypeOrmTransactionalPipelineStepSetsBuilder
@@ -60,6 +61,7 @@ export enum DefaultSteps {
 	TYPEORM_BY_SNIPPET = 'typeorm-snippet',
 	TYPEORM_LOAD_ONE_BY_SQL = 'typeorm-load-one',
 	TYPEORM_LOAD_MANY_BY_SQL = 'typeorm-load-many',
+	TYPEORM_LOAD_MANY_BY_SQL_USE_CURSOR = 'typeorm-use-cursor',
 	TYPEORM_SAVE_BY_SQL = 'typeorm-save',
 	TYPEORM_BULK_SAVE_BY_SQL = 'typeorm-bulk-save',
 	TYPEORM_TRANSACTIONAL = 'typeorm-transactional',
@@ -89,6 +91,7 @@ export const registerDefaults = () => {
 	StepBuilders.register(DefaultSteps.TYPEORM_BY_SNIPPET, TypeOrmBySnippetPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_ONE_BY_SQL, TypeOrmLoadOneBySQLPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_MANY_BY_SQL, TypeOrmLoadManyBySQLPipelineStepBuilder);
+	StepBuilders.register(DefaultSteps.TYPEORM_LOAD_MANY_BY_SQL_USE_CURSOR, TypeOrmLoadManyBySQLUseCursorPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_SAVE_BY_SQL, TypeOrmSaveBySQLPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_BULK_SAVE_BY_SQL, TypeOrmBulkSaveBySQLPipelineStepBuilder);
 	StepBuilders.register(DefaultSteps.TYPEORM_TRANSACTIONAL, TypeOrmTransactionalPipelineStepSetsBuilder);

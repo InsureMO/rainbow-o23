@@ -526,6 +526,28 @@ export interface TypeOrmLoadBasis extends TypeOrmBasis {
 Array<TypeOrmEntityToLoad>;
 ```
 
+#### Load Many by SQL, Use Cursor
+
+##### Request and Response
+
+```typescript
+// request
+export interface TypeOrmLoadBasis extends TypeOrmBasis {
+	params?: Array<TypeOrmEntityValue> | TypeOrmEntityToSave;
+}
+
+// response
+Array<any>;
+```
+
+By specifying `fetchSize`, each batch of data retrieved will execute sub-steps. Before executing the sub-steps, the data to be passed to it
+will be calculated using the `streamTo` function. If `streamTo` is not specified, the batch of data retrieved itself will be passed to the
+sub-steps. If the sub-steps is not specified, all retrieved data will be merged and returned.
+
+Therefore, the number of times the sub-step is executed is related to the quantity of data and the `fetchSize`. Meanwhile, each time the
+sub-step is invoked, the context will include a `$$typeOrmCursorRound` variable indicating the current batch (starting from 0), and a
+`$typeOrmCursorEnd` variable indicating whether it is the last batch.
+
 #### Save by SQL
 
 ##### Request and Response

@@ -70,10 +70,10 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 						logger,
 						dataSourceName: 'TEST',
 						sql: 'SELECT ID id, CONTENT content FROM T_TEST_TABLE WHERE ID = ?',
-						fromRequest: ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
+						fromRequest: async ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
 							return {params: [$factor.idToLoad]} as TypeOrmBasis;
 						},
-						toResponse: ($result: TestTable, _$request: PipelineStepData) => {
+						toResponse: async ($result: TestTable, _$request: PipelineStepData) => {
 							expect($result.id).toBe(1);
 							expect($result.content).toBe('hello world!');
 							return {loadedById: $result};
@@ -87,10 +87,10 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 						logger,
 						dataSourceName: 'TEST',
 						sql: 'INSERT INTO T_TEST_TABLE(ID, CONTENT) VALUES (?, ?)',
-						fromRequest: ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
+						fromRequest: async ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
 							return {values: [$factor.item3.id, $factor.item3.content]};
 						},
-						toResponse: ($result: TypeOrmIdOfInserted, _$request: PipelineStepData) => {
+						toResponse: async ($result: TypeOrmIdOfInserted, _$request: PipelineStepData) => {
 							expect($result).toBe(3);
 							return {insertedId: $result};
 						},
@@ -104,10 +104,10 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 						dataSourceName: 'TEST',
 						autonomous: true,
 						sql: 'SELECT ID id, CONTENT content FROM T_TEST_TABLE WHERE ID = ?',
-						fromRequest: ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
+						fromRequest: async ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
 							return {params: [$factor.item3.id]};
 						},
-						toResponse: ($result: Undefinable<TestTable>, $request: PipelineStepData) => {
+						toResponse: async ($result: Undefinable<TestTable>, $request: PipelineStepData) => {
 							expect($result).toBeUndefined();
 							return $request.content;
 						}
@@ -116,10 +116,10 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 				{
 					create: async ({config, logger}) => new TypeOrmSaveBySQLPipelineStep({
 						config, logger, dataSourceName: 'TEST', sql: 'UPDATE T_TEST_TABLE SET CONTENT = ? WHERE ID = ?',
-						fromRequest: ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
+						fromRequest: async ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
 							return {values: [$factor.item3ChangeTo.content, $factor.item3ChangeTo.id]};
 						},
-						toResponse: ($result: TypeOrmCountOfAffected, _$request: PipelineStepData) => {
+						toResponse: async ($result: TypeOrmCountOfAffected, _$request: PipelineStepData) => {
 							// DON'T KNOW WHY THIS IS 3, SEEMS SHOULD BE 1 ACCORDING TO BETTER-SQLITE3 DOCUMENT
 							// BUT CURRENTLY IT RETURNS COUNT OF THIS TABLE, NOT IMPACTED ROW COUNT
 							expect($result).toBe(3);
@@ -134,14 +134,14 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 						logger,
 						dataSourceName: 'TEST',
 						sql: 'INSERT INTO T_TEST_TABLE(ID, CONTENT) VALUES (?, ?)',
-						fromRequest: ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
+						fromRequest: async ($factor: TransactionalRequest, _$request: PipelineStepData<TransactionalRequest>) => {
 							return {
 								items: [
 									[$factor.item4.id, $factor.item4.content], [$factor.item5.id, $factor.item5.content]
 								]
 							};
 						},
-						toResponse: ($result: TypeOrmIdsOfInserted, _$request: PipelineStepData) => {
+						toResponse: async ($result: TypeOrmIdsOfInserted, _$request: PipelineStepData) => {
 							return {insertedIds: $result};
 						},
 						mergeRequest: true
@@ -150,7 +150,7 @@ class TransactionalTestStepSets extends TypeOrmTransactionalPipelineStepSets {
 				{
 					create: async ({config, logger}) => new TypeOrmLoadManyBySQLPipelineStep({
 						config, logger, dataSourceName: 'TEST', sql: 'SELECT ID id, CONTENT content FROM T_TEST_TABLE',
-						toResponse: ($result: Array<TestTable>, _$request: PipelineStepData) => {
+						toResponse: async ($result: Array<TestTable>, _$request: PipelineStepData) => {
 							return {all: $result};
 						},
 						mergeRequest: true
