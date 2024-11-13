@@ -485,7 +485,7 @@ snippet: >+
 
 ### `from-input`
 
-`($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => InFragment`:
+`($factor: In, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<InFragment>`:
 
 - `$factor`: input data,
 - `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
@@ -498,7 +498,7 @@ The data returned by `from-input` will serve as the input of this step.
 
 ### `to-output`
 
-`($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Out`:
+`($result: OutFragment, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<Out>`:
 
 - `$result`: result data after step execution,
 - `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
@@ -1216,6 +1216,42 @@ For example,
 The above definition will use input data `{params: {userName: 'john'}}`, and return an
 object `[{userId: 2, userName: 'Johnson'}, {userId: 3, userName: 'John'}]`. If the query does not match any data, it will return an empty
 array.
+
+### TypeOrmLoadManyBySQLUseCursorPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
+
+Load multiple rows of data, using the same method as `TypeOrmLoadManyBySQLPipelineStep`, but returned data depends on its definition.
+Execute after `from-input`.
+
+| Attribute   | Type         | Mandatory | Description                                                 |
+|-------------|--------------|-----------|-------------------------------------------------------------|
+| `fetchSize` | `number`     | No        | Size of one fetch.                                          |
+| `streamTo`  | `snippet`    | No        | Function to transform fetched data to sub steps input data. |
+| `steps`     | `step array` | No        | Sub steps.                                                  |
+
+For example,
+
+```yaml
+- name: Load Many
+  use: typeorm-use-cursor
+  sql: SELECT USER_ID AS "userId", USER_NAME AS "userName" FROM T_USER WHERE LOWER(USER_NAME) LIKE $name%
+  merge: users
+```
+
+> Sub steps are not mandatory, but if defined, the fetched data will be passed to sub steps. Meanwhile, `$typeOrmCursorRound: number` and
+`$typeOrmCursorEnd: boolean` also will be passed to sub steps in request context.
+
+### `stream-to`
+
+`($factor: Array<any>, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<any>`:
+
+- `$factor`: fetched data for current round,
+- `$request`: request data, including input data and context data. <span style='color: red;'>**DO NOT**</span> attempt to modify the context
+  data under any circumstances,
+- `$helpers`, `$`: helper functions.
+
+The data returned by `stream-to` will serve as the input of sub steps.
+
+> If `stream-to` is not defined, fetched data will be passed to sub steps directly.
 
 ### TypeOrmSaveBySQLPipelineStep, extends AbstractTypeOrmBySQLPipelineStep, AbstractTypeOrmPipelineStep, AbstractFragmentaryPipelineStep
 
