@@ -398,44 +398,6 @@ Autonomous transactions take precedence over the transaction name, meaning that 
 specified by the transaction name will be ignored. If you need to use the transaction name, you must nest the pipeline steps within
 transactional step sets, and ensure that the datasource name and transaction name remain the same.
 
-### By Entity (Deprecated, not recommended)
-
-#### Load Entity by ID
-
-##### Constructor Parameters
-
-| Name       | Type   | Default Value | Comments             |
-|------------|--------|---------------|----------------------|
-| entityName | string |               | TypeOrm entity name. |
-
-##### Request and Response
-
-```typescript
-// request
-export type TypeOrmIdType = string | number | bigint;
-// response
-export type TypeOrmEntityToLoad = Undefinable<DeepPartial<ObjectLiteral>>;
-```
-
-#### Save Entity
-
-##### Constructor Parameters
-
-| Name                   | Type                                   | Default Value | Comments             |
-|------------------------|----------------------------------------|---------------|----------------------|
-| entityName             | string                                 |               | TypeOrm entity name. |
-| fillIdBySnowflake      | boolean                                | false         |                      |
-| uniquenessCheckSnippet | ScriptFuncOrBody\<UniquenessCheckFunc> |               |                      |
-
-##### Request and Response
-
-```typescript
-// request
-export type EntityToSave = DeepPartial<ObjectLiteral>;
-// response
-export type EntityToSave = DeepPartial<ObjectLiteral>;
-```
-
 ### By SQL
 
 #### Environment Parameters
@@ -527,6 +489,12 @@ Array<TypeOrmEntityToLoad>;
 ```
 
 #### Load Many by SQL, Use Cursor
+
+##### Environment Parameters
+
+| Name                    | Type   | Default Value | Comments    |
+|-------------------------|--------|---------------|-------------|
+| `typeorm.DB.fetch.size` | number | 20            | Fetch size. |
 
 ##### Request and Response
 
