@@ -315,44 +315,45 @@ be accessed within the pipeline steps. It should be noted that only the matched 
 
 A pipeline step is a unit of execution logic. It can be a script fragment, a function, or a pipeline. The following table lists the steps:
 
-| Step Type                              | Extends From                       | Module    | Usage    | Description                                                                 |
-|----------------------------------------|------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
-| `AbstractFragmentaryPipelineStep`      |                                    | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
-| `GetPropertyPipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Get a property from the request payload.                                    |
-| `DeletePropertyPipelineStep`           | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
-| `SnippetPipelineStep`                  | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a script snippet.                                                   |
-| `SnowflakePipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Generate a snowflake number.                                                |
-| `FetchPipelineStep`                    | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
-| `RefPipelinePipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a pipeline.                                                         |
-| `RefStepPipelineStep`                  | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a step.                                                             |
-| `RoutesPipelineStepSets`               | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
-| `PipelineStepSets`                     | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps.                                                     |
-| `AsyncPipelineStepSets`                | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
-| `ConditionalPipelineStepSets`          | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
-| `EachPipelineStepSets`                 | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
-| `ParallelPipelineStepSets`             | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps parallel.                                            |
-| `AbstractTypeOrmPipelineStep`          | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
-| `TypeOrmBySnippetPipelineStep`         | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
-| `AbstractTypeOrmBySQLPipelineStep`     | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
-| `TypeOrmLoadOneBySQLPipelineStep`      | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
-| `TypeOrmLoadManyBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
-| `TypeOrmSaveBySQLPipelineStep`         | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
-| `TypeOrmBulkSaveBySQLPipelineStep`     | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
-| `TypeOrmTransactionalPipelineStepSets` | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
-| `PrintPdfPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n5`  | Print    | Print PDF file.                                                             |
-| `PrintCsvPipelineStep`                 | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print CSV file.                                                             |
-| `PrintExcelPipelineStep`               | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print Excel file.                                                           |
-| `PrintWordPipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n7`  | Print    | Print Word file.                                                            |
-| `AbstractRegionPipelineStep`           | `AbstractFragmentaryPipelineStep`  | `o23/n8`  | AWS      | Execute AWS command on region.                                              |
-| `AbstractS3PipelineStep`               | `AbstractRegionPipelineStep`       | `o23/n8`  | AWS      | Execute AWS S3 command.                                                     |
-| `S3GetObjectPipelineStep`              | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for getting an object.                               |
-| `S3PutObjectPipelineStep`              | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for putting an object.                               |
-| `S3DeleteObjectPipelineStep`           | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for deleting an object.                              |
-| `S3ListObjectsPipelineStep`            | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for listing objects.                                 |
-| `ScriptsLoadFilesPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Load database scripts files.                                                |
-| `ParsePipelineDefPipelineStep`         | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Parse pipeline definition                                                   |
-| `ServerInitSnippetPipelineStep`        | `SnippetPipelineStep`              | `o23/n90` | System   | Server initialization snippet                                               |
-| `TriggerPipelinePipelineStep`          | `AbstractFragmentaryPipelineStep`  | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
+| Step Type                                   | Extends From                       | Module    | Usage    | Description                                                                 |
+|---------------------------------------------|------------------------------------|-----------|----------|-----------------------------------------------------------------------------|
+| `AbstractFragmentaryPipelineStep`           |                                    | `o23/n3`  | Abstract | Provide in, out, error handlers.                                            |
+| `GetPropertyPipelineStep`                   | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Get a property from the request payload.                                    |
+| `DeletePropertyPipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Delete a property from the request payload.                                 |
+| `SnippetPipelineStep`                       | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a script snippet.                                                   |
+| `SnowflakePipelineStep`                     | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Generate a snowflake number.                                                |
+| `FetchPipelineStep`                         | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Fetch data from a remote server.                                            |
+| `RefPipelinePipelineStep`                   | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a pipeline.                                                         |
+| `RefStepPipelineStep`                       | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a step.                                                             |
+| `RoutesPipelineStepSets`                    | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps for each route, semantically equivalent to a switch. |
+| `PipelineStepSets`                          | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Standard | Execute a set of steps.                                                     |
+| `AsyncPipelineStepSets`                     | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps asynchronously.                                      |
+| `ConditionalPipelineStepSets`               | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps conditionally.                                       |
+| `EachPipelineStepSets`                      | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps for each item in an array.                           |
+| `ParallelPipelineStepSets`                  | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps parallel.                                            |
+| `AbstractTypeOrmPipelineStep`               | `AbstractFragmentaryPipelineStep`  | `o23/n3`  | Abstract | Provide TypeORM connection and transaction.                                 |
+| `TypeOrmBySnippetPipelineStep`              | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Standard | Execute a snippet based on TypeORM connection.                              |
+| `AbstractTypeOrmBySQLPipelineStep`          | `AbstractTypeOrmPipelineStep`      | `o23/n3`  | Abstract | Execute SQL statement.                                                      |
+| `TypeOrmLoadOneBySQLPipelineStep`           | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading one data, single record.                  |
+| `TypeOrmLoadManyBySQLPipelineStep`          | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records.              |
+| `TypeOrmLoadManyBySQLUseCursorPipelineStep` | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for loading many data, multiple records, use cursor.  |
+| `TypeOrmSaveBySQLPipelineStep`              | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for saving data.                                      |
+| `TypeOrmBulkSaveBySQLPipelineStep`          | `AbstractTypeOrmBySQLPipelineStep` | `o23/n3`  | Standard | Execute SQL statement for bulk saving data.                                 |
+| `TypeOrmTransactionalPipelineStepSets`      | `PipelineStepSets`                 | `o23/n3`  | Standard | Execute a set of steps in a transaction.                                    |
+| `PrintPdfPipelineStep`                      | `AbstractFragmentaryPipelineStep`  | `o23/n5`  | Print    | Print PDF file.                                                             |
+| `PrintCsvPipelineStep`                      | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print CSV file.                                                             |
+| `PrintExcelPipelineStep`                    | `AbstractFragmentaryPipelineStep`  | `o23/n6`  | Print    | Print Excel file.                                                           |
+| `PrintWordPipelineStep`                     | `AbstractFragmentaryPipelineStep`  | `o23/n7`  | Print    | Print Word file.                                                            |
+| `AbstractRegionPipelineStep`                | `AbstractFragmentaryPipelineStep`  | `o23/n8`  | AWS      | Execute AWS command on region.                                              |
+| `AbstractS3PipelineStep`                    | `AbstractRegionPipelineStep`       | `o23/n8`  | AWS      | Execute AWS S3 command.                                                     |
+| `S3GetObjectPipelineStep`                   | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for getting an object.                               |
+| `S3PutObjectPipelineStep`                   | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for putting an object.                               |
+| `S3DeleteObjectPipelineStep`                | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for deleting an object.                              |
+| `S3ListObjectsPipelineStep`                 | `AbstractS3PipelineStep`           | `o23/n8`  | AWS      | Execute AWS S3 command for listing objects.                                 |
+| `ScriptsLoadFilesPipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Load database scripts files.                                                |
+| `ParsePipelineDefPipelineStep`              | `AbstractFragmentaryPipelineStep`  | `o23/n90` | System   | Parse pipeline definition                                                   |
+| `ServerInitSnippetPipelineStep`             | `SnippetPipelineStep`              | `o23/n90` | System   | Server initialization snippet                                               |
+| `TriggerPipelinePipelineStep`               | `AbstractFragmentaryPipelineStep`  | `o23/n90` | Standard | Trigger a pipeline by code, a pipeline or step by given content.            |
 
 Pipeline steps are divided into several categories:
 
