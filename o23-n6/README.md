@@ -175,6 +175,12 @@ Find template and unit test in `/test` folder, syntax for using an Excel templat
 - All properties are relative paths, calculated relative to their parent node. Therefore, within a loop, only the values of each element
   can be accessed.
 
+### Want TypeOrm Cursor?
+
+Simply let the loop data be an instanceof `TypeOrmDataIterator`, see test case.
+
+> Feel free to use your own `LoopDataIterator`.
+
 ### Known Issues
 
 - Cannot apply auto filter into merged cells correctly, each cell will display a filter, which should only be displayed on the last cell.
