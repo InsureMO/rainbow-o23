@@ -1,10 +1,11 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
-import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
+import {FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
 import {parse} from 'csv-parse/sync';
 import {stringify} from 'csv-stringify/sync';
 import * as fs from 'fs';
 import {nanoid} from 'nanoid';
 import * as path from 'path';
+import {AbstractTypeormCursorAvailableStep} from './abstract-typeorm-cursor-available-step';
 import {
 	ERR_INCORRECT_LOOP_END,
 	ERR_INCORRECT_LOOP_END_VARIABLE,
@@ -88,7 +89,7 @@ interface CsvAstStdRow extends CsvAstRow {
 type CsvSheetAst = Array<CsvAstRow>;
 
 export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, >
-	extends AbstractFragmentaryPipelineStep<In, Out, PrintCsvPipelineStepInFragment, PrintCsvPipelineStepOutFragment> {
+	extends AbstractTypeormCursorAvailableStep<In, Out, PrintCsvPipelineStepInFragment, PrintCsvPipelineStepOutFragment> {
 	private readonly _keepTempFile: boolean;
 	private readonly _delimiter: Undefinable<string>;
 	private readonly _escapeChar: Undefinable<string>;
@@ -253,7 +254,7 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected printEmptyRow(_row: CsvAstEmptyRow, printedRows: PrintedCsvSheet): void {
+	protected async printEmptyRow(_row: CsvAstEmptyRow, printedRows: PrintedCsvSheet): Promise<void> {
 		printedRows.push([]);
 	}
 
@@ -270,26 +271,31 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printStandardRow(row: CsvAstStdRow, data: any, printedRows: PrintedCsvSheet): void {
+	protected async printStandardRow(row: CsvAstStdRow, data: any, printedRows: PrintedCsvSheet): Promise<void> {
 		printedRows.push(row.cells.map((cell, cellIndex) => this.printCell(row, cell, cellIndex + 1, data)));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printLoopRows(row: CsvAstLoopRows, data: any, printedRows: PrintedCsvSheet): void {
-		let loopData = row.loopVariable === '' ? data : Utils.getValue(data, row.loopVariable);
-		loopData = loopData == null ? [] : (Array.isArray(loopData) ? loopData : [loopData]);
+	protected async printLoopRows(row: CsvAstLoopRows, data: any, printedRows: PrintedCsvSheet): Promise<void> {
+		const loopData = row.loopVariable === '' ? data : Utils.getValue(data, row.loopVariable);
+		const iterator = this.createIterator(loopData);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		loopData.forEach((itemData: any) => row.rows.forEach(row => this.printRow(row, itemData, printedRows)));
+		await iterator.forEachItem(async (itemData: any) => {
+			return await row.rows.reduce(async (previous, row) => {
+				await previous;
+				return await this.printRow(row, itemData, printedRows);
+			}, Promise.resolve());
+		});
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printRow(row: CsvAstRow, data: any, printedRows: PrintedCsvSheet): void {
+	protected async printRow(row: CsvAstRow, data: any, printedRows: PrintedCsvSheet): Promise<void> {
 		if (this.isEmptyRow(row)) {
-			this.printEmptyRow(row, printedRows);
+			await this.printEmptyRow(row, printedRows);
 		} else if (this.isStandardRow(row)) {
-			this.printStandardRow(row, data, printedRows);
+			await this.printStandardRow(row, data, printedRows);
 		} else if (this.isLoopRows(row)) {
-			this.printLoopRows(row, data, printedRows);
+			await this.printLoopRows(row, data, printedRows);
 		} else {
 			// never occurred
 			throw new UncatchableError(ERR_UNDETECTABLE_ROW, `Undetectable row found, check [${row.originalRow.join(this.getDelimiter())}] at line ${row.lineNumber}.`);
@@ -347,7 +353,10 @@ export class PrintCsvPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		});
 		const ast = this.parseAst(sheet);
 		const printedRows = this.useTempFile() ? this.createPrintedRowsForTempFile() : this.createPrintedRowsInMemory();
-		ast.forEach(row => this.printRow(row, data, printedRows));
+		await ast.reduce(async (previous, row) => {
+			await previous;
+			return await this.printRow(row, data, printedRows);
+		}, Promise.resolve());
 		return Buffer.from(printedRows.csv());
 	}
 

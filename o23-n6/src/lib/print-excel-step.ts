@@ -1,9 +1,10 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
-import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
+import {FragmentaryPipelineStepOptions, Utils} from '@rainbow-o23/n3';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import {nanoid} from 'nanoid';
 import * as path from 'path';
+import {AbstractTypeormCursorAvailableStep} from './abstract-typeorm-cursor-available-step';
 import {
 	ERR_INCORRECT_LOOP_END,
 	ERR_INCORRECT_LOOP_END_VARIABLE,
@@ -12,6 +13,7 @@ import {
 	ERR_NESTED_LOOP_ON_SAME_ARRAY_NOT_ALLOWED,
 	ERR_UNDETECTABLE_ROW
 } from './error-codes';
+import {LoopDataIterator} from './loop-data-iterator';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PrintExcelPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
@@ -118,8 +120,8 @@ interface ExcelBookAst {
  *    use auto filter carefully.
  */
 
-export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, >
-	extends AbstractFragmentaryPipelineStep<In, Out, PrintExcelPipelineStepInFragment, PrintExcelPipelineStepOutFragment> {
+export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload>
+	extends AbstractTypeormCursorAvailableStep<In, Out, PrintExcelPipelineStepInFragment, PrintExcelPipelineStepOutFragment> {
 	private readonly _keepTempFile: boolean;
 
 	public constructor(options: PrintExcelPipelineStepOptions<In, Out, PrintExcelPipelineStepInFragment, PrintExcelPipelineStepOutFragment>) {
@@ -418,7 +420,7 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected getLoopData(data: any, variable: string): Array<any> {
+	protected getLoopData(data: any, variable: string): LoopDataIterator {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let loopData: Array<any> | any;
 		if (variable != null && variable !== '') {
@@ -426,10 +428,7 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		} else {
 			loopData = data;
 		}
-		if (!Array.isArray(loopData)) {
-			loopData = [loopData];
-		}
-		return loopData;
+		return this.createIterator(loopData);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -545,9 +544,9 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		rows.length = 0;
 	}
 
-	protected printEmptyRow(
+	protected async printEmptyRow(
 		sheet: ExcelJS.Worksheet, rowsToMerge: Array<[ExcelJS.Row, Array<ExcelAstCellMergeType>]>,
-		row: ExcelAstEmptyRow): void {
+		row: ExcelAstEmptyRow): Promise<void> {
 		const added = sheet.addRow([]);
 		added.height = row.height;
 		added.hidden = row.hidden;
@@ -627,10 +626,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		}
 	}
 
-	protected printStandardRow(
+	protected async printStandardRow(
 		sheet: ExcelJS.Worksheet, rowsToMerge: Array<[ExcelJS.Row, Array<ExcelAstCellMergeType>]>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		row: ExcelAstStdRow, data: any): void {
+		row: ExcelAstStdRow, data: any): Promise<void> {
 		const printedCells = row.cells.map((cell, cellIndex) => this.printCell(row, cell, cellIndex + 1, data));
 		const added = sheet.addRow(printedCells.map(([{value}]) => value));
 		printedCells.forEach(([{style, note}], index) => {
@@ -653,27 +652,31 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		this.tryToMergeRowsOrCells(sheet, rowsToMerge);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected printLoopRows(
+	protected async printLoopRows(
 		sheet: ExcelJS.Worksheet, rowsToMerge: Array<[ExcelJS.Row, Array<ExcelAstCellMergeType>]>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		row: ExcelAstLoopRows, data: any): void {
-		let loopData = row.loopVariable === '' ? data : Utils.getValue(data, row.loopVariable);
-		loopData = loopData == null ? [] : (Array.isArray(loopData) ? loopData : [loopData]);
+		row: ExcelAstLoopRows, data: any): Promise<void> {
+		const loopData = row.loopVariable === '' ? data : Utils.getValue(data, row.loopVariable);
+		const iterator = this.createIterator(loopData);
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		loopData.forEach((itemData: any) => row.rows.forEach(row => this.printRow(sheet, rowsToMerge, row, itemData)));
+		await iterator.forEachItem(async (item: any) => {
+			return await row.rows.reduce(async (previous, row) => {
+				await previous;
+				return await this.printRow(sheet, rowsToMerge, row, item);
+			}, Promise.resolve());
+		});
 	}
 
-	protected printRow(
+	protected async printRow(
 		sheet: ExcelJS.Worksheet, rowsToMerge: Array<[ExcelJS.Row, Array<ExcelAstCellMergeType>]>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		row: ExcelAstRow, data: any): void {
+		row: ExcelAstRow, data: any): Promise<void> {
 		if (this.isEmptyRow(row)) {
-			this.printEmptyRow(sheet, rowsToMerge, row);
+			await this.printEmptyRow(sheet, rowsToMerge, row);
 		} else if (this.isStandardRow(row)) {
-			this.printStandardRow(sheet, rowsToMerge, row, data);
+			await this.printStandardRow(sheet, rowsToMerge, row, data);
 		} else if (this.isLoopRows(row)) {
-			this.printLoopRows(sheet, rowsToMerge, row, data);
+			await this.printLoopRows(sheet, rowsToMerge, row, data);
 		} else {
 			// never occurred
 			throw new UncatchableError(ERR_UNDETECTABLE_ROW, `Undetectable row found, check line ${row.lineNumber}.`);
@@ -681,14 +684,16 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 	}
 
 	// noinspection JSUnresolvedReference
-	protected printSheet(
+	protected async printSheet(
 		ast: ExcelSheetAst,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		data: any,
-		workbook: ExcelJS.stream.xlsx.WorkbookWriter): void {
+		workbook: ExcelJS.stream.xlsx.WorkbookWriter): Promise<void> {
 		const {name, nameVariable, loopVariable, rows} = ast;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		this.getLoopData(data, loopVariable).forEach((loopData: any) => {
+		const iterator = this.getLoopData(data, loopVariable);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		await iterator.forEachItem(async (loopData: any) => {
 			const sheet = workbook.addWorksheet(this.getSheetName(loopData, name, nameVariable), {
 				pageSetup: ast.pageSetup,
 				headerFooter: ast.headerFooter,
@@ -704,9 +709,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 			});
 			sheet.autoFilter = ast.autoFilter;
 			const rowsToMerge: Array<[ExcelJS.Row, Array<ExcelAstCellMergeType>]> = [];
-			rows.forEach(rowAst => {
-				this.printRow(sheet, rowsToMerge, rowAst, loopData);
-			});
+			await rows.reduce(async (previous, rowAst) => {
+				await previous;
+				return await this.printRow(sheet, rowsToMerge, rowAst, loopData);
+			}, Promise.resolve());
 			sheet.commit();
 		});
 	}
@@ -720,7 +726,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({
 			useStyles: true, useSharedStrings: true, filename: tempFileName
 		});
-		ast.sheets.forEach(ast => this.printSheet(ast, data, workbook));
+		await ast.sheets.reduce(async (previous, ast) => {
+			await previous;
+			return await this.printSheet(ast, data, workbook);
+		}, Promise.resolve());
 		workbook.calcProperties = {fullCalcOnLoad: true};
 		await workbook.commit();
 
