@@ -117,10 +117,7 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 			const close = async (readable: ReadStream) => {
 				// never throw exception from this function
 				try {
-					readable?.close((e) => {
-						// ignore this error
-						this.getLogger().error(e);
-					});
+					readable?.destroy();
 				} catch (e) {
 					// ignore this error
 					this.getLogger().error(e);
@@ -137,6 +134,7 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 					reject(e);
 				});
 				readable.on('data', async (data) => {
+					readable.pause();
 					rows.push(data);
 					await pipe({
 						resolve, reject: async (e: Error) => {
@@ -144,9 +142,8 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 							reject(e);
 						}, end: false
 					});
-					readable.read();
+					readable.resume();
 				});
-				readable.read();
 			};
 			return new Promise<OutFragment>((resolve, reject) => read({resolve, reject}));
 		}, request);
