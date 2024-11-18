@@ -2,7 +2,10 @@ import {PipelineCode, PipelineStepCode, PipelineStepType, UncatchableError} from
 import {RefPipelinePipelineStep, RefPipelinePipelineStepOptions, RefStepPipelineStepOptions} from '@rainbow-o23/n3';
 import {ERR_PIPELINE_PIPELINE_REF_NOT_DEFINED} from '../../error-codes';
 import {redressString} from '../utils';
-import {AbstractFragmentaryPipelineStepBuilder, FragmentaryPipelineStepBuilderOptions} from './index';
+import {
+	AbstractFragmentaryPipelineStepBuilder,
+	FragmentaryPipelineStepBuilderOptions
+} from './abstract-fragmentary-step-builder';
 
 export type RefPipelinePipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOptions & {
 	ref?: PipelineStepCode;
