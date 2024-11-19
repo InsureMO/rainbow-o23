@@ -20,7 +20,6 @@ export const buildConfig = (lint) => {
 		plugins: [
 			string({include: '**/*.yaml'}),
 			lint ? eslint({exclude: ['../node_modules/**', 'node_modules/**', '**/*.yaml']}) : null,
-			// lint ? tslint({exclude: ['../node_modules/**', 'node_modules/**']}) : null,
 			typescript({clean: true}),
 			babel({babelHelpers: 'bundled'})
 		].filter(x => x != null),

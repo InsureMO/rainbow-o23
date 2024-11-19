@@ -47,7 +47,6 @@
 		"pg-query-stream": "^4.7.1",
 		"reflect-metadata": "^0.2.2",
 		"rollup": "^3.29.5",
-		"rollup-plugin-tslint": "^0.2.2",
 		"rollup-plugin-typescript2": "^0.34.1",
 		"tslib": "^2.4.1"
 	},

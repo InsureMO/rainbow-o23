@@ -52,7 +52,6 @@
 		"rollup": "^3.29.5",
 		"rollup-plugin-copy": "^3.5.0",
 		"rollup-plugin-delete": "^2.0.0",
-		"rollup-plugin-tslint": "^0.2.2",
 		"rollup-plugin-typescript2": "^0.34.1",
 		"tslib": "^2.4.1",
 		"typescript": "5.5.4"
