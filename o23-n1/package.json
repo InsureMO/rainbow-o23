@@ -9,7 +9,7 @@
 	"scripts": {
 		"build": "rollup -c",
 		"build:ci": "rollup -c rollup.config.ci.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "jest"
 	},
 	"repository": {
 		"type": "git",
@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"dayjs": "^1.11.13",
+		"decimal.js": "^10.4.3",
 		"mathjs": "^13.2.1",
 		"nanoid": "3.3.7"
 	},
@@ -41,6 +42,28 @@
 		"rollup-plugin-typescript2": "^0.34.1",
 		"tslib": "^2.4.1",
 		"typescript": "5.5.4"
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"json",
+			"ts"
+		],
+		"testRegex": "(/test/.*\\.(test|spec))\\.[tj]sx?$",
+		"testPathIgnorePatterns": [
+			"/node_modules/"
+		],
+		"transform": {
+			"^.+\\.(t|j)s$": "ts-jest"
+		},
+		"collectCoverageFrom": [
+			"src/**/*.(t|j)s"
+		],
+		"coverageDirectory": "./coverage",
+		"coverageReporters": [
+			"html"
+		],
+		"testEnvironment": "node"
 	},
 	"volta": {
 		"extends": "../package.json"

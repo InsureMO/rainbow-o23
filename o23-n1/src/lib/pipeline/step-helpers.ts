@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import Decimal from 'decimal.js';
 import * as math from 'mathjs';
 import {
 	CatchableError,
@@ -38,12 +39,14 @@ export class PipelineStepDateHelper {
 }
 
 export type PipelineStepMathHelper = typeof math;
+export type PipelineStepDecimalHelper = (value: Decimal.Value) => Decimal;
 
 export interface PipelineStepHelpers {
 	$config?: Config;
 	$logger?: Logger;
 	$date: PipelineStepDateHelper;
 	$math: PipelineStepMathHelper;
+	$decimal: PipelineStepDecimalHelper;
 	$nano: (size?: number) => string;
 	$ascii: (size?: number) => string;
 	/** create an exposed uncatchable error*/
@@ -73,6 +76,10 @@ export interface PipelineStepHelpers {
 	isNotBlank: (value: any) => boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	trim: (value: any) => string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	noop: (value: any) => void;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	asyncNoop: (value: any) => Promise<void>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;
@@ -91,6 +98,7 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		// date
 		$date: new PipelineStepDateHelper(config),
 		$math: math,
+		$decimal: (value: Decimal.Value) => new Decimal(value),
 		// nano
 		$nano: StepHelpersUtils.$nano, $ascii: StepHelpersUtils.$ascii,
 		// errors
@@ -104,6 +112,7 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		// utilities
 		isEmpty: StepHelpersUtils.isEmpty, isNotEmpty: StepHelpersUtils.isNotEmpty,
 		isBlank: StepHelpersUtils.isBlank, isNotBlank: StepHelpersUtils.isNotBlank,
-		trim: StepHelpersUtils.trim
+		trim: StepHelpersUtils.trim,
+		noop: StepHelpersUtils.noop, asyncNoop: StepHelpersUtils.asyncNoop
 	};
 };

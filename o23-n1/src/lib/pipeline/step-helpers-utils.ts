@@ -1,6 +1,8 @@
 import {customAlphabet, nanoid} from 'nanoid';
-import {CatchableError, ERR_TRIM_NON_STRING, ExposedUncatchableError, UncatchableError} from '../utils';
-import {PipelineStepHelpers} from './index';
+import {CatchableError, ERR_TRIM_NON_STRING, ExposedUncatchableError, UncatchableError, Undefinable} from '../utils';
+import {PipelineStepHelpers} from './step-helpers';
+import {IValueOperator, ValueOperator} from './step-helpers-value-operator';
+import {isArrayLike, isBlank, isEmpty, isLength, isNotBlank, isNotEmpty, OBJECT_PROTOTYPE} from './value-operators';
 
 export interface PipelineStepErrorOptions {
 	// exactly same as http status
@@ -27,8 +29,8 @@ export interface PipelineStepFile {
 
 export class StepHelpersUtils {
 	private static asciiNanoId = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_', 32);
-	private static OBJECT_PROTOTYPE = Object.prototype;
 
+	// noinspection JSUnusedLocalSymbols
 	private constructor() {
 		// avoid extend
 	}
@@ -92,60 +94,68 @@ export class StepHelpersUtils {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isPrototype(value: any): boolean {
 		const Ctor = value && value.constructor;
-		const proto = (typeof Ctor === 'function' && Ctor.prototype) || StepHelpersUtils.OBJECT_PROTOTYPE;
+		const proto = (typeof Ctor === 'function' && Ctor.prototype) || OBJECT_PROTOTYPE;
 
 		return value === proto;
 	}
 
+	/**
+	 * return true when given value is an integral number, and greater than or equals 0
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isLength(value: any): boolean {
-		return typeof value === 'number' && value > -1 && value % 1 === 0 && value <= Number.MAX_SAFE_INTEGER;
+		return isLength(value);
 	}
 
+	/**
+	 * return true when given value is not null, not undefined, not function and has length property.
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isArrayLike(value: any): boolean {
-		return value != null && typeof value !== 'function' && StepHelpersUtils.isLength(value.length);
+		return isArrayLike(value);
 	}
 
+	/**
+	 * return true when given value
+	 * 1. is null or undefined
+	 * 2. is array like, array or string, and length is 0
+	 * 3. is map, and size is 0
+	 * 4. is set, and size is 0
+	 * 5. is object, and has no own enumerable property
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isEmpty(value: any): boolean {
-		if (value == null) {
-			return true;
-		}
-		if (StepHelpersUtils.isArrayLike(value) && (Array.isArray(value) || typeof value === 'string')) {
-			return value.length === 0;
-		} else if (value instanceof Map) {
-			return value.size === 0;
-		} else if (value instanceof Set) {
-			return value.size === 0;
-		} else if (StepHelpersUtils.isPrototype(value)) {
-			return Object.keys(value).length === 0;
-		}
-
-		return false;
+		return isEmpty(value).test;
 	}
 
+	/**
+	 * return true when given value is not {@link isEmpty}
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotEmpty(value: any): boolean {
-		return !StepHelpersUtils.isEmpty(value);
+		return isNotEmpty(value).test;
 	}
 
+	/**
+	 * return true when given value is null, undefined or blank string.
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isBlank(value: any): boolean {
-		if (value == null) {
-			return true;
-		}
-		if (typeof value !== 'string') {
-			return false;
-		}
-		return value.trim().length === 0;
+		return isBlank(value).test;
 	}
 
+	/**
+	 * return true when given value is not {@link isBlank}
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotBlank(value: any): boolean {
-		return !StepHelpersUtils.isBlank(value);
+		return isNotBlank(value).test;
 	}
 
+	/**
+	 * return trimmed string, or empty string when given value is null or undefined.
+	 * or throw exception when given value is not null, not undefined, and not a string
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static trim(value: any): string {
 		if (value == null) {
@@ -155,5 +165,24 @@ export class StepHelpersUtils {
 			return value.trim();
 		}
 		throw new UncatchableError(ERR_TRIM_NON_STRING, `Cannot apply trim to non-string object[type=${typeof value}, value=${value}].`);
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	public static test(value: Undefinable<any>): IValueOperator {
+		return ValueOperator.from(value);
+	}
+
+	/**
+	 * do nothing
+	 */
+	public static noop(): void {
+		// do nothing
+	}
+
+	/**
+	 * do nothing
+	 */
+	public static async asyncNoop(): Promise<void> {
+		// do nothing
 	}
 }
