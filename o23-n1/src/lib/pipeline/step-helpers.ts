@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
-import * as math from 'mathjs';
+import {all, create, MathJsInstance} from 'mathjs';
 import {Config, DateTime, ErrorCodes, Logger} from '../utils';
 import {IStepHelpersUtils, PipelineStepErrorOptions, StepHelpersUtils} from './step-helpers-utils';
 
@@ -24,7 +24,7 @@ export class PipelineStepDateHelper {
 	}
 }
 
-export type PipelineStepMathHelper = typeof math;
+export type PipelineStepMathHelper = MathJsInstance;
 export type PipelineStepDecimalHelper = (value: Decimal.Value) => Decimal;
 
 export interface PipelineStepHelpers extends IStepHelpersUtils {
@@ -48,13 +48,14 @@ export const registerToStepHelpers = (helpers: Record<string, any>) => {
 	RegisteredHelpers.helpers = helpers ?? {};
 };
 
-export const createStepHelpers = (config: Config, logger: Logger): PipelineStepHelpers => {
-	return {
+const mathjs = create(all, {number: 'BigNumber', precision: 32});
+export const createStepHelpers = (config: Config, logger: Logger): Readonly<PipelineStepHelpers> => {
+	const helpers: PipelineStepHelpers = {
 		...RegisteredHelpers.helpers,
 		$config: config, $logger: logger,
 		// date
 		$date: new PipelineStepDateHelper(config),
-		$math: math,
+		$math: mathjs,
 		$decimal: (value: Decimal.Value) => new Decimal(value),
 		// nano
 		$nano: StepHelpersUtils.$nano, $ascii: StepHelpersUtils.$ascii,
@@ -73,4 +74,10 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		touch: StepHelpersUtils.touch,
 		noop: StepHelpersUtils.noop, asyncNoop: StepHelpersUtils.asyncNoop
 	};
+	return new Proxy(helpers, {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+		set(_target: PipelineStepHelpers, _p: string | symbol, _value: any, _receiver: any): boolean {
+			return false;
+		}
+	});
 };
