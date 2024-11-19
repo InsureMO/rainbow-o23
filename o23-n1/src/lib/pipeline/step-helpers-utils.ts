@@ -1,7 +1,8 @@
 import {customAlphabet, nanoid} from 'nanoid';
-import {CatchableError, ERR_TRIM_NON_STRING, ExposedUncatchableError, UncatchableError, Undefinable} from '../utils';
+import {CatchableError, ERR_TRIM_NON_STRING, ExposedUncatchableError, UncatchableError} from '../utils';
 import {PipelineStepHelpers} from './step-helpers';
 import {IValueOperator, ValueOperator} from './step-helpers-value-operator';
+import {StaticImplements} from './types';
 import {isArrayLike, isBlank, isEmpty, isLength, isNotBlank, isNotEmpty, OBJECT_PROTOTYPE} from './value-operators';
 
 export interface PipelineStepErrorOptions {
@@ -27,6 +28,47 @@ export interface PipelineStepFile {
 	content: Buffer;
 }
 
+export interface IStepHelpersUtils {
+	$nano: (size?: number) => string;
+	$ascii: (size?: number) => string;
+	$errors: {
+		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		isCatchable: (e: any) => e is CatchableError;
+		exposed: (options: PipelineStepErrorOptions) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		isExposed: (e: any) => e is ExposedUncatchableError;
+		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		isUncatchable: (e: any) => e is UncatchableError;
+	};
+	/** create a file */
+	$file: (options: PipelineStepFileOptions) => PipelineStepFile;
+	$clearContextData: () => typeof PIPELINE_STEP_RETURN_NULL;
+	/** @deprecated */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isEmpty: (value: any) => boolean;
+	/** @deprecated */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotEmpty: (value: any) => boolean;
+	/** @deprecated */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isBlank: (value: any) => boolean;
+	/** @deprecated */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	isNotBlank: (value: any) => boolean;
+	/** @deprecated */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	trim: (value: any) => string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	touch: (value: any) => IValueOperator;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	noop: (value: any) => void;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	asyncNoop: (value: any) => Promise<void>;
+}
+
+@StaticImplements<IStepHelpersUtils>()
 export class StepHelpersUtils {
 	private static asciiNanoId = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_', 32);
 
@@ -77,7 +119,7 @@ export class StepHelpersUtils {
 	};
 
 	// file
-	public static createFile(options: PipelineStepFileOptions): PipelineStepFile {
+	public static $file(options: PipelineStepFileOptions): PipelineStepFile {
 		return {
 			$file: PIPELINE_STEP_FILE_SYMBOL,
 			name: options.name, type: options.type,
@@ -122,6 +164,7 @@ export class StepHelpersUtils {
 	 * 3. is map, and size is 0
 	 * 4. is set, and size is 0
 	 * 5. is object, and has no own enumerable property
+	 * @deprecated use {@link touch} instead
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isEmpty(value: any): boolean {
@@ -130,6 +173,7 @@ export class StepHelpersUtils {
 
 	/**
 	 * return true when given value is not {@link isEmpty}
+	 * @deprecated use {@link touch} instead
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotEmpty(value: any): boolean {
@@ -138,6 +182,7 @@ export class StepHelpersUtils {
 
 	/**
 	 * return true when given value is null, undefined or blank string.
+	 * @deprecated use {@link touch} instead
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isBlank(value: any): boolean {
@@ -146,6 +191,7 @@ export class StepHelpersUtils {
 
 	/**
 	 * return true when given value is not {@link isBlank}
+	 * @deprecated use {@link touch} instead
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotBlank(value: any): boolean {
@@ -155,6 +201,7 @@ export class StepHelpersUtils {
 	/**
 	 * return trimmed string, or empty string when given value is null or undefined.
 	 * or throw exception when given value is not null, not undefined, and not a string
+	 * @deprecated use {@link touch} instead
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static trim(value: any): string {
@@ -168,7 +215,7 @@ export class StepHelpersUtils {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public static test(value: Undefinable<any>): IValueOperator {
+	public static touch(value: any): IValueOperator {
 		return ValueOperator.from(value);
 	}
 

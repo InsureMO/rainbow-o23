@@ -1,22 +1,8 @@
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
 import * as math from 'mathjs';
-import {
-	CatchableError,
-	Config,
-	DateTime,
-	ErrorCodes,
-	ExposedUncatchableError,
-	Logger,
-	UncatchableError
-} from '../utils';
-import {
-	PIPELINE_STEP_RETURN_NULL,
-	PipelineStepErrorOptions,
-	PipelineStepFile,
-	PipelineStepFileOptions,
-	StepHelpersUtils
-} from './step-helpers-utils';
+import {Config, DateTime, ErrorCodes, Logger} from '../utils';
+import {IStepHelpersUtils, PipelineStepErrorOptions, StepHelpersUtils} from './step-helpers-utils';
 
 export class PipelineStepDateHelper {
 	private readonly _dateTimeFormat: string;
@@ -41,45 +27,16 @@ export class PipelineStepDateHelper {
 export type PipelineStepMathHelper = typeof math;
 export type PipelineStepDecimalHelper = (value: Decimal.Value) => Decimal;
 
-export interface PipelineStepHelpers {
+export interface PipelineStepHelpers extends IStepHelpersUtils {
 	$config?: Config;
 	$logger?: Logger;
 	$date: PipelineStepDateHelper;
 	$math: PipelineStepMathHelper;
 	$decimal: PipelineStepDecimalHelper;
-	$nano: (size?: number) => string;
-	$ascii: (size?: number) => string;
+
 	/** create an exposed uncatchable error*/
 	$error: (options: PipelineStepErrorOptions) => never;
 	$errorCodes: Readonly<Record<string, string>>;
-	$errors: {
-		catchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		isCatchable: (e: any) => e is CatchableError;
-		exposed: (options: PipelineStepErrorOptions) => never;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		isExposed: (e: any) => e is ExposedUncatchableError;
-		uncatchable: (options: Omit<PipelineStepErrorOptions, 'status'>) => never;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		isUncatchable: (e: any) => e is UncatchableError;
-	};
-	/** create a file */
-	$file: (options: PipelineStepFileOptions) => PipelineStepFile;
-	$clearContextData: () => typeof PIPELINE_STEP_RETURN_NULL;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	isEmpty: (value: any) => boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	isNotEmpty: (value: any) => boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	isBlank: (value: any) => boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	isNotBlank: (value: any) => boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	trim: (value: any) => string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	noop: (value: any) => void;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	asyncNoop: (value: any) => Promise<void>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;
@@ -106,13 +63,14 @@ export const createStepHelpers = (config: Config, logger: Logger): PipelineStepH
 		$errorCodes: ErrorCodes,
 		$errors: StepHelpersUtils.$errors,
 		// file
-		$file: StepHelpersUtils.createFile,
+		$file: StepHelpersUtils.$file,
 		// semaphore
 		$clearContextData: StepHelpersUtils.$clearContextData,
 		// utilities
 		isEmpty: StepHelpersUtils.isEmpty, isNotEmpty: StepHelpersUtils.isNotEmpty,
 		isBlank: StepHelpersUtils.isBlank, isNotBlank: StepHelpersUtils.isNotBlank,
 		trim: StepHelpersUtils.trim,
+		touch: StepHelpersUtils.touch,
 		noop: StepHelpersUtils.noop, asyncNoop: StepHelpersUtils.asyncNoop
 	};
 };

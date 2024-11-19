@@ -119,31 +119,34 @@ export class SimplePipeline extends AbstractStaticPipeline<number, number> {
 
 Pipeline steps provide rich function support, and all the following functions or instances can be obtained from the `getHelpers` function.
 
-| Syntax                                                                                               | Comments                                                                                                                                                                                                             |
-|------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| $config                                                                                              | Get config instance.                                                                                                                                                                                                 |
-| $logger                                                                                              | Get logger instance.                                                                                                                                                                                                 |
-| $date.now()                                                                                          | Get current datetime, as string.                                                                                                                                                                                     |
-| $date.dayjs                                                                                          | Get [Day.js](https://day.js.org/).                                                                                                                                                                                   |
-| $math                                                                                                | Get [Math.js](https://mathjs.org).                                                                                                                                                                                   |
-| $decimal(value: string                                                   \| number \| Decimal.value) | Create a decimal value by [Decimal.js](https://mikemcl.github.io/decimal.js/).                                                                                                                                       |
-| $nano(size?: number)                                                                                 | Create a nano string.                                                                                                                                                                                                |
-| $ascii(size?: number)                                                                                | Create a nano string, only contains ascii characters (0-9, a-z, A-Z, _).                                                                                                                                             |
-| $error(options: PipelineStepErrorOptions)                                                            | Throw an exposed uncatchable error.                                                                                                                                                                                  |
-| $errorCodes                                                                                          | Get error codes record.                                                                                                                                                                                              |
-| $errors.catchable(options: Omit<PipelineStepErrorOptions, 'status'>)                                 | Throw a catchable error.                                                                                                                                                                                             |
-| $errors.isCatchable(e: any)                                                                          | Check if given is a catchable error.                                                                                                                                                                                 |
-| $errors.exposed(options: PipelineStepErrorOptions)                                                   | Throw an exposed uncatchable error, same as `$helpers.error`.                                                                                                                                                        |
-| $errors.isExposed(e: any)                                                                            | Check if given is an exposed uncatchable error.                                                                                                                                                                      |
-| $errors.catchable(uncatchable: Omit<PipelineStepErrorOptions, 'status'>)                             | Throw an uncatchable error.                                                                                                                                                                                          |
-| $errors.isUncatchable(e: any)                                                                        | Check if given is an uncatchable error.                                                                                                                                                                              |
-| $file(options: PipelineStepFileOptions) => PipelineStepFile                                          | Create a file instance by given options.                                                                                                                                                                             |
-| $clearContextData()                                                                                  | If the pipeline step does not return anything or returns null or undefined, the context will continue to be used without any modifications.<br>So returning this semaphore indicates clearing the step content data. |
-| isEmpty: (value: any)                                                                                | Check if given value is empty or not. Empty includes null value, empty string, array and array likes, map, set and object without keys.                                                                              |
-| isNotEmpty: (value: any)                                                                             | Check if given value is not empty or not.                                                                                                                                                                            |
-| isBlank: (value: any)                                                                                | Check if given value is blank or not. Blank means null value or a string has no length after trimming.                                                                                                               |
-| isNotBlank: (value: any)                                                                             | Check if given value is not blank or not.                                                                                                                                                                            |
-| trim: (value: any)                                                                                   | Try to trim a string, it's null safe, returns empty string when given value is null. Make sure given value is null or a string, otherwise an exception raised.                                                       |
+| Syntax                                                                   | Comments                                                                                                                                                                                                             |
+|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| $config                                                                  | Get config instance.                                                                                                                                                                                                 |
+| $logger                                                                  | Get logger instance.                                                                                                                                                                                                 |
+| $date.now()                                                              | Get current datetime, as string.                                                                                                                                                                                     |
+| $date.dayjs                                                              | Get [Day.js](https://day.js.org/).                                                                                                                                                                                   |
+| $math                                                                    | Get [Math.js](https://mathjs.org).                                                                                                                                                                                   |
+| $decimal(value: string \| number \| Decimal.value)                       | Create a decimal value by [Decimal.js](https://mikemcl.github.io/decimal.js/).                                                                                                                                       |
+| $nano(size?: number)                                                     | Create a nano string.                                                                                                                                                                                                |
+| $ascii(size?: number)                                                    | Create a nano string, only contains ascii characters (0-9, a-z, A-Z, _).                                                                                                                                             |
+| $error(options: PipelineStepErrorOptions)                                | Throw an exposed uncatchable error.                                                                                                                                                                                  |
+| $errorCodes                                                              | Get error codes record.                                                                                                                                                                                              |
+| $errors.catchable(options: Omit<PipelineStepErrorOptions, 'status'>)     | Throw a catchable error.                                                                                                                                                                                             |
+| $errors.isCatchable(e: any)                                              | Check if given is a catchable error.                                                                                                                                                                                 |
+| $errors.exposed(options: PipelineStepErrorOptions)                       | Throw an exposed uncatchable error, same as `$helpers.error`.                                                                                                                                                        |
+| $errors.isExposed(e: any)                                                | Check if given is an exposed uncatchable error.                                                                                                                                                                      |
+| $errors.catchable(uncatchable: Omit<PipelineStepErrorOptions, 'status'>) | Throw an uncatchable error.                                                                                                                                                                                          |
+| $errors.isUncatchable(e: any)                                            | Check if given is an uncatchable error.                                                                                                                                                                              |
+| $file(options: PipelineStepFileOptions) => PipelineStepFile              | Create a file instance by given options.                                                                                                                                                                             |
+| $clearContextData()                                                      | If the pipeline step does not return anything or returns null or undefined, the context will continue to be used without any modifications.<br>So returning this semaphore indicates clearing the step content data. |
+| isEmpty: (value: any)                                                    | **@deprecated**, Use `touch` chain instead.                                                                                                                                                                          |
+| isNotEmpty: (value: any)                                                 | **@deprecated**, Use `touch` chain instead.                                                                                                                                                                          |
+| isBlank: (value: any)                                                    | **@deprecated**, Use `touch` chain instead.                                                                                                                                                                          |
+| isNotBlank: (value: any)                                                 | **@deprecated**, Use `touch` chain instead.                                                                                                                                                                          |
+| trim: (value: any)                                                       | **@deprecated**, Use `touch` chain instead.                                                                                                                                                                          |
+| touch: (value: any): IValueOperator                                      | Operate given value, do test, transform.                                                                                                                                                                             |                                                                  
+| noop: () => void                                                         | Noop function.                                                                                                                                                                                                       |
+| asyncNoop: () => Promise<void>                                           | Async noop function.                                                                                                                                                                                                 |
 
 For example:
 
@@ -249,3 +252,37 @@ includes an additional field called `status`, which represents the HTTP response
 | `format.datetime`                  | string  | YYYY-MM-DD HH:mm:ss | Default datetime format, follows [Day.js](https://day.js.org/)                                                                                                                |
 | `pipeline.debug.log.enabled`       | boolean | false               | Enable the pipeline debug log.                                                                                                                                                |
 | `pipeline.performance.log.enabled` | boolean | false               | Enable the pipeline performance log, spent time of pipeline and pipeline step.<br>Translation: If `pipeline.debug.log.enabled` is true, this log output will also be enabled. |
+
+## Value Operator
+
+`o23/n1` provides a value operator to operate given value, do test, transform. The value operator is a chainable operation. For example,
+
+```ts
+// chainable operation, do test, transform, or default value
+$.touch('abc').isNotBlank().orUseDefault('default').value();                        // 'abc'
+$.touch('').isNotBlank.withDefault('default').value();                              // 'default'
+$.touch('123').isNumber().toFixed(2).value();                                       // '123.00'
+$.touch(void 0).isNumber.useDefault(100).value();                                   // 100       
+$.touch(123).isInt.toFixed2.value();                                                // '123.00' 
+$.touch('123.45').within({min: 100, max: 200}).toFixed3().orElse(150).value();      // '123.450'
+
+// success and failure callback
+$.touch(123).isPositive                                                             // isPositive 123
+	.success((value: number) => console.log('isPositive', value))
+	.failure((value: number) => console.log('isNotPositive', value));
+$.touch(-123).isPositive                                                            // isNotPositive -123
+	.success((value: number) => console.log('isPositive', value))
+	.failure((value: number) => console.log('isNotPositive', value));
+
+// check
+$.touch(123).isPositive.ok();                                                       // true
+$.touch(-123).isPositive.ok();                                                      // false
+
+// promisify
+try {
+	const v = await $.touch(123).isPositive.toNumber.promise();                     // resolved 123
+	await VO.of(-123).isPositive.promise();                                         // rejected, -123 can be caught in catch block
+} catch (v) {
+	console.log(v);	                                                                // -123
+}
+```

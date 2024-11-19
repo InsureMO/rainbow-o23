@@ -1,3 +1,4 @@
+import {StaticImplements} from './types';
 import {
 	AllTesters,
 	AllTransformers,
@@ -276,14 +277,6 @@ export interface IValueOperatorBoostrap {
 	with(value: any): IValueOperator;
 }
 
-const StaticImplements = <T>() => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	return <U extends T>(_constructor: U) => {
-		// since only one static method, no need to execute constructor anymore
-		// constructor;
-	};
-};
-
 @StaticImplements<IValueOperatorBoostrap>()
 class ValueOperatorBootstrap {
 	// noinspection JSUnusedLocalSymbols
@@ -309,7 +302,6 @@ class ValueOperatorBootstrap {
 	public static with(value: any): IValueOperator {
 		return ValueOperatorBootstrap.of(value);
 	}
-
 }
 
 export const ValueOperator: IValueOperatorBoostrap = ValueOperatorBootstrap;
