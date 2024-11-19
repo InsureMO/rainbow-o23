@@ -1,3 +1,6 @@
+// init
+import '@rainbow-o23/n1';
+
 export * from './lib/error-codes';
 
 export * from './lib/abstract-controller';

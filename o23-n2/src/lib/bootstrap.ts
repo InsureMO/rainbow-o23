@@ -1,30 +1,10 @@
 import {INestApplication, Logger} from '@nestjs/common';
 import {HttpAdapterHost, NestFactory} from '@nestjs/core';
-import dayjs from 'dayjs';
-import ArraySupport from 'dayjs/plugin/arraySupport.js';
-import CustomParseFormat from 'dayjs/plugin/customParseFormat.js';
-import Duration from 'dayjs/plugin/duration.js';
-import IsToday from 'dayjs/plugin/isToday.js';
-import ObjectSupport from 'dayjs/plugin/objectSupport.js';
-import QuarterOfYear from 'dayjs/plugin/quarterOfYear.js';
-import RelativeTime from 'dayjs/plugin/relativeTime.js';
-import UTC from 'dayjs/plugin/utc.js';
-import WeekOfYear from 'dayjs/plugin/weekOfYear.js';
 import {json, urlencoded} from 'express';
 import {WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston';
 import {createAppModule} from './app-module';
 import {BootstrapOptions, createBoostrapOptions} from './bootstrap-options';
 import {ErrorFilter} from './exception-handling';
-
-dayjs.extend(WeekOfYear);
-dayjs.extend(QuarterOfYear);
-dayjs.extend(Duration);
-dayjs.extend(IsToday);
-dayjs.extend(RelativeTime);
-dayjs.extend(ArraySupport);
-dayjs.extend(ObjectSupport);
-dayjs.extend(CustomParseFormat);
-dayjs.extend(UTC);
 
 // noinspection JSUnusedGlobalSymbols
 export class Bootstrap {
