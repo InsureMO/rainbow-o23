@@ -1,6 +1,7 @@
 import {BootstrapOptions} from '@rainbow-o23/n2';
-import {launchServer} from '@rainbow-o23/n90';
+import {ExtendedBootstrapOptions, launchServer} from '@rainbow-o23/n90';
 import {usePluginsInitialize} from './plugins';
+import {HelloWorld} from './programmatic';
 import {SimpleModule} from './simple';
 
 const useSimpleModule = async (options: BootstrapOptions) => {
@@ -10,8 +11,9 @@ const useSimpleModule = async (options: BootstrapOptions) => {
 };
 // noinspection JSIgnoredPromiseFromCall
 launchServer({
-	beforeDoPipelineInitialization: async (options: BootstrapOptions) => {
+	beforeDoPipelineInitialization: async (options: ExtendedBootstrapOptions) => {
 		await usePluginsInitialize(options);
+		options.addProgrammaticPipelineDef({'HelloWorld': HelloWorld});
 	},
 	beforeDoServerLaunch: async (options: BootstrapOptions) => {
 		await useSimpleModule(options);
