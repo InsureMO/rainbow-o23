@@ -8,3 +8,4 @@ export * from './pipeline-reader';
 export * from './abstract-reader';
 export * from './yml-reader';
 export * from './function-reader';
+export * from './diversified-reader';
