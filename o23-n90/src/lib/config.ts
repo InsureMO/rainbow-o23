@@ -1,6 +1,14 @@
 import {BootstrapOptions} from '@rainbow-o23/n2';
 import {DEFAULT_TRANSACTION_NAME, TypeOrmDataSourceName, TypeOrmTransactionName} from '@rainbow-o23/n3';
-import {Def, DiversifiedReader, FuncReader, MatchableReader, Reader, ReaderOptions, YmlReader} from '@rainbow-o23/n4';
+import {
+	DefCreate,
+	DiversifiedReader,
+	FuncReader,
+	MatchableReader,
+	Reader,
+	ReaderOptions,
+	YmlReader
+} from '@rainbow-o23/n4';
 
 export enum ConfigConstants {
 	APP_ENV_STRICT_MODE = 'app.env.strict',
@@ -123,7 +131,7 @@ export class ConfigUtils {
 			accept: (content: string): boolean => typeof content === 'string',
 			reader: new YmlReader(options)
 		}, {
-			accept: (content: Def): boolean => ['pipeline', 'step-sets', 'step'].includes(content?.type),
+			accept: (content: DefCreate): boolean => typeof content === 'function',
 			reader: new FuncReader(options)
 		}];
 	}
