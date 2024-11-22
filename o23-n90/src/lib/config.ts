@@ -1,6 +1,6 @@
 import {BootstrapOptions} from '@rainbow-o23/n2';
 import {DEFAULT_TRANSACTION_NAME, TypeOrmDataSourceName, TypeOrmTransactionName} from '@rainbow-o23/n3';
-import {Reader, YmlReader} from '@rainbow-o23/n4';
+import {Def, DiversifiedReader, FuncReader, MatchableReader, Reader, ReaderOptions, YmlReader} from '@rainbow-o23/n4';
 
 export enum ConfigConstants {
 	APP_ENV_STRICT_MODE = 'app.env.strict',
@@ -103,6 +103,7 @@ const createTypeOrmTransactionInstall: CreatePipelineDefInstall = (options: Boot
 };
 
 export class ConfigUtils {
+	// noinspection JSUnusedLocalSymbols
 	private constructor() {
 		// avoid extend
 	}
@@ -117,10 +118,22 @@ export class ConfigUtils {
 			options.getEnvAsString(ConfigConstants.DEFAULT_DATASOURCE_KEY, ConfigConstants.CONFIG_DATASOURCE_DEFAULT_NAME));
 	}
 
-	public static createDefReader(options: BootstrapOptions): Reader<string> {
+	public static createUnderlayDefReaders(options: ReaderOptions): Array<MatchableReader> {
+		return [{
+			accept: (content: string): boolean => typeof content === 'string',
+			reader: new YmlReader(options)
+		}, {
+			accept: (content: Def): boolean => ['pipeline', 'step-sets', 'step'].includes(content?.type),
+			reader: new FuncReader(options)
+		}];
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	public static createDefReader(options: BootstrapOptions): Reader<any> {
 		const strict = options.getEnvAsBoolean(ConfigConstants.APP_ENV_STRICT_MODE, true);
+		const readerOptions: ReaderOptions = {config: options.getConfig()};
 		if (strict) {
-			return new YmlReader({config: options.getConfig()});
+			return new DiversifiedReader(readerOptions, ...ConfigUtils.createUnderlayDefReaders(readerOptions));
 		}
 		const installs = [
 			createTypeOrmDataSourceInstall(options),
@@ -150,6 +163,7 @@ export class ConfigUtils {
 				return given;
 			}
 		};
-		return new YmlReader({config: options.getConfig(), redress});
+		readerOptions.redress = redress;
+		return new DiversifiedReader(readerOptions, ...ConfigUtils.createUnderlayDefReaders(readerOptions));
 	}
 }

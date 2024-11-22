@@ -1,3 +1,4 @@
+export * from './extended-bootstrap-options';
 export * from './abstract-pipeline-initializer';
 export * from '../pipeline/scripts-load-files-step';
 export * from '../pipeline/server-init-snippet-step';

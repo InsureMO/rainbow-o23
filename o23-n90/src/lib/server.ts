@@ -1,14 +1,12 @@
-import {Bootstrap, BootstrapOptions} from '@rainbow-o23/n2';
+import {Bootstrap} from '@rainbow-o23/n2';
 import {ApiInitializer, EnvironmentInitializer, ServerPipelineInitializer, TypeOrmInitializer} from './init';
+import {BeforeDoPipelineInitialization, BeforeDoServerLaunch} from './types';
 
-export type BeforeDoPipelineInitialization = (options: BootstrapOptions) => Promise<void>;
-export type BeforeDoServerLaunch = (options: BootstrapOptions) => Promise<void>;
-
-export const launchServer = async (options: {
+export const launchServer = async (options?: {
 	beforeDoPipelineInitialization?: BeforeDoPipelineInitialization;
 	beforeDoServerLaunch?: BeforeDoServerLaunch;
 }) => {
-	const {beforeDoPipelineInitialization, beforeDoServerLaunch} = options;
+	const {beforeDoPipelineInitialization, beforeDoServerLaunch} = options ?? {};
 
 	// create bootstrap options
 	const bootstrapOptions = await new EnvironmentInitializer().load();

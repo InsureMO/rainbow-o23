@@ -9,6 +9,7 @@ import {
 } from '../pipeline';
 import {ServerPipelineStepRegistrar} from '../plugins';
 import {AbstractPipelineInitializer} from './abstract-pipeline-initializer';
+import {ExtendedBootstrapOptions} from './extended-bootstrap-options';
 import {prebuilt} from './server';
 
 interface InitOnlyPipelineDef extends ParsedPipelineDef {
@@ -35,7 +36,7 @@ export class ServerPipelineInitializer extends AbstractPipelineInitializer {
 		return (def as InitOnlyPipelineDef).initOnly === true;
 	}
 
-	public async load(options: BootstrapOptions): Promise<Array<ParsedPipelineDef>> {
+	public async load(options: ExtendedBootstrapOptions): Promise<Array<ParsedPipelineDef>> {
 		await this.registerSpecialSteps(options);
 		const initPipelines: Array<ParsedPipelineDef> = [];
 		const serverPipelines: Array<ParsedPipelineDef> = [];

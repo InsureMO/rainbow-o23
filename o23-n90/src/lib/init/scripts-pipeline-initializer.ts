@@ -3,6 +3,7 @@ import {ParsedPipelineDef, StepBuilders} from '@rainbow-o23/n4';
 import {ConfigConstants} from '../config';
 import {createScriptsLoadFilesStepBuilder} from '../pipeline';
 import {AbstractPipelineInitializer} from './abstract-pipeline-initializer';
+import {ExtendedBootstrapOptions} from './extended-bootstrap-options';
 import prebuiltPipelines from './scripts';
 
 export class ScriptsPipelineInitializer extends AbstractPipelineInitializer {
@@ -14,7 +15,7 @@ export class ScriptsPipelineInitializer extends AbstractPipelineInitializer {
 		return ConfigConstants.APP_SCRIPTS_INIT_PIPELINES_DEFAULT_DIR;
 	}
 
-	public async load(options: BootstrapOptions): Promise<void> {
+	public async load(options: ExtendedBootstrapOptions): Promise<void> {
 		await this.registerSpecialSteps(options);
 		const pipelines: Array<ParsedPipelineDef> = [];
 		await this.readDefs(options,

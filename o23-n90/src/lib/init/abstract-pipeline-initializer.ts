@@ -6,6 +6,7 @@ import {glob} from 'glob';
 import * as path from 'path';
 import {ConfigConstants, ConfigUtils} from '../config';
 import {ERR_DUPLICATED_PIPELINE, ERR_DUPLICATED_PIPELINE_STEP} from '../error-codes';
+import {ExtendedBootstrapOptions} from './extended-bootstrap-options';
 
 export abstract class AbstractPipelineInitializer {
 	public constructor() {
@@ -35,7 +36,7 @@ export abstract class AbstractPipelineInitializer {
 	protected async scanDefFiles(options: BootstrapOptions): Promise<Array<string>> {
 		return (await Promise.all(this.getScanDir(options)
 			.map(dir => path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir))
-			.map(dir => glob(path.resolve(dir, '**', options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINE_FILE, '*.{yaml,yml}')).replace(/\\/g, '/')))))
+			.map(dir => glob(path.resolve(dir, '**', options.getEnvAsString(ConfigConstants.APP_INIT_PIPELINE_FILE, '*.{yaml,yml,o23}')).replace(/\\/g, '/')))))
 			.flat();
 	}
 
@@ -83,7 +84,7 @@ export abstract class AbstractPipelineInitializer {
 	}
 
 	protected async readDefs(
-		options: BootstrapOptions,
+		options: ExtendedBootstrapOptions,
 		add: (def: ParsedPipelineDef) => void,
 		prebuilt?: (options: BootstrapOptions) => Array<{ key: string; content: string }>
 	): Promise<void> {
@@ -93,11 +94,20 @@ export abstract class AbstractPipelineInitializer {
 		const stepMap: Record<PipelineStepCode, string> = {};
 		const reader = ConfigUtils.createDefReader(options);
 
+		// prebuilt first
 		const prebuiltDefs = prebuilt == null ? [] : prebuilt(options);
 		prebuiltDefs.forEach(({key, content}) => {
 			const def = reader.load(content);
 			this.parseDef({key, def, pipelineMap, stepMap, options, add});
 		});
+		// and programmatic
+		const programmaticDefs = options.getProgrammaticPipelineDefs() ?? {};
+		Object.keys(programmaticDefs).forEach(key => {
+			const def = reader.load(programmaticDefs[key]);
+			this.parseDef({key, def: def, pipelineMap, stepMap, options, add});
+		});
+
+		// then scan files
 		files.filter(file => excludedDirs.every(dir => !file.startsWith(dir)))
 			.sort()
 			.forEach(file => {
