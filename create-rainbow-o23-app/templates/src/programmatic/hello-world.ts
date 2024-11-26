@@ -1,5 +1,10 @@
-import {PipelineDef, PipelineStepDef, SnippetPipelineStepBuilderOptions} from '@rainbow-o23/n4';
-import {DefEnablement, ExposedPipelineDef} from '@rainbow-o23/n4/src';
+import {
+	DefEnablement,
+	ExposedPipelineDef,
+	PipelineDef,
+	PipelineStepDef,
+	SnippetPipelineStepBuilderOptions
+} from '@rainbow-o23/n4';
 
 export const HelloWorld = (): PipelineDef & ExposedPipelineDef & DefEnablement => {
 	return {
