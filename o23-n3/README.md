@@ -434,8 +434,8 @@ Since different databases have varying degrees of support for dialects, `o23/n3`
 	- `MySQL` uses `LIMIT $offset, $limit`,
 	- `PostgreSQL` uses `OFFSET $offset LIMIT $limit`.
 	- `MSSQL` and `Oracle` use `OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`,
-		- `MSSQL` requires an `ORDER BY` clause for pagination SQL. If there is no `ORDER BY` clause, will
-		  use `ORDER BY 1 OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`.
+	- `MSSQL` requires an `ORDER BY` clause for pagination SQL. If there is no `ORDER BY` clause, will
+	  use `ORDER BY 1 OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY`.
 - For JSON column, because some databases (such as MSSQL) do not have a JSON column type, they cannot automatically replace strings in the
   result set with JSON objects,
 	- Use `config as "config.@json"` to explicitly indicate that the `config` column is of JSON data type.
