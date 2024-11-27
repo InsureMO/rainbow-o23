@@ -1,9 +1,8 @@
+import {isArrayLike, isLength, isPrototype, IValueOperator, ValueOperator} from '@rainbow-n19/n1';
 import {customAlphabet, nanoid} from 'nanoid';
 import {CatchableError, ERR_TRIM_NON_STRING, ExposedUncatchableError, UncatchableError} from '../utils';
 import {PipelineStepHelpers} from './step-helpers';
-import {IValueOperator, ValueOperator} from './step-helpers-value-operator';
 import {StaticImplements} from './types';
-import {isArrayLike, isBlank, isEmpty, isLength, isNotBlank, isNotEmpty, OBJECT_PROTOTYPE} from './value-operators';
 
 export interface PipelineStepErrorOptions {
 	// exactly same as http status
@@ -135,10 +134,7 @@ export class StepHelpersUtils {
 	// utils
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isPrototype(value: any): boolean {
-		const Ctor = value && value.constructor;
-		const proto = (typeof Ctor === 'function' && Ctor.prototype) || OBJECT_PROTOTYPE;
-
-		return value === proto;
+		return isPrototype(value);
 	}
 
 	/**
@@ -168,7 +164,7 @@ export class StepHelpersUtils {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isEmpty(value: any): boolean {
-		return isEmpty(value).test;
+		return ValueOperator.of(value).isEmpty().ok();
 	}
 
 	/**
@@ -177,7 +173,7 @@ export class StepHelpersUtils {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotEmpty(value: any): boolean {
-		return isNotEmpty(value).test;
+		return ValueOperator.of(value).isNotEmpty().ok();
 	}
 
 	/**
@@ -186,7 +182,7 @@ export class StepHelpersUtils {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isBlank(value: any): boolean {
-		return isBlank(value).test;
+		return ValueOperator.of(value).isBlank().ok();
 	}
 
 	/**
@@ -195,7 +191,7 @@ export class StepHelpersUtils {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static isNotBlank(value: any): boolean {
-		return isNotBlank(value).test;
+		return ValueOperator.of(value).isNotBlank().ok();
 	}
 
 	/**
@@ -216,7 +212,7 @@ export class StepHelpersUtils {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static touch(value: any): IValueOperator {
-		return ValueOperator.from(value);
+		return ValueOperator.of(value);
 	}
 
 	/**

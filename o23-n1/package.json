@@ -21,6 +21,7 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
+		"@rainbow-n19/n1": "latest",
 		"dayjs": "^1.11.13",
 		"decimal.js": "^10.4.3",
 		"mathjs": "^13.2.1",

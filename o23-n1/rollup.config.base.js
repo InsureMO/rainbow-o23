@@ -23,7 +23,10 @@ export const buildConfig = (lint) => {
 		].filter(x => x != null),
 		external(id) {
 			return ["dayjs/plugin/"].some(scope => id.startsWith(scope))
-				|| ['nanoid', 'dayjs', 'mathjs', 'decimal.js'].includes(id);
+				|| [
+					'@rainbow-n19/n1',
+					'nanoid', 'dayjs', 'mathjs', 'decimal.js'
+				].includes(id);
 		}
 	};
 };
