@@ -26,6 +26,8 @@ export interface PipelineRequestAuthorization<A = any> {
 	readonly authentication?: A;
 	/** empty array when authorized is false */
 	readonly roles: Array<PipelineRequestAuthorizationRole>;
+	/** headers should be added to response */
+	readonly headers?: Record<string, string>;
 }
 
 export interface PipelineRequest<C = PipelineRequestPayload> {

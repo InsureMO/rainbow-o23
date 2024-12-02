@@ -7,6 +7,20 @@ export const handleException = (logger: LoggerService, e: Error, context: string
 	throw e;
 };
 
+const ErrorHandling = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	buildResponseBody: (options: { code: string, message?: any }): any => ({
+		code: options.code || ERR_UNKNOWN,
+		message: options.message || 'Exception occurred.'
+	})
+};
+
+export const useErrorResponseBodyAdvisor = (advice: typeof ErrorHandling['buildResponseBody']) => {
+	if (advice != null) {
+		ErrorHandling.buildResponseBody = advice;
+	}
+};
+
 @Catch()
 export class ErrorFilter implements ExceptionFilter {
 	public constructor(private readonly httpAdapterHost: HttpAdapterHost) {
@@ -21,28 +35,28 @@ export class ErrorFilter implements ExceptionFilter {
 			httpStatus = e.getStatus();
 			const response = e.getResponse();
 			if (response == null) {
-				responseBody = {code: ERR_UNKNOWN, message: e.message || 'Exception occurred.'};
+				responseBody = ErrorHandling.buildResponseBody({code: ERR_UNKNOWN, message: e.message});
 			} else if (typeof response === 'string') {
-				responseBody = {code: ERR_UNKNOWN, message: response || 'Exception occurred.'};
+				responseBody = ErrorHandling.buildResponseBody({code: ERR_UNKNOWN, message: response});
 			} else {
-				responseBody = {
+				responseBody = ErrorHandling.buildResponseBody({
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					code: (response as any).code || ERR_UNKNOWN,
+					code: (response as any).code,
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					message: (response as any).message || (response as any).error || 'Exception occurred.'
-				};
+					message: (response as any).message || (response as any).error
+				});
 			}
 		} else if (e instanceof CatchableError) {
-			responseBody = {code: e.getCode() || ERR_UNKNOWN, message: e.message || 'Exception occurred.'};
+			responseBody = ErrorHandling.buildResponseBody({code: e.getCode(), message: e.message});
 		} else if (e instanceof ExposedUncatchableError) {
 			httpStatus = e.getStatus();
-			responseBody = {code: e.getCode() || ERR_UNKNOWN, message: e.message || 'Exception occurred.'};
+			responseBody = ErrorHandling.buildResponseBody({code: e.getCode(), message: e.message});
 		} else if (e instanceof UncatchableError) {
-			responseBody = {code: e.getCode() || ERR_UNKNOWN, message: e.message || 'Exception occurred.'};
+			responseBody = ErrorHandling.buildResponseBody({code: e.getCode(), message: e.message});
 		} else if (e instanceof Error) {
-			responseBody = {code: ERR_UNKNOWN, message: e.message || 'Exception occurred.'};
+			responseBody = ErrorHandling.buildResponseBody({code: ERR_UNKNOWN, message: e.message});
 		} else {
-			responseBody = {code: ERR_UNKNOWN, message: e};
+			responseBody = ErrorHandling.buildResponseBody({code: ERR_UNKNOWN, message: e});
 		}
 
 		const {httpAdapter} = this.httpAdapterHost;

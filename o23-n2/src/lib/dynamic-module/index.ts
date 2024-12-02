@@ -12,8 +12,7 @@ export * from './request-query-params';
 export * from './request-file';
 export * from './request';
 
-export * from './response-header';
-export * from './response-file';
+export * from './response-headers-guard';
 export * from './response';
 
 export * from './controllers';

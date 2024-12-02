@@ -86,6 +86,7 @@ Support response outputs as following:
 | `app.provider`                                        | string  | Rainbow Team                       | Application provider.                               |
 | `app.version`                                         | string  | UNDOCUMENTED                       | Application build version.                          |
 | `app.built.at`                                        | string  | UNDOCUMENTED                       | Application build time.                             |
+| `app.auth.enabled`                                    | boolean | false                              | Enable authentication.                              |
 | `app.auth.pipeline`                                   | string  | Authenticate                       | Pipeline code for authentication and authorization. |
 | `app.body.json.max.size`                              | string  | 50mb                               | Request maximum body size, for json body.           |
 | `app.body.urlencoded.max.size`                        | string  | 50mb                               | Request maximum body size, for urlencoded body.     |

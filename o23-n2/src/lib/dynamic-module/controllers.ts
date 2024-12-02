@@ -15,14 +15,14 @@ import {AbstractController} from '../abstract-controller';
 import {ERR_REQUEST_NOT_FOUND, ERR_RESPONSE_NOT_FOUND} from '../error-codes';
 import {handleException} from '../exception-handling';
 import {DynamicModuleRequest} from './request';
-import {AuthGuardMetadata, DynamicModuleRequestAuthGuard} from './request-auth-guard';
+import {AuthGuardMetadata} from './request-auth-guard';
 import {DynamicModuleRequestBody} from './request-body';
 import {DynamicModuleRequestFile} from './request-file';
 import {DynamicModuleRequestHeader} from './request-header';
 import {DynamicModuleRequestPathParams} from './request-path-params';
 import {DynamicModuleRequestQueryParams} from './request-query-params';
 import {DynamicModuleResponse} from './response';
-import {DynamicModuleResponseFile} from './response-file';
+import {ResponseHeadersGuardMetadata} from './response-headers-guard';
 import {DynamicModulePipeline, ParameterDecoratorDelegateDef, ParameterType} from './types';
 
 export class DynamicModuleController {
@@ -53,20 +53,16 @@ export class DynamicModuleController {
 		if (fileDecorator != null) {
 			decorators.push(fileDecorator);
 		}
-		const responseDecorator = DynamicModuleResponseFile.create(def, decorators.length);
-		if (responseDecorator != null) {
-			decorators.push(responseDecorator);
-		}
-		const authRequestDecorator = DynamicModuleRequestAuthGuard.create(def, decorators.length);
-		if (authRequestDecorator != null) {
-			decorators.push(authRequestDecorator);
-		}
+		// always decorate request and response
+		decorators.push(DynamicModuleResponse.create(def, decorators.length));
+		decorators.push(DynamicModuleRequest.create(def, decorators.length));
 		return decorators;
 	}
 
 	public static createController(def: DynamicModulePipeline): typeof AbstractController {
 		const parameterDecorators = DynamicModuleController.createParameterDecorators(def);
 		const authorizationMetadata = new AuthGuardMetadata(def.authorizations);
+		const responseHeadersMetadata = new ResponseHeadersGuardMetadata(def.exposeHeaders);
 		const ControllerClass = class extends AbstractController {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			protected createRequest(...args: Array<any>): any {
@@ -131,35 +127,34 @@ export class DynamicModuleController {
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			protected async authorize(...args: Array<any>): Promise<Undefinable<PipelineRequestAuthorization>> {
-				// do auth first, if needed
-				if (authorizationMetadata.isAnonymousAllowed()) {
-					// pass the auth anyway
+				if (this.getConfig().getBoolean('app.auth.enabled', false)) {
 					return (void 0);
+				}
+				// do auth first, if needed
+				const authPipelineCode = this.getConfig().getString('app.auth.pipeline', 'Authenticate');
+				// need authorization, find request
+				const request = this.findRequest(args);
+				const headers = request.headers ?? {};
+				const authorizationToken = headers.authorization;
+				const pipeline = await PipelineRepository.findPipeline(authPipelineCode, this.buildPipelineOptions());
+				if (pipeline == null) {
+					handleException(this.getLogger(),
+						new UncatchableError(ERR_PIPELINE_NOT_FOUND, `Pipeline[code=${authPipelineCode}] not found.`),
+						this.constructor.name);
 				} else {
-					const authPipelineCode = this.getConfig().getString('app.auth.pipeline', 'Authenticate');
-					// need authorization, find request
-					const request = this.findRequest(args);
-					const headers = request.headers ?? {};
-					const authorizationToken = headers.authorization;
-					const pipeline = await PipelineRepository.findPipeline(authPipelineCode, this.buildPipelineOptions());
-					if (pipeline == null) {
-						handleException(this.getLogger(),
-							new UncatchableError(ERR_PIPELINE_NOT_FOUND, `Pipeline[code=${authPipelineCode}] not found.`),
-							this.constructor.name);
-					} else {
-						const result = await pipeline.perform({
-							payload: {request, headers, authorization: authorizationToken}
-						});
-						const {payload: {authentication, roles} = {authentication: (void 0), roles: []}} = result ?? {};
-						if (!authorizationMetadata.isFullyAuthenticated(authentication)) {
-							throw new UnauthorizedException('Unauthorized');
-						}
-						const {authorized, roles: matchedRoles} = authorizationMetadata.authorize({roles});
-						if (!authorized) {
-							throw new ForbiddenException('Access denied');
-						}
-						return {authorized: true, authentication, roles: matchedRoles};
+					const result = await pipeline.perform({
+						payload: {request, headers, authorization: authorizationToken}
+					});
+					const {payload: {authentication, roles} = {authentication: (void 0), roles: []}} = result ?? {};
+					// no authentication found
+					if (authorizationMetadata.isFullyAuthenticatedRequired() && !authorizationMetadata.isFullyAuthenticated(authentication)) {
+						throw new UnauthorizedException('Unauthorized');
 					}
+					const {authorized, roles: matchedRoles} = authorizationMetadata.authorize({roles});
+					if (!authorized) {
+						throw new ForbiddenException('Access denied');
+					}
+					return {authorized: true, authentication, roles: matchedRoles};
 				}
 			}
 
@@ -176,21 +171,36 @@ export class DynamicModuleController {
 					try {
 						const result = await pipeline.perform({payload: this.createRequest(...args), authorization});
 						const {payload} = result;
+						const response = this.findResponse(args);
+						// set expose headers, and authorization headers
+						const {headers} = authorization ?? {};
+						const exposeHeaders = () => {
+							const exposed = {
+								...(responseHeadersMetadata.getExposedHeaders() ?? {}),
+								...(headers ?? {})
+							};
+							return Object.keys(exposed).reduce((data, key) => {
+								if (exposed[key] != null && exposed[key].trim().length !== 0) {
+									data[key] = exposed[key];
+								}
+								return data;
+							}, {});
+						};
+						response.set(exposeHeaders);
+
+						//  set response body
 						if (payload == null || payload === PIPELINE_STEP_RETURN_NULL) {
 							return null;
 						} else if (payload instanceof StreamableFile) {
-							const response = this.findResponse(args);
 							response.set({'Content-Type': 'application/octet-stream'});
 							return payload;
 						} else if (payload instanceof Buffer) {
-							const response = this.findResponse(args);
 							response.set({'Content-Type': 'application/octet-stream'});
 							const stream = new Readable();
 							stream.push(payload);
 							stream.push(null);
 							return new StreamableFile(stream);
 						} else if (typeof payload === 'object' && payload.$file === PIPELINE_STEP_FILE_SYMBOL) {
-							const response = this.findResponse(args);
 							const file = payload as PipelineStepFile;
 							if (file.name != null && file.name.trim().length !== 0) {
 								response.set({
@@ -218,7 +228,6 @@ export class DynamicModuleController {
 			// http method
 			DynamicModuleRequest.createMethodDecorator(def),
 			DynamicModuleRequest.createFileDecorator(def),
-			...DynamicModuleResponse.createHeaderDecorators(def),
 			HttpCode(200),
 			...parameterDecorators.map(({delegate}) => delegate),
 			Reflect.metadata('design:type', Function),
