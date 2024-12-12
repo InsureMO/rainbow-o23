@@ -1,3 +1,4 @@
+import {PipelineStepBuilder} from '@rainbow-o23/n1';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from '@rainbow-o23/n3';
 import {
 	Def,
@@ -15,7 +16,9 @@ export type FragmentaryPipelineStepBuilderOptions = PipelineStepBuilderOptions &
 	toOutput?: FragmentaryPipelineStepOptions['toResponse'];
 	merge?: FragmentaryPipelineStepOptions['mergeRequest'];
 	errorHandles?: {
-		[K in keyof FragmentaryPipelineStepOptions['errorHandles']]: string | Array<PipelineStepDef | PipelineStepSetsDef>;
+		[K in keyof FragmentaryPipelineStepOptions['errorHandles']]:
+		| Exclude<FragmentaryPipelineStepOptions['errorHandles'][K], Array<PipelineStepBuilder>>
+		| Array<PipelineStepDef | PipelineStepSetsDef>;
 	};
 };
 
@@ -42,7 +45,7 @@ export abstract class AbstractFragmentaryPipelineStepBuilder<G extends Fragmenta
 				const handle = given.errorHandles[key];
 				if (handle == null) {
 					// do nothing
-				} else if (typeof handle === 'string') {
+				} else if (typeof handle === 'string' || typeof handle === 'function') {
 					handlers[key] = redressSnippet(handle);
 				} else if (Array.isArray(handle)) {
 					// steps
