@@ -14,7 +14,9 @@ export type FragmentaryPipelineStepBuilderOptions = PipelineStepBuilderOptions &
 	fromInput?: FragmentaryPipelineStepOptions['fromRequest'];
 	toOutput?: FragmentaryPipelineStepOptions['toResponse'];
 	merge?: FragmentaryPipelineStepOptions['mergeRequest'];
-	errorHandles?: FragmentaryPipelineStepOptions['errorHandles'];
+	errorHandles?: {
+		[K in keyof FragmentaryPipelineStepOptions['errorHandles']]: string | Array<PipelineStepDef | PipelineStepSetsDef>;
+	};
 };
 
 export abstract class AbstractFragmentaryPipelineStepBuilder<G extends FragmentaryPipelineStepBuilderOptions, O extends FragmentaryPipelineStepOptions, S extends AbstractFragmentaryPipelineStep>
@@ -36,7 +38,7 @@ export abstract class AbstractFragmentaryPipelineStepBuilder<G extends Fragmenta
 		transformed.toResponse = redressSnippet(given.toOutput);
 		transformed.mergeRequest = typeof given.merge === 'string' ? redressString(given.merge) : given.merge;
 		if (given.errorHandles != null) {
-			transformed.errorHandles = Object.keys(given.errorHandles).reduce((handlers, key) => {
+			transformed.errorHandles = Object.keys(given.errorHandles).reduce((handlers, key: keyof FragmentaryPipelineStepOptions['errorHandles']) => {
 				const handle = given.errorHandles[key];
 				if (handle == null) {
 					// do nothing
@@ -44,7 +46,7 @@ export abstract class AbstractFragmentaryPipelineStepBuilder<G extends Fragmenta
 					handlers[key] = redressSnippet(handle);
 				} else if (Array.isArray(handle)) {
 					// steps
-					handlers[key] = handle;
+					// handlers[key] = handle;
 					handlers[key] = handle.map(step => {
 						const def = this.readSubStep(step);
 						return def.def;
