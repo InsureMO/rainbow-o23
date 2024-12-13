@@ -14,20 +14,22 @@ import {TypeOrmLoadBasis} from './abstract-typeorm-load-by-sql-step';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StreamToSubSteps = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type StreamToFunc<In> = ($factor: Array<any>, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<StreamToSubSteps>;
+export type StreamToFunc<In, Item> = ($factor: Array<Item>, $request: PipelineStepData<In>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<StreamToSubSteps>;
 
-export interface TypeOrmLoadManyBySQLUseCursorPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = TypeOrmLoadBasis, OutFragment = Out>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface TypeOrmLoadManyBySQLUseCursorPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = TypeOrmLoadBasis, OutFragment = Out, Item = any>
 	extends TypeOrmBySQLPipelineStepOptions<In, Out, InFragment, OutFragment> {
 	fetchSize?: number;
-	streamTo?: ScriptFuncOrBody<StreamToFunc<In>>;
+	streamTo?: ScriptFuncOrBody<StreamToFunc<In, Item>>;
 	steps?: Array<PipelineStepBuilder>;
 }
 
-export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = Undefinable<TypeOrmLoadBasis>, OutFragment = Out>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = Undefinable<TypeOrmLoadBasis>, OutFragment = Out, Item = any>
 	extends AbstractTypeOrmBySQLPipelineStep<In, Out, Undefinable<TypeOrmLoadBasis>, OutFragment> {
 	private readonly _fetchSize: number;
-	private readonly _streamToSnippet: ScriptFuncOrBody<StreamToFunc<In>>;
-	private readonly _streamToFunc: StreamToFunc<In>;
+	private readonly _streamToSnippet: ScriptFuncOrBody<StreamToFunc<In, Item>>;
+	private readonly _streamToFunc: StreamToFunc<In, Item>;
 	private readonly _stepBuilders: Array<PipelineStepBuilder>;
 
 	public constructor(options: TypeOrmLoadManyBySQLUseCursorPipelineStepOptions<In, Out, InFragment, OutFragment>) {
@@ -51,7 +53,7 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 		return this._fetchSize;
 	}
 
-	public getStreamToSnippet(): ScriptFuncOrBody<StreamToFunc<In>> {
+	public getStreamToSnippet(): ScriptFuncOrBody<StreamToFunc<In, Item>> {
 		return this._streamToSnippet;
 	}
 
