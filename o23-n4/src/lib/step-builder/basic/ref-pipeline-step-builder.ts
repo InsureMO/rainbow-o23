@@ -1,5 +1,5 @@
-import {PipelineCode, PipelineStepCode, PipelineStepType, UncatchableError} from '@rainbow-o23/n1';
-import {RefPipelinePipelineStep, RefPipelinePipelineStepOptions, RefStepPipelineStepOptions} from '@rainbow-o23/n3';
+import {PipelineCode, PipelineStepType, UncatchableError} from '@rainbow-o23/n1';
+import {RefPipelinePipelineStep, RefPipelinePipelineStepOptions} from '@rainbow-o23/n3';
 import {ERR_PIPELINE_PIPELINE_REF_NOT_DEFINED} from '../../error-codes';
 import {redressString} from '../utils';
 import {
@@ -8,7 +8,7 @@ import {
 } from './abstract-fragmentary-step-builder';
 
 export type RefPipelinePipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOptions & {
-	ref?: PipelineStepCode;
+	ref?: PipelineCode;
 	/**
 	 * @deprecated use {#ref} instead
 	 */
@@ -21,7 +21,7 @@ export class RefPipelinePipelineStepBuilder
 		return RefPipelinePipelineStep;
 	}
 
-	protected readMoreOptions(given: RefPipelinePipelineStepBuilderOptions, transformed: RefStepPipelineStepOptions): RefStepPipelineStepOptions {
+	protected readMoreOptions(given: RefPipelinePipelineStepBuilderOptions, transformed: RefPipelinePipelineStepOptions): RefPipelinePipelineStepOptions {
 		transformed = super.readMoreOptions(given, transformed);
 		const code = redressString(given.ref) ?? redressString(given.code);
 		if (code == null) {
