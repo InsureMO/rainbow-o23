@@ -14,7 +14,8 @@ import {
 	HttpUnknownErrorCode
 } from './types';
 
-export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out, BodyData = any>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
 	endpointSystemCode: string;
 	endpointName: string;
@@ -24,13 +25,14 @@ export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = Pipeli
 	timeout?: number;
 	headersGenerate?: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	bodyUsed?: boolean;
-	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment>>;
-	responseGenerate?: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>>;
+	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment, BodyData>>;
+	responseGenerate?: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment, OutFragment>>;
 	responseErrorHandles?: ScriptFuncOrBody<HttpHandleError<In, InFragment, OutFragment>>
 		| { [key: HttpErrorCode]: ScriptFuncOrBody<HttpHandleError<In, InFragment, OutFragment>>; };
 }
 
-export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out, BodyData = any>
 	extends AbstractFragmentaryPipelineStep<In, Out, InFragment, OutFragment> {
 	private readonly _endpointSystemCode: string;
 	private readonly _endpointName: string;
@@ -43,10 +45,10 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 	private readonly _headersGenerateSnippet: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	private readonly _headersGenerateFunc: HttpGenerateHeaders<In, InFragment>;
 	private readonly _bodyUsed: boolean;
-	private readonly _bodyGenerateSnippet: ScriptFuncOrBody<HttpGenerateBody<In, InFragment>>;
-	private readonly _bodyGenerateFunc: HttpGenerateBody<In, InFragment>;
-	private readonly _responseGenerateSnippet: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>>;
-	private readonly _responseGenerateFunc: HttpGenerateResponse<In, InFragment>;
+	private readonly _bodyGenerateSnippet: ScriptFuncOrBody<HttpGenerateBody<In, InFragment, BodyData>>;
+	private readonly _bodyGenerateFunc: HttpGenerateBody<In, InFragment, BodyData>;
+	private readonly _responseGenerateSnippet: ScriptFuncOrBody<HttpGenerateResponse<In, InFragment, OutFragment>>;
+	private readonly _responseGenerateFunc: HttpGenerateResponse<In, InFragment, OutFragment>;
 	private readonly _responseErrorHandleFunc: HttpHandleError<In, InFragment, OutFragment>;
 
 	public constructor(options: FetchPipelineStepOptions<In, Out, InFragment, OutFragment>) {
@@ -91,7 +93,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		this._bodyGenerateFunc = Utils.createAsyncFunction(this.getBodyGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			createDefault: () => async ($factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => {
-				return ($factor == null || (typeof $factor === 'string' && $factor.length === 0)) ? (void 0) : JSON.stringify($factor);
+				return (($factor == null || (typeof $factor === 'string' && $factor.length === 0)) ? (void 0) : JSON.stringify($factor)) as BodyData;
 			},
 			getVariableNames: () => this.getBodyGenerateVariableNames(),
 			error: (e: Error) => {
@@ -224,7 +226,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return this._bodyUsed;
 	}
 
-	public getBodyGenerateSnippet(): ScriptFuncOrBody<HttpGenerateBody<In, InFragment>> {
+	public getBodyGenerateSnippet(): ScriptFuncOrBody<HttpGenerateBody<In, InFragment, BodyData>> {
 		return this._bodyGenerateSnippet;
 	}
 
@@ -235,7 +237,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return ['$factor', '$request', ...this.getHelpersVariableNames()];
 	}
 
-	public getResponseGenerateSnippet(): ScriptFuncOrBody<HttpGenerateResponse<In, InFragment>> {
+	public getResponseGenerateSnippet(): ScriptFuncOrBody<HttpGenerateResponse<In, InFragment, OutFragment>> {
 		return this._responseGenerateSnippet;
 	}
 
