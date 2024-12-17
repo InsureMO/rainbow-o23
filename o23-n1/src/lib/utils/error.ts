@@ -24,34 +24,31 @@ export const ErrorCodes: Record<string, O23ErrorCode> = new Proxy({
 });
 
 export class CatchableError extends Error {
-	public constructor(private readonly _code: string, message: string) {
+	public constructor(private readonly code: string, message: string) {
 		super(message);
 	}
 
 	public getCode(): string {
-		return this._code;
+		return this.code;
 	}
 }
 
 export class UncatchableError extends Error {
-	public constructor(private readonly _code: string, message: string) {
+	public constructor(private readonly code: string, message: string) {
 		super(message);
 	}
 
 	public getCode(): string {
-		return this._code;
+		return this.code;
 	}
 }
 
 export class ExposedUncatchableError extends UncatchableError {
-	private readonly _status: number;
-
-	public constructor(status: number, code: string, message: string) {
+	public constructor(private readonly status: number, code: string, message: string) {
 		super(code, message);
-		this._status = status;
 	}
 
 	public getStatus(): number {
-		return this._status;
+		return this.status;
 	}
 }
