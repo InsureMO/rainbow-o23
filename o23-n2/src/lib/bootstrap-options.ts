@@ -116,7 +116,7 @@ export class BootstrapOptions {
 					}
 					info.level = info.level === 'VERBOSE' ? 'TRACE' : (info.level === 'LOG' ? 'INFO' : info.level);
 					if (provider.trim().length !== 0) {
-						info.provider = provider
+						info.provider = provider;
 					}
 					if (appName.trim().length !== 0) {
 						info.current_app_name = appName;

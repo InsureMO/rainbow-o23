@@ -4,11 +4,11 @@ import {
 	PIPELINE_STEP_FILE_SYMBOL,
 	PIPELINE_STEP_RETURN_NULL,
 	PipelineRepository,
+	PipelineRequestAuthorization,
 	PipelineStepFile,
 	UncatchableError,
 	Undefinable
 } from '@rainbow-o23/n1';
-import {PipelineRequestAuthorization} from '@rainbow-o23/n1/lib/pipeline/pipeline';
 import {Request, Response} from 'express';
 import {Readable} from 'stream';
 import {AbstractController} from '../abstract-controller';
