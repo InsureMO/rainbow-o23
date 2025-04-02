@@ -22,6 +22,7 @@ export interface TypeOrmLoadManyBySQLUseCursorPipelineStepOptions<In = PipelineS
 	fetchSize?: number;
 	streamTo?: ScriptFuncOrBody<StreamToFunc<In, Item>>;
 	steps?: Array<PipelineStepBuilder>;
+	pauseStreamEnabled?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,6 +32,7 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 	private readonly _streamToSnippet: ScriptFuncOrBody<StreamToFunc<In, Item>>;
 	private readonly _streamToFunc: StreamToFunc<In, Item>;
 	private readonly _stepBuilders: Array<PipelineStepBuilder>;
+	private readonly _pauseStreamEnabled: boolean;
 
 	public constructor(options: TypeOrmLoadManyBySQLUseCursorPipelineStepOptions<In, Out, InFragment, OutFragment>) {
 		super(options);
@@ -47,6 +49,10 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 			}
 		});
 		this._stepBuilders = options.steps;
+		// for unknown reason, in some environment if the pause and resume functions of readable invoked,
+		// only the first row are returns and end event invoked immediately
+		// so default disable it.
+		this._pauseStreamEnabled = options.pauseStreamEnabled ?? config.getBoolean(`typeorm.${this.getDataSourceName()}.stream.pause.enabled`, false);
 	}
 
 	protected getFetchSize(): number {
@@ -63,6 +69,10 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 
 	protected getStepBuilders(): Array<PipelineStepBuilder> {
 		return this._stepBuilders ?? [];
+	}
+
+	protected isPauseStreamEnabled(): boolean {
+		return this._pauseStreamEnabled;
 	}
 
 	protected async doPerform(basis: Undefinable<TypeOrmLoadBasis>, request: PipelineStepData<In>): Promise<Undefinable<OutFragment>> {
@@ -136,7 +146,9 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 					reject(e);
 				});
 				readable.on('data', async (data) => {
-					readable.pause();
+					if (this.isPauseStreamEnabled()) {
+						readable.pause();
+					}
 					rows.push(data);
 					await pipe({
 						resolve, reject: async (e: Error) => {
@@ -144,7 +156,9 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 							reject(e);
 						}, end: false
 					});
-					readable.resume();
+					if (this.isPauseStreamEnabled()) {
+						readable.resume();
+					}
 				});
 			};
 			return new Promise<OutFragment>((resolve, reject) => read({resolve, reject}));

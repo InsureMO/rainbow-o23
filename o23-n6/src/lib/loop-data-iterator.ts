@@ -32,9 +32,10 @@ export interface TypeOrmDataIteratorOptions extends Pick<PipelineStepOptions, 'c
 	transactionName?: TypeOrmPipelineStepOptions['transactionName'];
 	autonomous?: TypeOrmPipelineStepOptions['autonomous'];
 	sql: TypeOrmLoadBasis['sql'],
-	fetchSize?: TypeOrmLoadManyBySQLUseCursorPipelineStepOptions['fetchSize']
+	fetchSize?: TypeOrmLoadManyBySQLUseCursorPipelineStepOptions['fetchSize'];
+	pauseStreamEnabled?: TypeOrmLoadManyBySQLUseCursorPipelineStepOptions['pauseStreamEnabled'];
 	// variables binding of given sql
-	params?: TypeOrmLoadBasis['params'],
+	params?: TypeOrmLoadBasis['params'];
 	// context to execute, find datasource by context, it is mandatory
 	$context: PipelineStepData['$context'];
 }

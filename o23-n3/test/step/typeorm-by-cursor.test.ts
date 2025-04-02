@@ -9,7 +9,8 @@ describe('TypeORM Cursor Suite', () => {
 		process.env.CFG_TYPEORM_TEST_HOST = 'localhost';
 		process.env.CFG_TYPEORM_TEST_USERNAME = 'o23';
 		process.env.CFG_TYPEORM_TEST_PASSWORD = 'o23';
-		const type = 'pg' + 'sql';
+		// process.env.CFG_TYPEORM_TEST_STREAM_PAUSE_ENABLED = 'true'
+		const type = 'my' + 'sql';
 		if (type === 'mysql') {
 			process.env.CFG_TYPEORM_TEST_TYPE = 'mysql';
 			process.env.CFG_TYPEORM_TEST_PORT = '3306';

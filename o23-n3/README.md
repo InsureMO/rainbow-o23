@@ -492,9 +492,16 @@ Array<TypeOrmEntityToLoad>;
 
 ##### Environment Parameters
 
-| Name                    | Type   | Default Value | Comments    |
-|-------------------------|--------|---------------|-------------|
-| `typeorm.DB.fetch.size` | number | 20            | Fetch size. |
+| Name                              | Type    | Default Value | Comments                               |
+|-----------------------------------|---------|---------------|----------------------------------------|
+| `typeorm.DB.fetch.size`           | number  | 20            | Fetch size.                            |
+| `typeorm.DB.stream.pause.enabled` | boolean | false         | Pause and resume result stream or not. |
+
+##### Constructor Parameters
+
+| Name               | Type    | Default Value | Comments                               |
+|--------------------|---------|---------------|----------------------------------------|
+| pauseStreamEnabled | boolean |               | Pause and resume result stream or not. |
 
 ##### Request and Response
 
