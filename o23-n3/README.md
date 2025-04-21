@@ -632,7 +632,7 @@ CFG_ENDPOINTS_ORDER_PAYMENT_URL=https://order.com/payment
 
 - `transparentHeaderNames` and `omittedTransparentHeaderNames`:
   Use `transparentHeaderNames` to specify the names of request headers whose values need to be transparently passed from the input
-  parameters to the downstream service. Separate the names with ';'. The names support using `.` for connection so that values from
+  parameters to the downstream service. Separate the names with `;`. The names support using `.` for connection so that values from
   multi-level objects can be directly retrieved. For example, `account.name` will retrieve the value of the `name` property from the
   `account` property of the input object. When writing the values into the header values, the following rules apply:
 	- If the value is an array, use `, ` to connect the elements. `null` and empty strings will be filtered out.
