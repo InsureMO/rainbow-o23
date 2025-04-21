@@ -30,6 +30,7 @@
 		"@babel/core": "^7.23.9",
 		"@babel/preset-env": "^7.23.9",
 		"@babel/preset-typescript": "^7.23.3",
+		"@oneidentity/zstd-js": "^1.0.3",
 		"@rollup/plugin-babel": "^6.0.4",
 		"@rollup/plugin-eslint": "^9.0.3",
 		"@types/better-sqlite3": "^7.6.6",

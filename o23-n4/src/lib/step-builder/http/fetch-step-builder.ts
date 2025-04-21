@@ -13,6 +13,8 @@ export type FetchPipelineStepBuilderOptions = FragmentaryPipelineStepBuilderOpti
 	decorateUrl?: FetchPipelineStepOptions['urlGenerate'];
 	method?: FetchPipelineStepOptions['method'];
 	timeout?: FetchPipelineStepOptions['timeout'];
+	transparentHeaderNames?: string | FetchPipelineStepOptions['transparentHeaderNames'];
+	omittedTransparentHeaderNames?: string | FetchPipelineStepOptions['omittedTransparentHeaderNames'];
 	generateHeaders?: FetchPipelineStepOptions['headersGenerate'];
 	bodyUsed?: FetchPipelineStepOptions['bodyUsed'];
 	generateBody?: FetchPipelineStepOptions['bodyGenerate'];
@@ -39,6 +41,24 @@ export class FetchPipelineStepBuilder
 		transformed.urlGenerate = redressSnippet(given.decorateUrl);
 		transformed.method = redressString(given.method);
 		transformed.timeout = given.timeout;
+		if (given.transparentHeaderNames != null) {
+			if (Array.isArray(given.transparentHeaderNames)) {
+				transformed.transparentHeaderNames = given.transparentHeaderNames;
+			} else {
+				transformed.transparentHeaderNames = redressString(given.transparentHeaderNames).split(';').map(name => name.trim());
+			}
+		} else {
+			delete transformed.transparentHeaderNames;
+		}
+		if (given.omittedTransparentHeaderNames != null) {
+			if (Array.isArray(given.omittedTransparentHeaderNames)) {
+				transformed.omittedTransparentHeaderNames = given.omittedTransparentHeaderNames;
+			} else {
+				transformed.omittedTransparentHeaderNames = redressString(given.omittedTransparentHeaderNames).split(';').map(name => name.trim());
+			}
+		} else {
+			delete transformed.omittedTransparentHeaderNames;
+		}
 		transformed.headersGenerate = redressSnippet(given.generateHeaders);
 		transformed.bodyUsed = given.bodyUsed;
 		transformed.bodyGenerate = redressSnippet(given.generateBody);

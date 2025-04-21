@@ -592,13 +592,17 @@ step set. Additionally, nested transactions are also supported, which means Tran
 
 #### Environment Parameters
 
-| Name                                | Type   | Default Value | Comments                                                                                                                          |
-|-------------------------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `endpoints.SYSTEM.ENDPOINT.url`     | string |               | Endpoint URL.                                                                                                                     |
-| `endpoints.SYSTEM.ENDPOINT.headers` | string |               | Endpoint request headers, use global headers if this parameter doesn't present.<br>Format follows `name=value[;name=value[...]]`. |
-| `endpoints.SYSTEM.global.headers`   | string |               | Endpoint system global request headers.<br>Format follows `name=value[;name=value[...]]`.                                         |
-| `endpoints.SYSTEM.ENDPOINT.timeout` | number |               | Endpoint request timeout, in seconds, use global timeout if this parameter doesn't present.                                       |
-| `endpoints.SYSTEM.global.timeout`   | number | -1            | Endpoint system global timeout, in seconds, `-1` represents no timeout.                                                           |
+| Name                                                    | Type   | Default Value | Comments                                                                                                                                                                    |
+|---------------------------------------------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `endpoints.SYSTEM.ENDPOINT.url`                         | string |               | Endpoint URL.                                                                                                                                                               |
+| `endpoints.SYSTEM.ENDPOINT.headers`                     | string |               | Endpoint request headers, use global headers if this parameter doesn't present.<br>Format follows `name=value[;name=value[...]]`.                                           |
+| `endpoints.SYSTEM.global.headers`                       | string |               | Endpoint system global request headers.<br>Format follows `name=value[;name=value[...]]`.                                                                                   |
+| `endpoints.SYSTEM.ENDPOINT.headers.transparent`         | string |               | Endpoint request transparent-passed headers names, use global headers if this parameter doesn't present.<br>Format follows `name1[;name2[...]]`.                            |
+| `endpoints.SYSTEM.global.headers.transparent`           | string |               | Endpoint system global request transparent-passed headers names.<br>Format follows `name1[;name2[...]]`.                                                                    |
+| `endpoints.SYSTEM.ENDPOINT.headers.transparent.omitted` | string |               | Endpoint request headers names which omitted from transparent-passed headers, use global headers if this parameter doesn't present.<br>Format follows `name1[;name2[...]]`. |
+| `endpoints.SYSTEM.global.headers.transparent.omitted`   | string |               | Endpoint system global request headers names which omitted from transparent-passed headers.<br>Format follows `name1[;name2[...]]`.                                         |
+| `endpoints.SYSTEM.ENDPOINT.timeout`                     | number |               | Endpoint request timeout, in seconds, use global timeout if this parameter doesn't present.                                                                                 |
+| `endpoints.SYSTEM.global.timeout`                       | number | -1            | Endpoint system global timeout, in seconds, `-1` represents no timeout.                                                                                                     |
 
 `SYSTEM` represents endpoint system, `ENDPOINT` represents endpoint url. For example:
 
@@ -611,18 +615,60 @@ CFG_ENDPOINTS_ORDER_PAYMENT_URL=https://order.com/payment
 
 #### Constructor Parameters
 
-| Name                 | Type                                                                                                   | Default Value | Comments                                                                                                             |
-|----------------------|--------------------------------------------------------------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
-| endpointSystemCode   | string                                                                                                 |               | Endpoint system code.                                                                                                |
-| endpointName         | string                                                                                                 |               | Endpoint name.                                                                                                       |
-| urlGenerate          | ScriptFuncOrBody\<HttpGenerateUrl>                                                                     |               | Endpoint url generator, `$endpointUrl`.                                                                              |
-| method               | string                                                                                                 |               | Http method, default `post`.                                                                                         |
-| timeout              | number                                                                                                 |               | Endpoint timeout, in seconds.                                                                                        |
-| headersGenerate      | ScriptFuncOrBody\<HttpGenerateHeaders>                                                                 |               | Endpoint request headers generator.                                                                                  |
-| bodyUsed             | boolean                                                                                                |               | Send request with body or not, or automatically disregards the body when sending a `get` request when not specified. |
-| bodyGenerate         | ScriptFuncOrBody\<HttpGenerateBody>                                                                    |               | Endpoint request body generator.                                                                                     |
-| responseGenerate     | ScriptFuncOrBody\<HttpGenerateResponse>                                                                |               | Endpoint response body generator, `$response`.                                                                       |
-| responseErrorHandles | ScriptFuncOrBody\<HttpHandleError><br>or<br>{[key: HttpErrorCode]: ScriptFuncOrBody\<HttpHandleError>} |               | Endpoint response error handlers.                                                                                    |
+| Name                          | Type                                                                                                   | Default Value | Comments                                                                                                             |
+|-------------------------------|--------------------------------------------------------------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
+| endpointSystemCode            | string                                                                                                 |               | Endpoint system code.                                                                                                |
+| endpointName                  | string                                                                                                 |               | Endpoint name.                                                                                                       |
+| urlGenerate                   | ScriptFuncOrBody\<HttpGenerateUrl>                                                                     |               | Endpoint url generator, `$endpointUrl`.                                                                              |
+| method                        | string                                                                                                 |               | Http method, default `post`.                                                                                         |
+| timeout                       | number                                                                                                 |               | Endpoint timeout, in seconds.                                                                                        |
+| transparentHeaderNames        | Array<string>                                                                                          |               | Transparent-passed request headers names.                                                                            |
+| omittedTransparentHeaderNames | Array<string>                                                                                          |               | Omitted names of transparently-passed request headers.                                                               |
+| headersGenerate               | ScriptFuncOrBody\<HttpGenerateHeaders>                                                                 |               | Endpoint request headers generator.                                                                                  |
+| bodyUsed                      | boolean                                                                                                |               | Send request with body or not, or automatically disregards the body when sending a `get` request when not specified. |
+| bodyGenerate                  | ScriptFuncOrBody\<HttpGenerateBody>                                                                    |               | Endpoint request body generator.                                                                                     |
+| responseGenerate              | ScriptFuncOrBody\<HttpGenerateResponse>                                                                |               | Endpoint response body generator, `$response`.                                                                       |
+| responseErrorHandles          | ScriptFuncOrBody\<HttpHandleError><br>or<br>{[key: HttpErrorCode]: ScriptFuncOrBody\<HttpHandleError>} |               | Endpoint response error handlers.                                                                                    |
+
+- `transparentHeaderNames` and `omittedTransparentHeaderNames`:
+  Use `transparentHeaderNames` to specify the names of request headers whose values need to be transparently passed from the input
+  parameters to the downstream service. Separate the names with ';'. The names support using `.` for connection so that values from
+  multi-level objects can be directly retrieved. For example, `account.name` will retrieve the value of the `name` property from the
+  `account` property of the input object. When writing the values into the header values, the following rules apply:
+	- If the value is an array, use `, ` to connect the elements. `null` and empty strings will be filtered out.
+	- If the value is an object, use the object's keys to generate multiple headers. `null` and empty strings will be filtered out.
+	- For other values, convert them to strings. `null` and empty strings will be filtered out.
+	- Note that an empty string does not include blank strings, and no automatic trimming will be performed.
+
+  If the `transparentHeaderNames` at the step level is not defined, use the definition in
+  `endpoints.SYSTEM.ENDPOINT.headers.transparent`. If it is also not defined at the endpoint level, use the definition in
+  `endpoints.SYSTEM.global.headers.transparent`.
+
+  After obtaining the transparently passed request headers, check the definition of `omittedTransparentHeaderNames`. If it is defined,
+  remove the corresponding headers from the headers. `omittedTransparentHeaderNames` is case-insensitive. Similarly, if the
+  `omittedTransparentHeaderNames` at the step level is not defined, use the definition in
+  `endpoints.SYSTEM.ENDPOINT.headers.transparent.omitted`. If it is also not defined at the endpoint level, use the definition in
+  `endpoints.SYSTEM.global.headers.transparent.omitted`.
+
+  For example:
+  If the input data contains `{account: {name: 'John', token: '******'}}` and `transparentHeaderNames` is defined as `account`, then two
+  transparently passed headers will be obtained: `name=John` and `token=******`. At this time, if `omittedTransparentHeaderNames` is defined
+  as `name`, the headers that will be finally transparently passed to the downstream service are `token=******`, and `name` will be ignored.
+
+## Request headers
+
+There are three ways to transmit request headers to downstream services. In order of priority from high to low, they are `headersGenerate`,
+`headers.transparent`, and `headers`. If a header appears in a higher-priority method, the header with the same name generated by a
+lower-priority method will be ignored. Note that the matching is case-sensitive.
+
+Normally, if you need to transparently pass the request headers from the client to the downstream service, you should use `headers: true` in
+the pipeline definition. Then you can directly use `transparentHeaderNames: headers` to obtain all the request headers, and then use
+`omittedTransparentHeaderNames` for necessary filtering.
+
+> It should be noted that since the fetch step initiates a new request to the downstream service, its request structure and data will be
+> modified or reset according to requirements. Therefore, even if you need to transparently pass the request headers, some of the headers
+> are still not applicable. So by default, the two headers `content-encoding` and `content-length` will be filtered out. No matter how the
+> request headers are generated in the above process, these two headers are always automatically generated by `node-fetch`.
 
 ## Installation
 

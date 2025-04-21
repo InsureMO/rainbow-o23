@@ -23,6 +23,8 @@ export interface FetchPipelineStepOptions<In = PipelineStepPayload, Out = Pipeli
 	method?: string;
 	/** on seconds */
 	timeout?: number;
+	transparentHeaderNames?: Array<string>;
+	omittedTransparentHeaderNames?: Array<string>;
 	headersGenerate?: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	bodyUsed?: boolean;
 	bodyGenerate?: ScriptFuncOrBody<HttpGenerateBody<In, InFragment, BodyData>>;
@@ -42,6 +44,8 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 	private readonly _endpointTimeout: number;
 	private readonly _urlGenerateSnippet: ScriptFuncOrBody<HttpGenerateUrl<In, InFragment>>;
 	private readonly _urlGenerateFunc: HttpGenerateUrl<In, InFragment>;
+	private readonly _transparentHeaderNames: Array<string>;
+	private readonly _omittedTransparentHeaderNames: Array<string>;
 	private readonly _headersGenerateSnippet: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	private readonly _headersGenerateFunc: HttpGenerateHeaders<In, InFragment>;
 	private readonly _bodyUsed: boolean;
@@ -78,6 +82,14 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 				throw e;
 			}
 		});
+		this._transparentHeaderNames = options.transparentHeaderNames
+			?? this.generateTransparentHeaderNames(
+				config.getString(`endpoints.${endpointKey}.headers.transparent`),
+				this.generateTransparentHeaderNames(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers.transparent`)));
+		this._omittedTransparentHeaderNames = options.omittedTransparentHeaderNames
+			?? this.generateTransparentHeaderNames(
+				config.getString(`endpoints.${endpointKey}.headers.transparent.omitted`),
+				this.generateTransparentHeaderNames(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers.transparent.omitted`)));
 		this._headersGenerateSnippet = options.headersGenerate;
 		this._headersGenerateFunc = Utils.createAsyncFunction(this.getHeadersGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -104,8 +116,14 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		this._responseGenerateSnippet = options.responseGenerate;
 		this._responseGenerateFunc = Utils.createAsyncFunction(this.getResponseGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => async ($response: Response, _$factor: InFragment, _$request: PipelineStepData<In>, _$helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => {
-				return await $response.json();
+			createDefault: () => async ($response: Response, _$factor: InFragment, _$request: PipelineStepData<In>, $helpers: PipelineStepHelpers, _$: PipelineStepHelpers) => {
+				const contentEncoding = $response.headers?.get('content-encoding');
+				if (contentEncoding === 'zstd') {
+					const buffer = await $response.buffer();
+					return JSON.parse(await $helpers.$zstd(buffer));
+				} else {
+					return await $response.json();
+				}
 			},
 			getVariableNames: () => this.getResponseGenerateVariableName(),
 			error: (e: Error) => {
@@ -211,6 +229,23 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return ['$endpointUrl', '$factor', '$request', ...this.getHelpersVariableNames()];
 	}
 
+	public getTransparentHeaderNames(): Array<string> {
+		return this._transparentHeaderNames ?? [];
+	}
+
+	public getOmittedTransparentHeaderNames(): Array<string> {
+		return this._omittedTransparentHeaderNames ?? [];
+	}
+
+	protected generateTransparentHeaderNames(headerNames?: string, base?: Array<string>): Array<string> {
+		return [
+			...(base ?? []),
+			...new Set(`${headerNames || ''}`.split(';')
+				.map(x => x.trim())
+				.filter(x => x.length !== 0))
+		];
+	}
+
 	public getHeadersGenerateSnippet(): ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>> {
 		return this._headersGenerateSnippet;
 	}
@@ -256,7 +291,36 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 			url = await this._urlGenerateFunc(this.getEndpointUrl(), data, request, $helpers, $helpers);
 			const method = this.getEndpointMethod();
 			const staticHeaders = this.getEndpointHeaders() ?? {};
-			const headers = await this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
+			const transparentHeaders = (this.getTransparentHeaderNames() ?? []).reduce((headers, name) => {
+				const value = Utils.getValue(data, name);
+				if (value == null) {
+					// no value of given header name, ignored
+				} else if (Array.isArray(value)) {
+					const headerValue = value.filter(v => v != null && `${v}`.length !== 0).join(', ');
+					if (headerValue.length !== 0) {
+						headers[name] = headerValue;
+					}
+				} else if (typeof value === 'object') {
+					Object.keys(value).forEach(key => {
+						const headerValue = value[key];
+						if (headerValue != null) {
+							const s = `${headerValue}`;
+							if (s.length !== 0) {
+								headers[key] = s;
+							}
+						}
+					});
+				} else {
+					const headerValue = `${value}`;
+					if (headerValue.length !== 0) {
+						headers[name] = headerValue;
+					}
+				}
+				return headers;
+			}, {});
+			(this.getOmittedTransparentHeaderNames() ?? []).forEach(name => delete transparentHeaders[name]);
+
+			const generatedHeaders = await this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			let body: any;
 			const bodyUsed = this.isBodyUsed();
@@ -268,8 +332,16 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 			if (body != null && typeof body !== 'string') {
 				body = JSON.stringify(body);
 			}
+			const headers = {...staticHeaders, ...transparentHeaders, ...generatedHeaders};
+			// remove some headers, leave them to fetch to calculate automatically.
+			Object.keys(headers).filter(name => {
+				return ['content-encoding', 'content-length'].includes(name.toLowerCase());
+			}).forEach(name => {
+				delete headers[name];
+			});
+
 			const response = await fetch(url, {
-				method, headers: {...staticHeaders, ...headers}, body,
+				method, headers, body,
 				signal: this.needTimeout() ? (() => {
 					const controller = new AbortController();
 					setTimeout(() => controller.abort(), this.getEndpointTimeout());

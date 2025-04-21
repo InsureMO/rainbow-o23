@@ -25,7 +25,7 @@ export const buildConfig = (lint) => {
 			return ["dayjs/plugin/"].some(scope => id.startsWith(scope))
 				|| [
 					'@rainbow-n19/n1',
-					'nanoid', 'dayjs', 'mathjs', 'decimal.js'
+					'nanoid', 'dayjs', 'mathjs', 'decimal.js', "zstddec"
 				].includes(id);
 		}
 	};
