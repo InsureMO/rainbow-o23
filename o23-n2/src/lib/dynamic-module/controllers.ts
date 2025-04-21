@@ -127,7 +127,7 @@ export class DynamicModuleController {
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			protected async authorize(...args: Array<any>): Promise<Undefinable<PipelineRequestAuthorization>> {
-				if (this.getConfig().getBoolean('app.auth.enabled', false)) {
+				if (!this.getConfig().getBoolean('app.auth.enabled', false)) {
 					return (void 0);
 				}
 				// do auth first, if needed
