@@ -216,9 +216,8 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 					if (path.trim().length === 0) {
 						path = '.';
 					}
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					node.textContent = await window.getValue(data, path) ?? 'Configuration not found, use "data-field" to define your property path.';
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					node.textContent = (await window.getValue(data, path as any) as any) ?? 'Configuration not found, use "data-field" to define your property path.';
 					return Promise.resolve();
 				}, Promise.resolve());
 			};
@@ -236,9 +235,8 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 					if (path.trim().length === 0) {
 						path = '.';
 					}
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					let loopData = await window.getValue(data, path);
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					let loopData = await window.getValue(data, path as any) as any;
 					if (loopData == null) {
 						loopData = [];
 					} else if (!Array.isArray(loopData)) {
