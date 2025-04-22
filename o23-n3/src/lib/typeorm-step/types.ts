@@ -1,5 +1,5 @@
 import {DeepPartial, ObjectLiteral, QueryRunner} from 'typeorm';
-import {PipelineStepSetsContext} from '../step';
+import {PipelineStepSetsExecutionContext} from '../step';
 import {TypeOrmDataSource} from '../typeorm';
 
 export type TypeOrmIdType = string | number | bigint;
@@ -19,6 +19,6 @@ export type TypeOrmBulkWrittenResult = TypeOrmIdsOfInserted | TypeOrmCountsOfAff
 
 export const DEFAULT_TRANSACTION_NAME: TypeOrmTransactionName = '$default-transaction';
 
-export interface TypeOrmTransactionalContext extends PipelineStepSetsContext {
+export interface TypeOrmTransactionalContext extends PipelineStepSetsExecutionContext {
 	$trans: Record<TypeOrmTransactionKey, [TypeOrmDataSource, QueryRunner]>;
 }

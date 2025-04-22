@@ -1,7 +1,7 @@
 import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
 import {QueryRunner} from 'typeorm';
 import {ERR_TYPEORM_DATASOURCE_NOT_FOUND} from '../error-codes';
-import {PipelineStepSets, PipelineStepSetsContext, PipelineStepSetsOptions} from '../step';
+import {PipelineStepSets, PipelineStepSetsExecutionContext, PipelineStepSetsOptions} from '../step';
 import {TypeOrmDataSource, TypeOrmDataSourceManager} from '../typeorm';
 import {
 	DEFAULT_TRANSACTION_NAME,
@@ -69,7 +69,7 @@ export class TypeOrmTransactionalPipelineStepSets<In = PipelineStepPayload, Out 
 	 * inherit transaction (use runner in context) if exists, otherwise create new runner
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async attachMineToInternalContext(inheritedContext: PipelineStepSetsContext, _request: PipelineStepData<In>): Promise<TypeOrmTransactionalContext> {
+	protected async attachMineToInternalContext(inheritedContext: PipelineStepSetsExecutionContext, _request: PipelineStepData<In>): Promise<TypeOrmTransactionalContext> {
 		const context = inheritedContext as TypeOrmTransactionalContext;
 		if (context.$trans != null) {
 			if (context.$trans[this.getTransactionKey()] != null) {
@@ -96,7 +96,7 @@ export class TypeOrmTransactionalPipelineStepSets<In = PipelineStepPayload, Out 
 	 */
 	protected async performWithContext(
 		request: PipelineStepData<In>,
-		run: (request: PipelineStepData<In>, context: PipelineStepSetsContext) => Promise<OutFragment>): Promise<OutFragment> {
+		run: (request: PipelineStepData<In>, context: PipelineStepSetsExecutionContext) => Promise<OutFragment>): Promise<OutFragment> {
 		let runner: QueryRunner = null;
 		try {
 			const context: TypeOrmTransactionalContext = await this.createInternalContext(request);

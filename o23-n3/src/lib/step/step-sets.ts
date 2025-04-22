@@ -1,4 +1,5 @@
 import {
+	PipelineExecutionContext,
 	PipelineStep,
 	PipelineStepBuilder,
 	PipelineStepData,
@@ -6,10 +7,9 @@ import {
 	PipelineStepPayload
 } from '@rainbow-o23/n1';
 import {AbstractFragmentaryPipelineStep, FragmentaryPipelineStepOptions} from './abstract-fragmentary-pipeline-step';
-import {Utils} from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PipelineStepSetsContext {
+export interface PipelineStepSetsExecutionContext extends PipelineExecutionContext {
 }
 
 export interface PipelineStepSetsOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
@@ -46,25 +46,20 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 		return await Promise.all(this.getStepBuilders().map(async builder => await builder.create(options)));
 	}
 
-	protected inheritContext(request: PipelineStepData<In>): PipelineStepSetsContext {
-		const context = request.$context;
-		if (context == null) {
-			return {};
-		} else {
-			const {authorization, traceId, ...rest} = context;
-			return {authorization, traceId, ...Utils.clone(rest)};
-		}
+	protected inheritContext(request: PipelineStepData<In>): PipelineStepSetsExecutionContext {
+		request.$context = request.$context ?? {};
+		return request.$context;
 	}
 
 	/**
 	 * default do nothing, return given inherited context directly
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async attachMineToInternalContext(inheritedContext: PipelineStepSetsContext, _request: PipelineStepData<In>): Promise<PipelineStepSetsContext> {
+	protected async attachMineToInternalContext(inheritedContext: PipelineStepSetsExecutionContext, _request: PipelineStepData<In>): Promise<PipelineStepSetsExecutionContext> {
 		return inheritedContext;
 	}
 
-	protected async createInternalContext<Ctx extends PipelineStepSetsContext>(request: PipelineStepData<In>): Promise<Ctx> {
+	protected async createInternalContext<Ctx extends PipelineStepSetsExecutionContext>(request: PipelineStepData<In>): Promise<Ctx> {
 		return await this.attachMineToInternalContext(this.inheritContext(request), request) as Ctx;
 	}
 
@@ -73,15 +68,15 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 	 */
 	protected async performWithContext(
 		request: PipelineStepData<In>,
-		run: (request: PipelineStepData<In>, context: PipelineStepSetsContext) => Promise<OutFragment>): Promise<OutFragment> {
+		run: (request: PipelineStepData<In>, context: PipelineStepSetsExecutionContext) => Promise<OutFragment>): Promise<OutFragment> {
 		const context = await this.createInternalContext(request);
 		return await run(request, context);
 	}
 
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.performWithContext(
-			request, async (request: PipelineStepData<In>, context: PipelineStepSetsContext): Promise<OutFragment> => {
-				const {$context: {authorization, traceId} = {}} = request;
+			request, async (request: PipelineStepData<In>, context: PipelineStepSetsExecutionContext): Promise<OutFragment> => {
+				const {$context: {authorization, traceId, $traceIds} = {}} = request;
 				const steps = await this.createSteps();
 				const response = await steps.reduce(async (promise, step) => {
 					const request = await promise;
@@ -89,7 +84,7 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({
-								...request, $context: {...context, authorization, traceId}
+								...request, $context: {...context, authorization, traceId, $traceIds}
 							});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next

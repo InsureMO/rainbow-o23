@@ -38,6 +38,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 	extends AbstractFragmentaryPipelineStep<In, Out, InFragment, OutFragment> {
 	private readonly _endpointSystemCode: string;
 	private readonly _endpointName: string;
+	private readonly _endpointKey: string;
 	private readonly _endpointUrl: string;
 	private readonly _endpointMethod: string;
 	private readonly _endpointHeaders: Record<string, string>;
@@ -48,6 +49,8 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 	private readonly _omittedTransparentHeaderNames: Array<string>;
 	private readonly _headersGenerateSnippet: ScriptFuncOrBody<HttpGenerateHeaders<In, InFragment>>;
 	private readonly _headersGenerateFunc: HttpGenerateHeaders<In, InFragment>;
+	private readonly _endpointTraceIdHeaderName?: string;
+	private readonly _endpointTraceIdScope?: 'system' | 'endpoint';
 	private readonly _bodyUsed: boolean;
 	private readonly _bodyGenerateSnippet: ScriptFuncOrBody<HttpGenerateBody<In, InFragment, BodyData>>;
 	private readonly _bodyGenerateFunc: HttpGenerateBody<In, InFragment, BodyData>;
@@ -60,16 +63,16 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		const config = this.getConfig();
 		this._endpointSystemCode = options.endpointSystemCode;
 		this._endpointName = options.endpointName;
-		const endpointKey = this.getEndpointKey();
-		this._endpointUrl = config.getString(`endpoints.${endpointKey}.url`);
+		this._endpointKey = `${this._endpointSystemCode}.${this._endpointName}`;
+		this._endpointUrl = config.getString(`endpoints.${this._endpointKey}.url`);
 		this._endpointMethod = (options.method ?? 'POST').trim().toLowerCase();
 		this._endpointHeaders = this.generateEndpointHeaders(
-			config.getString(`endpoints.${endpointKey}.headers`),
-			this.generateEndpointHeaders(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers`)));
+			config.getString(`endpoints.${this._endpointKey}.headers`),
+			this.generateEndpointHeaders(config.getString(`endpoints.${this._endpointSystemCode}.global.headers`)));
 		// in second
 		this._endpointTimeout = options.timeout
-			?? config.getNumber(`endpoints.${endpointKey}.timeout`)
-			?? config.getNumber(`endpoints.${this.getEndpointSystemCode()}.global.timeout`, -1);
+			?? config.getNumber(`endpoints.${this._endpointKey}.timeout`)
+			?? config.getNumber(`endpoints.${this._endpointSystemCode}.global.timeout`, -1);
 		// to millisecond
 		this._endpointTimeout = this._endpointTimeout > 0 ? this._endpointTimeout * 1000 : -1;
 		this._urlGenerateSnippet = options.urlGenerate;
@@ -84,12 +87,12 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		});
 		this._transparentHeaderNames = options.transparentHeaderNames
 			?? this.generateTransparentHeaderNames(
-				config.getString(`endpoints.${endpointKey}.headers.transparent`),
-				this.generateTransparentHeaderNames(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers.transparent`)));
+				config.getString(`endpoints.${this._endpointKey}.headers.transparent`),
+				this.generateTransparentHeaderNames(config.getString(`endpoints.${this._endpointSystemCode}.global.headers.transparent`)));
 		this._omittedTransparentHeaderNames = options.omittedTransparentHeaderNames
 			?? this.generateTransparentHeaderNames(
-				config.getString(`endpoints.${endpointKey}.headers.transparent.omitted`),
-				this.generateTransparentHeaderNames(config.getString(`endpoints.${this.getEndpointSystemCode()}.global.headers.transparent.omitted`)));
+				config.getString(`endpoints.${this._endpointKey}.headers.transparent.omitted`),
+				this.generateTransparentHeaderNames(config.getString(`endpoints.${this._endpointSystemCode}.global.headers.transparent.omitted`)));
 		this._headersGenerateSnippet = options.headersGenerate;
 		this._headersGenerateFunc = Utils.createAsyncFunction(this.getHeadersGenerateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -100,6 +103,20 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 				throw e;
 			}
 		});
+		let traceIdHeaderName = config.getString(`endpoints.${this._endpointKey}.trace.header.name`)?.trim();
+		if (traceIdHeaderName != null) {
+			this._endpointTraceIdHeaderName = traceIdHeaderName.toLowerCase();
+			this._endpointTraceIdScope = 'endpoint';
+		} else {
+			traceIdHeaderName = config.getString(`endpoints.${this._endpointSystemCode}.global.trace.header.name`)?.trim();
+			if (traceIdHeaderName != null) {
+				this._endpointTraceIdHeaderName = traceIdHeaderName.toLowerCase();
+				this._endpointTraceIdScope = 'system';
+			} else {
+				this._endpointTraceIdHeaderName = (void 0);
+				this._endpointTraceIdScope = (void 0);
+			}
+		}
 		this._bodyUsed = options.bodyUsed;
 		this._bodyGenerateSnippet = options.bodyGenerate;
 		this._bodyGenerateFunc = Utils.createAsyncFunction(this.getBodyGenerateSnippet(), {
@@ -182,7 +199,7 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 	}
 
 	public getEndpointKey(): string {
-		return `${this.getEndpointSystemCode()}.${this.getEndpointName()}`;
+		return this._endpointKey;
 	}
 
 	public getEndpointUrl(): string {
@@ -257,6 +274,14 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return ['$factor', '$request', ...this.getHelpersVariableNames()];
 	}
 
+	public getEndpointTraceIdHeaderName(): string | undefined {
+		return this._endpointTraceIdHeaderName;
+	}
+
+	public getEndpointTraceIdScope(): 'system' | 'endpoint' | undefined {
+		return this._endpointTraceIdScope;
+	}
+
 	protected isBodyUsed(): boolean | undefined {
 		return this._bodyUsed;
 	}
@@ -284,81 +309,165 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		return ['$options', ...this.getHelpersVariableNames()];
 	}
 
+	protected syncEndpointTraceId(headers: Record<string, string>, request: PipelineStepData<In>): string | undefined {
+		const endpointTraceIdHeaderName = this.getEndpointTraceIdHeaderName();
+		if (endpointTraceIdHeaderName == null) {
+			return (void 0);
+		}
+
+		const headerName = Object.keys(headers).find(name => name.toLowerCase() === endpointTraceIdHeaderName);
+		if (headerName != null) {
+			return (void 0);
+		}
+		let endpointTraceId = headers[headerName];
+		const endpointTraceIdScope = this.getEndpointTraceIdScope();
+
+		if (endpointTraceId != null) {
+			// trace id found in headers, put into context
+			if (request.$context.$traceIds == null) {
+				request.$context.$traceIds = {};
+			}
+			if (endpointTraceIdScope === 'system') {
+				request.$context.$traceIds[this.getEndpointSystemCode()] = endpointTraceId;
+			} else {
+				request.$context.$traceIds[this.getEndpointKey()] = endpointTraceId;
+			}
+		} else if (request.$context?.$traceIds != null) {
+			// trace if not in headers, find in context, and put into header if found
+			if (endpointTraceIdScope === 'system') {
+				endpointTraceId = request.$context.$traceIds[this.getEndpointSystemCode()];
+			} else {
+				endpointTraceId = request.$context.$traceIds[this.getEndpointKey()];
+			}
+			if (endpointTraceId != null) {
+				headers[endpointTraceIdHeaderName] = endpointTraceId;
+			}
+		}
+
+		return endpointTraceId;
+	}
+
+	protected async generateRequestHeaders(data: InFragment, request: PipelineStepData<In>, $helpers: PipelineStepHelpers): Promise<Record<string, string>> {
+		const staticHeaders = this.getEndpointHeaders() ?? {};
+		const transparentHeaders = (this.getTransparentHeaderNames() ?? []).reduce((headers, name) => {
+			const value = Utils.getValue(data, name);
+			if (value == null) {
+				// no value of given header name, ignored
+			} else if (Array.isArray(value)) {
+				const headerValue = value.filter(v => v != null && `${v}`.length !== 0).join(', ');
+				if (headerValue.length !== 0) {
+					headers[name] = headerValue;
+				}
+			} else if (typeof value === 'object') {
+				Object.keys(value).forEach(key => {
+					const headerValue = value[key];
+					if (headerValue != null) {
+						const s = `${headerValue}`;
+						if (s.length !== 0) {
+							headers[key] = s;
+						}
+					}
+				});
+			} else {
+				const headerValue = `${value}`;
+				if (headerValue.length !== 0) {
+					headers[name] = headerValue;
+				}
+			}
+			return headers;
+		}, {});
+		(this.getOmittedTransparentHeaderNames() ?? []).forEach(name => delete transparentHeaders[name]);
+
+		const generatedHeaders = await this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
+		const headers = {...staticHeaders, ...transparentHeaders, ...generatedHeaders};
+		// remove some headers, leave them to fetch to calculate automatically.
+		// and get trace id when existing
+		Object.keys(headers).filter(name => {
+			return ['content-encoding', 'content-length'].includes(name.toLowerCase());
+		}).forEach(name => {
+			delete headers[name];
+		});
+
+		return headers;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	protected async generateRequestBody(method: string, data: InFragment, request: PipelineStepData<In>, $helpers: PipelineStepHelpers): Promise<any> {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let body: any;
+		const bodyUsed = this.isBodyUsed();
+		if (bodyUsed === true || (bodyUsed == null && method !== 'get')) {
+			body = await this._bodyGenerateFunc(data, request, $helpers, $helpers);
+		} else {
+			body = (void 0);
+		}
+		if (body != null && typeof body !== 'string') {
+			body = JSON.stringify(body);
+		}
+		return body;
+	}
+
+	protected tryToRetrieveTraceIdFromResponse(request: PipelineStepData<In>, response: Response): string | undefined {
+		const endpointTraceIdHeaderName = this.getEndpointTraceIdHeaderName();
+		if (endpointTraceIdHeaderName == null) {
+			return (void 0);
+		}
+
+		const endpointTraceId = response.headers.get(endpointTraceIdHeaderName);
+		if (endpointTraceId == null || endpointTraceId.length !== 0) {
+			return (void 0);
+		}
+
+		const endpointTraceIdScope = this.getEndpointTraceIdScope();
+		if (request.$context.$traceIds == null) {
+			request.$context.$traceIds = {};
+		}
+		if (endpointTraceIdScope === 'system') {
+			request.$context.$traceIds[this.getEndpointSystemCode()] = endpointTraceId;
+		} else {
+			request.$context.$traceIds[this.getEndpointKey()] = endpointTraceId;
+		}
+
+		return endpointTraceId;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	protected async sendRequest(url: string, method: string, headers: Record<string, string>, body: any,
+	                            data: InFragment, request: PipelineStepData<In>,
+	                            $helpers: PipelineStepHelpers): Promise<OutFragment> {
+		const response = await fetch(url, {
+			method, headers, body,
+			signal: this.needTimeout() ? (() => {
+				const controller = new AbortController();
+				setTimeout(() => controller.abort(), this.getEndpointTimeout());
+				return controller.signal;
+			})() : (void 0)
+		});
+		// retrieve trace id from response anyway
+		this.tryToRetrieveTraceIdFromResponse(request, response);
+		const status = response.status;
+		if (status >= 400) {
+			return await this._responseErrorHandleFunc({
+				$url: url, $factor: data, $request: request, $response: response,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				$errorCode: `${status}`
+			}, $helpers, $helpers);
+		} else {
+			return await this._responseGenerateFunc(response, data, request, $helpers, $helpers);
+		}
+	}
+
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		const $helpers = this.getHelpers();
 		let url = '';
 		try {
 			url = await this._urlGenerateFunc(this.getEndpointUrl(), data, request, $helpers, $helpers);
 			const method = this.getEndpointMethod();
-			const staticHeaders = this.getEndpointHeaders() ?? {};
-			const transparentHeaders = (this.getTransparentHeaderNames() ?? []).reduce((headers, name) => {
-				const value = Utils.getValue(data, name);
-				if (value == null) {
-					// no value of given header name, ignored
-				} else if (Array.isArray(value)) {
-					const headerValue = value.filter(v => v != null && `${v}`.length !== 0).join(', ');
-					if (headerValue.length !== 0) {
-						headers[name] = headerValue;
-					}
-				} else if (typeof value === 'object') {
-					Object.keys(value).forEach(key => {
-						const headerValue = value[key];
-						if (headerValue != null) {
-							const s = `${headerValue}`;
-							if (s.length !== 0) {
-								headers[key] = s;
-							}
-						}
-					});
-				} else {
-					const headerValue = `${value}`;
-					if (headerValue.length !== 0) {
-						headers[name] = headerValue;
-					}
-				}
-				return headers;
-			}, {});
-			(this.getOmittedTransparentHeaderNames() ?? []).forEach(name => delete transparentHeaders[name]);
-
-			const generatedHeaders = await this._headersGenerateFunc(data, request, $helpers, $helpers) ?? {};
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			let body: any;
-			const bodyUsed = this.isBodyUsed();
-			if (bodyUsed === true || (bodyUsed == null && method !== 'get')) {
-				body = await this._bodyGenerateFunc(data, request, $helpers, $helpers);
-			} else {
-				body = (void 0);
-			}
-			if (body != null && typeof body !== 'string') {
-				body = JSON.stringify(body);
-			}
-			const headers = {...staticHeaders, ...transparentHeaders, ...generatedHeaders};
-			// remove some headers, leave them to fetch to calculate automatically.
-			Object.keys(headers).filter(name => {
-				return ['content-encoding', 'content-length'].includes(name.toLowerCase());
-			}).forEach(name => {
-				delete headers[name];
-			});
-
-			const response = await fetch(url, {
-				method, headers, body,
-				signal: this.needTimeout() ? (() => {
-					const controller = new AbortController();
-					setTimeout(() => controller.abort(), this.getEndpointTimeout());
-					return controller.signal;
-				})() : (void 0)
-			});
-			const status = response.status;
-			if (status >= 400) {
-				return await this._responseErrorHandleFunc({
-					$url: url, $factor: data, $request: request, $response: response,
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					$errorCode: `${status}`
-				}, $helpers, $helpers);
-			} else {
-				return await this._responseGenerateFunc(response, data, request, $helpers, $helpers);
-			}
+			const headers = await this.generateRequestHeaders(data, request, $helpers);
+			this.syncEndpointTraceId(headers, request);
+			const body = await this.generateRequestBody(method, data, request, $helpers);
+			return await this.sendRequest(url, method, headers, body, data, request, $helpers);
 		} catch (e) {
 			if (e instanceof DOMException || e.name === 'AbortError') {
 				return await this._responseErrorHandleFunc({

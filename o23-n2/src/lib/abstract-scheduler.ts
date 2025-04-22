@@ -170,7 +170,7 @@ export abstract class ScheduleService {
 		}
 		try {
 			const pipeline = await this.acquirePipeline(this.createJobPipelineCode);
-			const result = await pipeline.perform({payload: {code, executedAt}, traceId});
+			const result = await pipeline.perform({payload: {code, executedAt}, $context: {traceId}});
 			const {payload} = result;
 			return payload as string;
 		} catch (e) {
@@ -220,7 +220,7 @@ export abstract class ScheduleService {
 				try {
 					// execute job
 					const pipeline = await this.acquirePipeline(context.code);
-					const result = await pipeline.perform({payload: {startedAt: now}, traceId});
+					const result = await pipeline.perform({payload: {startedAt: now}, $context: {traceId}});
 					const {payload} = result ?? {};
 					// write result
 					if (payload === PIPELINE_STEP_RETURN_NULL || payload == null) {

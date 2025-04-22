@@ -61,6 +61,6 @@ export class TypeOrmDataIterator extends LoopDataIterator {
 				// release memory, no return
 			}
 		});
-		await step.perform({content: {params} as TypeOrmLoadBasis, $context: $context});
+		await step.perform({content: {params} as TypeOrmLoadBasis, $context});
 	}
 }

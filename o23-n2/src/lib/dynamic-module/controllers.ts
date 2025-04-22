@@ -169,15 +169,19 @@ export class DynamicModuleController {
 						this.constructor.name);
 				} else {
 					try {
-						const result = await pipeline.perform({payload: this.createRequest(...args), authorization});
-						const {payload} = result;
+						const result = await pipeline.perform({
+							payload: this.createRequest(...args),
+							$context: {authorization}
+						});
+						const {payload, $context} = result;
 						const response = this.findResponse(args);
 						// set expose headers, and authorization headers
 						const {headers} = authorization ?? {};
-						const exposeHeaders = () => {
+						const exposeHeaders = (() => {
 							const exposed = {
 								...(responseHeadersMetadata.getExposedHeaders() ?? {}),
-								...(headers ?? {})
+								...(headers ?? {}),
+								...($context?.$traceIds ?? {})
 							};
 							return Object.keys(exposed).reduce((data, key) => {
 								if (exposed[key] != null && exposed[key].trim().length !== 0) {
@@ -185,7 +189,7 @@ export class DynamicModuleController {
 								}
 								return data;
 							}, {});
-						};
+						})();
 						response.set(exposeHeaders);
 
 						//  set response body

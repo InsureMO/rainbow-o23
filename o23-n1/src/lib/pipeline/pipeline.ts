@@ -30,10 +30,24 @@ export interface PipelineRequestAuthorization<A = any> {
 	readonly headers?: Record<string, string>;
 }
 
-export interface PipelineRequest<C = PipelineRequestPayload> {
-	payload: C;
+export interface PipelineExecutionContext {
 	authorization?: PipelineRequestAuthorization;
 	traceId?: string;
+	/*
+	 * typically, when calling a remote service, and which is from some microservices group,
+	 * there might be some trace ids brought in.
+	 * therefore, these trace ids should be collected and put into pipeline context.
+	 * the key is tracing group, and value is trace id of this tracing group.
+	 */
+	$traceIds?: Record<string, string>;
+	// other context values
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+}
+
+export interface PipelineRequest<C = PipelineRequestPayload> {
+	payload: C;
+	$context?: PipelineExecutionContext;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,6 +55,7 @@ export type PipelineResponsePayload = any;
 
 export interface PipelineResponse<C = PipelineResponsePayload> {
 	payload: C;
+	$context?: PipelineExecutionContext;
 }
 
 export type PipelineCode = string;
@@ -95,15 +110,21 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 	}
 
 	public convertRequestToPipelineData<I, FirstStepIn>(request: PipelineRequest<I>): PipelineStepData<FirstStepIn> {
-		return {content: request.payload as unknown as FirstStepIn};
+		return {
+			content: request.payload as unknown as FirstStepIn,
+			$context: request.$context ?? {}
+		};
 	}
 
 	public convertPipelineDataToResponse<LastStepOut, O>(result: PipelineStepData<LastStepOut>): PipelineResponse<O> {
-		return {payload: result.content as unknown as O};
+		return {
+			payload: result.content as unknown as O,
+			$context: result.$context
+		};
 	}
 
 	protected createTraceId(request: PipelineRequest<In>): string {
-		const {traceId} = request;
+		const {traceId} = request.$context ?? {};
 		if (traceId == null || traceId.trim().length === 0) {
 			return nanoid(16);
 		} else {
@@ -118,8 +139,9 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 	 * - use last step's result as response.
 	 */
 	public async perform(request: PipelineRequest<In>): Promise<PipelineResponse<Out>> {
+		// guard context
+		request.$context = request.$context ?? {};
 		const traceId = this.createTraceId(request);
-		const authorization = request.authorization;
 		const response = await this.measurePerformance(traceId, 'PIPELINE')
 			.execute(async () => {
 				this.traceRequest(traceId, request);
@@ -130,7 +152,7 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({
-								...request, $context: {...request.$context, authorization, traceId}
+								...request, $context: request.$context
 							});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next

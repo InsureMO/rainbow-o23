@@ -1,5 +1,5 @@
 import {PipelineStepData, PipelineStepHelpers, PipelineStepPayload} from '@rainbow-o23/n1';
-import {PipelineStepSets, PipelineStepSetsContext, PipelineStepSetsOptions} from './step-sets';
+import {PipelineStepSets, PipelineStepSetsExecutionContext, PipelineStepSetsOptions} from './step-sets';
 import {ScriptFuncOrBody} from './types';
 import {Utils} from './utils';
 
@@ -59,17 +59,33 @@ export class ParallelPipelineStepSets<In = PipelineStepPayload, Out = PipelineSt
 		return this._cloneData($factor, $request, $helpers, $helpers);
 	}
 
+	protected inheritContext(request: PipelineStepData<In>): PipelineStepSetsExecutionContext {
+		const context = super.inheritContext(request);
+
+		const {
+			authorization, traceId, $traceIds,
+			// $trans does not inherit by sub step
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			$trans,
+			...rest
+		} = context;
+		return {authorization, traceId, $traceIds, ...Utils.clone(rest)};
+	}
+
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.performWithContext(
-			request, async (request: PipelineStepData<In>, context: PipelineStepSetsContext): Promise<OutFragment> => {
-				const {$context: {authorization, traceId} = {}} = request;
+			request, async (request: PipelineStepData<In>, context: PipelineStepSetsExecutionContext): Promise<OutFragment> => {
+				const {$context: {authorization, traceId, $traceIds} = {}} = request;
 				const steps = await this.createSteps();
 				const execute = () => {
 					return steps.map(async step => {
 						return await this.measurePerformance(traceId, 'STEP', step.constructor.name)
 							.execute(async () => {
 								const eachData = await this.cloneDataForEach(data, request);
-								const eachRequest = {content: eachData, $context: {...context, authorization, traceId}};
+								const eachRequest = {
+									content: eachData,
+									$context: {...context, authorization, traceId, $traceIds}
+								};
 								this.traceStepIn(traceId, step, request);
 								const response = await step.perform(eachRequest);
 								this.traceStepOut(traceId, step, response);

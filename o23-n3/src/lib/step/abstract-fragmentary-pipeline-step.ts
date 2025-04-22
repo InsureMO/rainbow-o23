@@ -11,7 +11,7 @@ import {
 	UncatchableError
 } from '@rainbow-o23/n1';
 import {ERR_PIPELINE_STEP_SNIPPET_NOT_EMPTY} from '../error-codes';
-import {PipelineStepSetsContext} from './step-sets';
+import {PipelineStepSetsExecutionContext} from './step-sets';
 import {
 	HandleAnyError,
 	HandleCatchableError,
@@ -264,7 +264,10 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	 */
 	protected async setToOutput($result: OutFragment, $request: PipelineStepData<In>): Promise<PipelineStepData<Out>> {
 		const $helpers = this.getHelpers();
-		return {content: await this._toResponseFunc($result, $request, $helpers, $helpers)};
+		return {
+			content: await this._toResponseFunc($result, $request, $helpers, $helpers),
+			$context: $request.$context
+		};
 	}
 
 	/**
@@ -278,13 +281,13 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 		return {config: this.getConfig(), logger: this.getLogger()};
 	}
 
-	protected createErrorHandleContext(request: PipelineStepData<In>): PipelineStepSetsContext {
+	protected createErrorHandleContext(request: PipelineStepData<In>): PipelineStepSetsExecutionContext {
 		const context = request.$context;
 		if (context == null) {
 			return {};
 		} else {
-			const {authorization, traceId, ...rest} = context;
-			return {authorization, traceId, ...Utils.clone(rest)};
+			const {authorization, traceId, $traceIds, ...rest} = context;
+			return {authorization, traceId, $traceIds, ...Utils.clone(rest)};
 		}
 	}
 

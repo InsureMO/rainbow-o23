@@ -1,5 +1,5 @@
 import {Config, Logger} from '../utils';
-import {PipelineRequestAuthorization} from './pipeline';
+import {PipelineExecutionContext} from './pipeline';
 import {AbstractPipelineExecution, PipelineExecutionOptions} from './pipeline-execution';
 import {createStepHelpers, PipelineStepHelpers} from './step-helpers';
 
@@ -8,12 +8,7 @@ export type PipelineStepCode = string;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PipelineStepPayload = any;
 
-export interface PipelineStepContext {
-	authorization?: PipelineRequestAuthorization;
-	traceId?: string;
-}
-
-export interface PipelineStepData<C = PipelineStepPayload, CTX = PipelineStepContext> {
+export interface PipelineStepData<C = PipelineStepPayload, CTX = PipelineExecutionContext> {
 	/** this is runtime context */
 	$context?: CTX;
 	content: C;
