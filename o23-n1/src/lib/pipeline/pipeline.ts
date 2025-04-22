@@ -1,4 +1,3 @@
-import {nanoid} from 'nanoid';
 import {Config, Logger} from '../utils';
 import {AbstractPipelineExecution, PipelineExecutionOptions} from './pipeline-execution';
 import {PipelineExecutionContext} from './pipeline-execution-context';
@@ -90,15 +89,6 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 			payload: result.content as unknown as O,
 			$context: result.$context
 		};
-	}
-
-	protected createTraceId(request: PipelineRequest<In>): string {
-		const {traceId} = request.$context ?? {};
-		if (traceId == null || traceId.trim().length === 0) {
-			return nanoid(16);
-		} else {
-			return traceId;
-		}
 	}
 
 	/**
