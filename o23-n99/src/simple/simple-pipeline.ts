@@ -9,14 +9,14 @@ import {
 export class SimplePipelineStep1 extends AbstractPipelineStep<number, number> {
 	public perform(request: PipelineStepData<number>): Promise<PipelineStepData<number>> {
 		this.debug(() => `Perform (${request.content} + 100)`);
-		return Promise.resolve({content: request.content + 100});
+		return Promise.resolve({content: request.content + 100, $context: request.$context});
 	}
 }
 
 export class SimplePipelineStep2 extends AbstractPipelineStep<number, number> {
 	public perform(request: PipelineStepData<number>): Promise<PipelineStepData<number>> {
 		this.debug(() => `Perform (${request.content} * 2)`);
-		return Promise.resolve({content: request.content * 2});
+		return Promise.resolve({content: request.content * 2, $context: request.$context});
 	}
 }
 

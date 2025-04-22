@@ -1,4 +1,10 @@
-import {PipelineStepData, PipelineStepPayload, UncatchableError, Undefinable} from '@rainbow-o23/n1';
+import {
+	PipelineExecutionContext,
+	PipelineStepData,
+	PipelineStepPayload,
+	UncatchableError,
+	Undefinable
+} from '@rainbow-o23/n1';
 import {
 	AbstractFragmentaryPipelineStep,
 	FragmentaryPipelineStepOptions,
@@ -11,7 +17,7 @@ import puppeteer from 'puppeteer/lib/cjs/puppeteer/puppeteer.js';
 import {ERR_PDF_TEMPLATE_NOT_EMPTY} from './error-codes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type FindSubTemplate = (data: any, templateCode: string) => Promise<Undefinable<string>>;
+export type FindSubTemplate = (data: any, templateCode: string, $context: PipelineExecutionContext) => Promise<Undefinable<string>>;
 
 export interface PrintPdfPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
@@ -82,8 +88,8 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 		this._findSubTemplateSnippet = options.findSubTemplate;
 		this._findSubTemplateFunc = Utils.createAsyncFunction(this.getFindSubTemplateSnippet(), {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			createDefault: () => async (_$data, _$templateCode): Promise<Undefinable<string>> => (void 0),
-			getVariableNames: () => ['$data', '$templateCode'],
+			createDefault: () => async (_$data, _$templateCode, _$context): Promise<Undefinable<string>> => (void 0),
+			getVariableNames: () => ['$data', '$templateCode', '$context'],
 			error: (e: Error) => {
 				this.getLogger().error(`Failed on create function for get template, snippet is [${this.getFindSubTemplateSnippet()}].`);
 				throw e;
@@ -315,7 +321,12 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected async printPdf(templateHtml: Buffer | string, data: Record<string, any>): Promise<Buffer> {
+	protected async printPdf(templateHtml: Buffer | string, data: Record<string, any>, request: PipelineStepData<In>): Promise<Buffer> {
+		const $context = request.$context;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const findSubTemplate = async (data: any, templateCode: string) => {
+			return await this._findSubTemplateFunc(data, templateCode, $context);
+		};
 		let browser: Browser = null;
 		try {
 			browser = await this.findOrCreateBrowser();
@@ -323,9 +334,7 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 			await page.setViewport(this.getViewport());
 			await page.setContent(templateHtml.toString());
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			await page.exposeFunction('findSubTemplate', async (data: any, templateCode: string) => {
-				return this._findSubTemplateFunc(data, templateCode);
-			});
+			await page.exposeFunction('findSubTemplate', findSubTemplate);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await page.exposeFunction('getValue', (data: any, property: string) => Utils.getValue(data, property));
 			const definePdfOptions = this.getPdfOptions();
@@ -353,11 +362,11 @@ export class PrintPdfPipelineStep<In = PipelineStepPayload, Out = PipelineStepPa
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected async doPerform(data: PrintPdfPipelineStepInFragment, _request: PipelineStepData<In>): Promise<PrintPdfPipelineStepOutFragment> {
+	protected async doPerform(data: PrintPdfPipelineStepInFragment, request: PipelineStepData<In>): Promise<PrintPdfPipelineStepOutFragment> {
 		if (data.template == null) {
 			throw new UncatchableError(ERR_PDF_TEMPLATE_NOT_EMPTY, 'Print template cannot be empty.');
 		}
-		const file = await this.printPdf(data.template, data.data);
+		const file = await this.printPdf(data.template, data.data, request);
 		return {file};
 	}
 }

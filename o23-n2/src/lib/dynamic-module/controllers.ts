@@ -3,6 +3,7 @@ import {
 	ERR_PIPELINE_NOT_FOUND,
 	PIPELINE_STEP_FILE_SYMBOL,
 	PIPELINE_STEP_RETURN_NULL,
+	PipelineExecutionContext,
 	PipelineRepository,
 	PipelineRequestAuthorization,
 	PipelineStepFile,
@@ -143,7 +144,8 @@ export class DynamicModuleController {
 						this.constructor.name);
 				} else {
 					const result = await pipeline.perform({
-						payload: {request, headers, authorization: authorizationToken}
+						payload: {request, headers, authorization: authorizationToken},
+						$context: new PipelineExecutionContext()
 					});
 					const {payload: {authentication, roles} = {authentication: (void 0), roles: []}} = result ?? {};
 					// no authentication found
@@ -154,7 +156,40 @@ export class DynamicModuleController {
 					if (!authorized) {
 						throw new ForbiddenException('Access denied');
 					}
-					return {authorized: true, authentication, roles: matchedRoles};
+					return {
+						authorized: true,
+						authentication, roles: matchedRoles,
+						headers: (() => {
+							const headers = {} as PipelineRequestAuthorization['headers'];
+							if (authorizationToken != null
+								&& authorizationToken.trim().length !== 0
+								&& this.getConfig().getBoolean('app.auth.authorization.expose', false)) {
+								const name = this.getConfig().getString('app.auth.authorization.expose.name', 'O23-Authorization');
+								headers[name] = authorizationToken;
+							}
+							if (authentication != null
+								&& this.getConfig().getBoolean('app.auth.authentication.expose', true)) {
+								const name = this.getConfig().getString('app.auth.authentication.expose.name', 'O23-Authentication');
+								if (typeof authentication === 'string') {
+									headers[name] = authentication;
+								} else {
+									Object.keys(authentication).forEach(key => {
+										const value = authentication[key];
+										if (value != null && `${value}`.trim().length !== 0) {
+											headers[`${name}-${key}`] = authentication[key];
+										}
+									});
+								}
+							}
+							if (matchedRoles != null
+								&& matchedRoles.length !== 0
+								&& this.getConfig().getBoolean('app.auth.roles.expose', false)) {
+								const name = this.getConfig().getString('app.auth.roles.expose.name', 'O23-Authorized-Roles');
+								headers[name] = matchedRoles.map(({code}) => code).join(', ');
+							}
+							return headers;
+						})()
+					};
 				}
 			}
 
@@ -169,11 +204,12 @@ export class DynamicModuleController {
 						this.constructor.name);
 				} else {
 					try {
+						const $context = new PipelineExecutionContext(authorization);
 						const result = await pipeline.perform({
 							payload: this.createRequest(...args),
-							$context: {authorization}
+							$context
 						});
-						const {payload, $context} = result;
+						const {payload} = result;
 						const response = this.findResponse(args);
 						// set expose headers, and authorization headers
 						const {headers} = authorization ?? {};
@@ -181,7 +217,7 @@ export class DynamicModuleController {
 							const exposed = {
 								...(responseHeadersMetadata.getExposedHeaders() ?? {}),
 								...(headers ?? {}),
-								...($context?.$traceIds ?? {})
+								...($context?.scopedTraceIds ?? {})
 							};
 							return Object.keys(exposed).reduce((data, key) => {
 								if (exposed[key] != null && exposed[key].trim().length !== 0) {

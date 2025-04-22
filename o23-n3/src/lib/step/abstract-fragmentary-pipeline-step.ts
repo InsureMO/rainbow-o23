@@ -282,13 +282,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	}
 
 	protected createErrorHandleContext(request: PipelineStepData<In>): PipelineStepSetsExecutionContext {
-		const context = request.$context;
-		if (context == null) {
-			return {};
-		} else {
-			const {authorization, traceId, $traceIds, ...rest} = context;
-			return {authorization, traceId, $traceIds, ...Utils.clone(rest)};
-		}
+		return request.$context;
 	}
 
 	/**
@@ -296,7 +290,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected async handleErrorSteps(fragment: InFragment, errorCode: string, error: any, request: PipelineStepData<In>, builders: Array<PipelineStepBuilder>): Promise<OutFragment> {
-		const {$context: {authorization, traceId} = {}} = request;
+		const traceId = request.$context.traceId;
 		const errorContext = this.createErrorHandleContext(request);
 		const options = this.buildStepOptions();
 		const steps = await Promise.all(builders.map(async builder => await builder.create(options)));
@@ -306,7 +300,7 @@ export abstract class AbstractFragmentaryPipelineStep<In = PipelineStepPayload, 
 				.execute(async () => {
 					this.traceStepIn(traceId, step, request);
 					const response = await step.perform({
-						...request, $context: {...errorContext, authorization, traceId}
+						...request, $context: errorContext
 					});
 					this.traceStepOut(traceId, step, response);
 					// if no response returned, keep using request for next

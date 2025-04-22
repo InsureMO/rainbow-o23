@@ -324,20 +324,17 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 
 		if (endpointTraceId != null) {
 			// trace id found in headers, put into context
-			if (request.$context.$traceIds == null) {
-				request.$context.$traceIds = {};
-			}
 			if (endpointTraceIdScope === 'system') {
-				request.$context.$traceIds[this.getEndpointSystemCode()] = endpointTraceId;
+				request.$context.setScopedTraceId(this.getEndpointSystemCode(), endpointTraceIdHeaderName, endpointTraceId);
 			} else {
-				request.$context.$traceIds[this.getEndpointKey()] = endpointTraceId;
+				request.$context.setScopedTraceId(this.getEndpointKey(), endpointTraceIdHeaderName, endpointTraceId);
 			}
-		} else if (request.$context?.$traceIds != null) {
+		} else {
 			// trace if not in headers, find in context, and put into header if found
 			if (endpointTraceIdScope === 'system') {
-				endpointTraceId = request.$context.$traceIds[this.getEndpointSystemCode()];
+				endpointTraceId = request.$context.findScopedTraceId(this.getEndpointSystemCode())?.[1];
 			} else {
-				endpointTraceId = request.$context.$traceIds[this.getEndpointKey()];
+				endpointTraceId = request.$context.findScopedTraceId(this.getEndpointKey())?.[1];
 			}
 			if (endpointTraceId != null) {
 				headers[endpointTraceIdHeaderName] = endpointTraceId;
@@ -414,18 +411,15 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		}
 
 		const endpointTraceId = response.headers.get(endpointTraceIdHeaderName);
-		if (endpointTraceId == null || endpointTraceId.length !== 0) {
+		if (endpointTraceId == null || endpointTraceId.length === 0) {
 			return (void 0);
 		}
 
 		const endpointTraceIdScope = this.getEndpointTraceIdScope();
-		if (request.$context.$traceIds == null) {
-			request.$context.$traceIds = {};
-		}
 		if (endpointTraceIdScope === 'system') {
-			request.$context.$traceIds[this.getEndpointSystemCode()] = endpointTraceId;
+			request.$context.setScopedTraceId(this.getEndpointSystemCode(), endpointTraceIdHeaderName, endpointTraceId);
 		} else {
-			request.$context.$traceIds[this.getEndpointKey()] = endpointTraceId;
+			request.$context.setScopedTraceId(this.getEndpointKey(), endpointTraceIdHeaderName, endpointTraceId);
 		}
 
 		return endpointTraceId;

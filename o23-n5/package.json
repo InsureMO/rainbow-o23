@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@rainbow-o23/n3": "1.0.58",
 		"@rainbow-o23/n4": "1.0.58",
-		"puppeteer": "^23.7.0"
+		"puppeteer": "^24.7.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",

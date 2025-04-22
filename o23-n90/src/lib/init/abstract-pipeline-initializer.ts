@@ -1,4 +1,11 @@
-import {EnhancedLogger, PipelineCode, PipelineRepository, PipelineStepCode, UncatchableError} from '@rainbow-o23/n1';
+import {
+	EnhancedLogger,
+	PipelineCode,
+	PipelineExecutionContext,
+	PipelineRepository,
+	PipelineStepCode,
+	UncatchableError
+} from '@rainbow-o23/n1';
 import {BootstrapOptions} from '@rainbow-o23/n2';
 import {ParsedDef, ParsedPipelineDef, ParsedPipelineStepDef, registerDefaults} from '@rainbow-o23/n4';
 import * as fs from 'fs';
@@ -133,7 +140,7 @@ export abstract class AbstractPipelineInitializer {
 				await previous;
 				const pipeline = await def.create(initOptions);
 				// startup pipeline has no request/response payload
-				await pipeline.perform({payload: (void 0)});
+				await pipeline.perform({payload: (void 0), $context: new PipelineExecutionContext()});
 				return Promise.resolve();
 			}, Promise.resolve());
 	}

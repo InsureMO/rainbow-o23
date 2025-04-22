@@ -105,7 +105,9 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const {content: _, $context, ...rest} = request;
 						// pass a cursor end indicator to sub steps
-						const contextForSub = {...$context, $typeOrmCursorRound: cursorRound, $typeOrmCursorEnd: end};
+						const contextForSub = $context.temporaryWith({
+							$typeOrmCursorRound: cursorRound, $typeOrmCursorEnd: end
+						});
 						const requestForSub = {...rest, $context: contextForSub, content: contentForSub};
 						const result = await sets.perform(requestForSub);
 						const {content} = result;

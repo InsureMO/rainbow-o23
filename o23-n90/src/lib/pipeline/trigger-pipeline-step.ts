@@ -155,7 +155,7 @@ export class TriggerPipelinePipelineStep<In = PipelineStepPayload, Out = Pipelin
 			throw new UncatchableError(ERR_PIPELINE_NOT_FOUND_BY_TRIGGER, `Pipeline trigger[${LoggerUtils.stringifyObject(rest)}] not found.`);
 		}
 		const {data} = trigger;
-		const result = await pipeline.perform({payload: data});
+		const result = await pipeline.perform({payload: data, $context: request.$context});
 		return result.payload;
 	}
 }

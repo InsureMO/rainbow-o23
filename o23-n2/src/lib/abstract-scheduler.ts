@@ -4,6 +4,7 @@ import {
 	ERR_PIPELINE_NOT_FOUND,
 	Pipeline,
 	PIPELINE_STEP_RETURN_NULL,
+	PipelineExecutionContext,
 	PipelineOptions,
 	PipelineRepository,
 	UncatchableError
@@ -154,7 +155,10 @@ export abstract class ScheduleService {
 		}
 		try {
 			const pipeline = await this.acquirePipeline(this.obtainClusterExecutionLockPipelineCode);
-			const result = await pipeline.perform({payload: {code, startedAt: executedAt}});
+			const result = await pipeline.perform({
+				payload: {code, startedAt: executedAt},
+				$context: new PipelineExecutionContext()
+			});
 			const {payload = true} = result ?? {};
 			// not false, treated as true
 			return payload !== false;
@@ -170,7 +174,10 @@ export abstract class ScheduleService {
 		}
 		try {
 			const pipeline = await this.acquirePipeline(this.createJobPipelineCode);
-			const result = await pipeline.perform({payload: {code, executedAt}, $context: {traceId}});
+			const result = await pipeline.perform({
+				payload: {code, executedAt},
+				$context: new PipelineExecutionContext((void 0), traceId)
+			});
 			const {payload} = result;
 			return payload as string;
 		} catch (e) {
@@ -186,7 +193,10 @@ export abstract class ScheduleService {
 		}
 		try {
 			const pipeline = await this.acquirePipeline(this.writeJobResultPipelineCode);
-			await pipeline.perform({payload: result});
+			await pipeline.perform({
+				payload: result,
+				$context: new PipelineExecutionContext((void 0), result.jobTraceId)
+			});
 		} catch (e) {
 			// ignore it.
 			this.logger.error(e);
@@ -220,7 +230,10 @@ export abstract class ScheduleService {
 				try {
 					// execute job
 					const pipeline = await this.acquirePipeline(context.code);
-					const result = await pipeline.perform({payload: {startedAt: now}, $context: {traceId}});
+					const result = await pipeline.perform({
+						payload: {startedAt: now},
+						$context: new PipelineExecutionContext((void 0), traceId)
+					});
 					const {payload} = result ?? {};
 					// write result
 					if (payload === PIPELINE_STEP_RETURN_NULL || payload == null) {

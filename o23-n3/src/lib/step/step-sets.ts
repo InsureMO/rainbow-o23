@@ -47,7 +47,6 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 	}
 
 	protected inheritContext(request: PipelineStepData<In>): PipelineStepSetsExecutionContext {
-		request.$context = request.$context ?? {};
 		return request.$context;
 	}
 
@@ -76,7 +75,7 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 	protected async doPerform(data: InFragment, request: PipelineStepData<In>): Promise<OutFragment> {
 		return await this.performWithContext(
 			request, async (request: PipelineStepData<In>, context: PipelineStepSetsExecutionContext): Promise<OutFragment> => {
-				const {$context: {authorization, traceId, $traceIds} = {}} = request;
+				const traceId = context.traceId;
 				const steps = await this.createSteps();
 				const response = await steps.reduce(async (promise, step) => {
 					const request = await promise;
@@ -84,7 +83,7 @@ export class PipelineStepSets<In = PipelineStepPayload, Out = PipelineStepPayloa
 						.execute(async () => {
 							this.traceStepIn(traceId, step, request);
 							const response = await step.perform({
-								...request, $context: {...context, authorization, traceId, $traceIds}
+								...request, $context: context
 							});
 							this.traceStepOut(traceId, step, response);
 							// if no response returned, keep using request for next

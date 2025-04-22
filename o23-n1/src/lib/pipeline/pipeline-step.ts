@@ -1,6 +1,6 @@
 import {Config, Logger} from '../utils';
-import {PipelineExecutionContext} from './pipeline';
 import {AbstractPipelineExecution, PipelineExecutionOptions} from './pipeline-execution';
+import {PipelineExecutionContext} from './pipeline-execution-context';
 import {createStepHelpers, PipelineStepHelpers} from './step-helpers';
 
 export type PipelineStepCode = string;
@@ -10,7 +10,7 @@ export type PipelineStepPayload = any;
 
 export interface PipelineStepData<C = PipelineStepPayload, CTX = PipelineExecutionContext> {
 	/** this is runtime context */
-	$context?: CTX;
+	$context: CTX;
 	content: C;
 }
 

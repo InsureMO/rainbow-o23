@@ -1,2 +1,4 @@
 # can not use puppeteer.config.cjs, cannot be detected in standalone mode.
 cacheDirectory: puppeteer
+chrome:
+  version: 119.0.6045.105

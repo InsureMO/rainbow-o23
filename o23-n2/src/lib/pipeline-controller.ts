@@ -1,5 +1,5 @@
 import {Body, Controller, Post} from '@nestjs/common';
-import {ERR_PIPELINE_NOT_FOUND, PipelineRepository, UncatchableError} from '@rainbow-o23/n1';
+import {ERR_PIPELINE_NOT_FOUND, PipelineExecutionContext, PipelineRepository, UncatchableError} from '@rainbow-o23/n1';
 import {AbstractController} from './abstract-controller';
 import {handleException} from './exception-handling';
 
@@ -24,7 +24,8 @@ export class PipelineController extends AbstractController {
 		} else {
 			try {
 				const result = await pipeline.perform({
-					payload: request.payload
+					payload: request.payload,
+					$context: new PipelineExecutionContext()
 				});
 				return result.payload as O;
 			} catch (e) {
