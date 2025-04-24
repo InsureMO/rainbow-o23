@@ -15,7 +15,7 @@ export type PipelineRequestPayload = any;
 
 export interface PipelineRequest<C = PipelineRequestPayload> {
 	payload: C;
-	$context: PipelineExecutionContext;
+	$context?: PipelineExecutionContext;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,6 +77,13 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 		return await Promise.all(this.getStepBuilders().map(async builder => await builder.create(options)));
 	}
 
+	protected defendPipelineRequest(request: PipelineRequest<In>): Required<PipelineRequest<In>> {
+		if (request.$context == null) {
+			request.$context = new PipelineExecutionContext();
+		}
+		return request as Required<PipelineRequest<In>>;
+	}
+
 	public convertRequestToPipelineData<I, FirstStepIn>(request: PipelineRequest<I>): PipelineStepData<FirstStepIn> {
 		return {
 			content: request.payload as unknown as FirstStepIn,
@@ -98,6 +105,7 @@ export abstract class AbstractPipeline<In = any, Out = any> extends AbstractPipe
 	 * - use last step's result as response.
 	 */
 	public async perform(request: PipelineRequest<In>): Promise<PipelineResponse<Out>> {
+		request = this.defendPipelineRequest(request);
 		const $context = request.$context;
 		const traceId = $context.traceId;
 		const response = await this.measurePerformance(traceId, 'PIPELINE')
