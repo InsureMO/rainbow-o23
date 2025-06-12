@@ -1,4 +1,4 @@
-import {createConfig, createLogger} from '@rainbow-o23/n1';
+import {createConfig, createLogger, PipelineExecutionContext} from '@rainbow-o23/n1';
 import {Column, Entity, PrimaryColumn} from 'typeorm';
 import {
 	TypeOrmBulkSaveBySQLPipelineStep,
@@ -47,7 +47,7 @@ describe('TypeORM SQL Autonomous Suite', () => {
 			config, logger, dataSourceName: 'TEST', sql: 'SELECT ID id, CONTENT content FROM T_TEST_TABLE WHERE ID = ?',
 			autonomous: true
 		});
-		const request = {content: {params: [1]}};
+		const request = {content: {params: [1]}, $context: new PipelineExecutionContext()};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
 		expect(response.content.id).toBe(1);
@@ -60,7 +60,7 @@ describe('TypeORM SQL Autonomous Suite', () => {
 			config, logger, dataSourceName: 'TEST', sql: 'INSERT INTO T_TEST_TABLE(ID, CONTENT) VALUES (?, ?)',
 			autonomous: true, mergeRequest: 'id'
 		});
-		const request = {content: {values: [3, 'another world!']}};
+		const request = {content: {values: [3, 'another world!']}, $context: new PipelineExecutionContext()};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
 		expect(response.content.id).toBe(3);
@@ -72,7 +72,7 @@ describe('TypeORM SQL Autonomous Suite', () => {
 			config, logger, dataSourceName: 'TEST', sql: 'UPDATE T_TEST_TABLE SET CONTENT = ? WHERE ID = ?',
 			autonomous: true, mergeRequest: 'count'
 		});
-		const request = {content: {values: ['world #3!', 3]}};
+		const request = {content: {values: ['world #3!', 3]}, $context: new PipelineExecutionContext()};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
 		// DON'T KNOW WHY THIS IS 3, SEEMS SHOULD BE 1 ACCORDING TO BETTER-SQLITE3 DOCUMENT
@@ -89,7 +89,8 @@ describe('TypeORM SQL Autonomous Suite', () => {
 		const request = {
 			content: {
 				items: [[4, 'world #4!'], [5, 'world #5!']]
-			}
+			},
+			$context: new PipelineExecutionContext()
 		};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
@@ -104,7 +105,7 @@ describe('TypeORM SQL Autonomous Suite', () => {
 			config, logger, dataSourceName: 'TEST', sql: 'SELECT ID id, CONTENT content FROM T_TEST_TABLE',
 			autonomous: true
 		});
-		const request = {content: (void 0)};
+		const request = {content: (void 0), $context: new PipelineExecutionContext()};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
 		expect(Array.isArray(response.content)).toBeTruthy();

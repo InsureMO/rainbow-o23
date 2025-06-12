@@ -1,4 +1,4 @@
-import {createConfig, createLogger} from '@rainbow-o23/n1';
+import {createConfig, createLogger, PipelineExecutionContext} from '@rainbow-o23/n1';
 import {TypeOrmDataSourceHelper, TypeOrmLoadManyBySQLUseCursorPipelineStep} from '../../src';
 
 const logger = createLogger();
@@ -44,7 +44,7 @@ describe('TypeORM Cursor Suite', () => {
 			config, logger, dataSourceName: 'TEST', sql: 'SELECT * FROM T_O23_DB_CHANGE_LOG',
 			autonomous: true
 		});
-		const request = {content: (void 0)};
+		const request = {content: (void 0), $context: new PipelineExecutionContext()};
 		const response = await step.perform(request);
 		expect(response.content).not.toBeNull();
 		console.log(response.content);

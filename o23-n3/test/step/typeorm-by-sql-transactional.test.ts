@@ -3,6 +3,7 @@ import {
 	createConfig,
 	createLogger,
 	PipelineCode,
+	PipelineExecutionContext,
 	PipelineStepData,
 	PipelineStepType,
 	Undefinable
@@ -201,7 +202,8 @@ describe('TypeORM SQL Transactional Suite', () => {
 				item3ChangeTo: {id: 3, content: 'world #3!'},
 				item4: {id: 4, content: 'world #4'},
 				item5: {id: 5, content: 'world #5'}
-			}
+			},
+			$context: new PipelineExecutionContext()
 		});
 		expect(response).not.toBeNull();
 	});
