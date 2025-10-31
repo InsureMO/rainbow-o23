@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@rainbow-o23/n1": "1.0.59",
 		"node-fetch": "2.6.7",
-		"typeorm": "^0.3.20",
+		"typeorm": "^0.3.26",
 		"typescript": "5.5.4"
 	},
 	"devDependencies": {
