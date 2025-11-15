@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@rainbow-o23/n3": "1.0.59",
-		"js-yaml": "^4.1.0"
+		"js-yaml": "^4.1.1"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
