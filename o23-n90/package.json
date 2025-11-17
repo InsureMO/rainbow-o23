@@ -25,7 +25,7 @@
 		"@rainbow-o23/n3": "1.0.59",
 		"@rainbow-o23/n4": "1.0.59",
 		"dotenv": "^16.4.5",
-		"glob": "^11.0.0"
+		"glob": "^11.1.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.9",
