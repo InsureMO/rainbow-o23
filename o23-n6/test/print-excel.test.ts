@@ -18,7 +18,7 @@ test('Test Print Excel', async () => {
 					{name: 'Research', cashierName: 'Joe', cashInTxn: 159.67, cashInAmt: 1277.36}
 				],
 				subTotal: {
-					cashInTxn: 294.07, cashInAmt: 2621.36
+					cashInTxn: "294.07", cashInAmt: 2621.36
 				}
 			},
 			{
@@ -27,7 +27,7 @@ test('Test Print Excel', async () => {
 					{name: 'Research', cashierName: 'Joe', cashInTxn: 129.67, cashInAmt: 977.36}
 				],
 				subTotal: {
-					cashInTxn: 234.07, cashInAmt: 2021.36
+					cashInTxn: "234.07", cashInAmt: 2021.36
 				}
 			}
 		],

@@ -57,9 +57,14 @@ interface ExcelAstStdCell extends ExcelAstCell {
 	value: any;
 }
 
+enum ExcelAstVariableValueType {
+	ANY, NUM
+}
+
 interface ExcelAstVariableCell extends ExcelAstCell {
 	type: ExcelAstCellType.VARIABLE;
 	variable: string;
+	valueType: ExcelAstVariableValueType;
 }
 
 enum ExcelAstRowType {
@@ -236,11 +241,19 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 					} as ExcelAstStdCell;
 				} else if (trimmed === '$.$') {
 					return {
-						type: ExcelAstCellType.VARIABLE, merge, variable: '', originalCell: this.transformCell(cell)
+						type: ExcelAstCellType.VARIABLE, merge, variable: '', originalCell: this.transformCell(cell),
+						valueType: ExcelAstVariableValueType.ANY
+					} as ExcelAstVariableCell;
+				} else if (trimmed.startsWith('$.num.')) {
+					return {
+						type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(6).trim(),
+						valueType: ExcelAstVariableValueType.NUM,
+						originalCell: this.transformCell(cell)
 					} as ExcelAstVariableCell;
 				} else {
 					return {
 						type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(1).trim(),
+						valueType: ExcelAstVariableValueType.ANY,
 						originalCell: this.transformCell(cell)
 					} as ExcelAstVariableCell;
 				}
@@ -608,8 +621,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			let value: any = Utils.getValue(data, cell.variable === '' ? '.' : cell.variable);
 			const type = typeof value;
-			if (value == null || ['number', 'bigint', 'string'].includes(type)) {
-				// do nothing, let it be null
+			if (cell.valueType === ExcelAstVariableValueType.NUM) {
+				value = Number(value);
+			} else if (value == null || ['number', 'bigint', 'string'].includes(type)) {
+				// do nothing, let it be
 			} else {
 				if (value.toString != null) {
 					value = value.toString();

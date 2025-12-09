@@ -92,6 +92,12 @@ $policy.end
 - All properties are relative paths, calculated relative to their parent node. Therefore, within a loop, only the values of each element
   can be accessed.
 
+> According to [Issue 7067](https://github.com/typeorm/typeorm/issues/7067) of TypeORM, when the database field type is Decimal,
+> it's not possible to specify that it should be parsed as a JavaScript Number type when converting to JSON (even if you can tolerate the
+> precision issue). Therefore, if your data is directly retrieved from the database and the values in the JSON are strings instead of numbers
+> due to the Decimal issue, you can change the value retrieval logic to start with `$.num.`. The printing engine will automatically convert it
+> to a Number and output it to Excel. For example, if it was originally `$amount`, you can specify `$.num.amount`.
+
 #### Output
 
 ```csv
