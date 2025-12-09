@@ -1,4 +1,4 @@
-import {createConfig, createLogger} from '@rainbow-o23/n1';
+import {createConfig, createLogger, PipelineExecutionContext} from '@rainbow-o23/n1';
 import {PrintCsvPipelineStep} from '../src';
 
 const logger = createLogger();
@@ -32,7 +32,7 @@ $policy.end`;
 	};
 
 	const step = new PrintCsvPipelineStep({config, logger});
-	const {content: {file}} = await step.perform({content: {template, data}});
+	const {content: {file}} = await step.perform({content: {template, data}, $context: new PipelineExecutionContext()});
 	expect(file).not.toBeNull();
 	expect(file.toString()).toEqual(`column1,column2
 Test CSV

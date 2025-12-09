@@ -1,4 +1,4 @@
-import {createConfig, createLogger, PipelineStepData} from '@rainbow-o23/n1';
+import {createConfig, createLogger, PipelineExecutionContext, PipelineStepData} from '@rainbow-o23/n1';
 import {TypeOrmDataSourceHelper} from '@rainbow-o23/n3';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -54,7 +54,7 @@ $logs.end`;
 
 		// use from request to build a typeorm iterator
 		const step = new PrintCsvPipelineStep({name: 'TestPrintCsvUseCursor', config, logger, fromRequest});
-		const {content: {file}} = await step.perform({content: {template, data}});
+		const {content: {file}} = await step.perform({content: {template, data}, $context: new PipelineExecutionContext()});
 		expect(file).not.toBeNull();
 		expect(file.toString()).toEqual(`column1,column2
 Test CSV Use TypeOrm
@@ -77,7 +77,7 @@ Id,Author,File Name
 		const data = {
 			type: 'Test Excel Use TypeOrm'
 		};
-		const {content: {file}} = await step.perform({content: {template, data}});
+		const {content: {file}} = await step.perform({content: {template, data}, $context: new PipelineExecutionContext()});
 		expect(file).not.toBeNull();
 	});
 
