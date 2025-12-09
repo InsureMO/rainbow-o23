@@ -1,4 +1,4 @@
-import {createConfig, createLogger} from '@rainbow-o23/n1';
+import {createConfig, createLogger, PipelineExecutionContext} from '@rainbow-o23/n1';
 import * as fs from 'fs';
 import * as path from 'path';
 import {PrintExcelPipelineStep} from '../src';
@@ -44,6 +44,6 @@ test('Test Print Excel', async () => {
 	};
 
 	const step = new PrintExcelPipelineStep({config, logger});
-	const {content: {file}} = await step.perform({content: {template, data}});
+	const {content: {file}} = await step.perform({content: {template, data}, $context: new PipelineExecutionContext()});
 	expect(file).not.toBeNull();
 });
