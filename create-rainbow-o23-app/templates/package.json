@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n99",
-	"version": "1.0.59",
+	"version": "1.0.60",
 	"description": "o23 server",
 	"scripts": {
 		"build": "nest build",
@@ -34,9 +34,9 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n90": "1.0.59",
-		"@rainbow-o23/n91": "1.0.59",
-		"@rainbow-o23/n92": "1.0.59",
+		"@rainbow-o23/n90": "1.0.60",
+		"@rainbow-o23/n91": "1.0.60",
+		"@rainbow-o23/n92": "1.0.60",
 		"mssql": "^11.0.1",
 		"mysql2": "^3.15.3",
 		"oracledb": "^6.6.0",

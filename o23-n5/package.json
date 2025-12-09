@@ -1,6 +1,6 @@
 {
 	"name": "@rainbow-o23/n5",
-	"version": "1.0.59",
+	"version": "1.0.60",
 	"description": "o23 pdf print",
 	"main": "index.cjs",
 	"module": "index.js",
@@ -21,8 +21,8 @@
 		"url": "https://github.com/InsureMO/rainbow-o23/issues"
 	},
 	"dependencies": {
-		"@rainbow-o23/n3": "1.0.59",
-		"@rainbow-o23/n4": "1.0.59",
+		"@rainbow-o23/n3": "1.0.60",
+		"@rainbow-o23/n4": "1.0.60",
 		"puppeteer": "^24.7.0"
 	},
 	"devDependencies": {
