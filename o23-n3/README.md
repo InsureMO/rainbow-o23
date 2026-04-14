@@ -492,10 +492,10 @@ Array<TypeOrmEntityToLoad>;
 
 ##### Environment Parameters
 
-| Name                              | Type    | Default Value | Comments                               |
-|-----------------------------------|---------|---------------|----------------------------------------|
-| `typeorm.DB.fetch.size`           | number  | 20            | Fetch size.                            |
-| `typeorm.DB.stream.pause.enabled` | boolean | false         | Pause and resume result stream or not. |
+| Name                              | Type    | Default Value | Comments                                                                                      |
+|-----------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------|
+| `typeorm.DB.fetch.size`           | number  | 20            | Fetch size.                                                                                   |
+| `typeorm.DB.stream.pause.enabled` | boolean | false         | Pause and resume result stream or not. For Mysql, use default `false`. For Pgsql, use `true`. |
 
 ##### Constructor Parameters
 

@@ -80,52 +80,39 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 		return await this.autoTrans<OutFragment>(async (runner) => {
 			const results = [];
 			const rows = [];
+			const fetchSize = this.getFetchSize();
 			let cursorRound = 0;
-			const pipe = async ({resolve, reject, end}) => {
-				if (!end && rows.length < this.getFetchSize()) {
-					// not end, and size not meet the fresh required
-					// do nothing, wait for next
-					return;
+			const pipe = async ({rows, end}) => {
+				// get data from cache
+				const contentForSub = await this._streamToFunc(rows, request, this.getHelpers(), this.getHelpers());
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				let resultContent: any;
+				if (this.getStepBuilders().length === 0) {
+					// no sub step, use content as result
+					resultContent = contentForSub;
+				} else {
+					// create a step sets to run
+					const sets = new PipelineStepSets({
+						...this.buildStepOptions(), name: this.getName(), steps: this.getStepBuilders()
+					});
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const {content: _, $context, ...rest} = request;
+					// pass a cursor end indicator to sub steps
+					const contextForSub = $context.temporaryWith({
+						$typeOrmCursorRound: cursorRound, $typeOrmCursorEnd: end
+					});
+					const requestForSub = {...rest, $context: contextForSub, content: contentForSub};
+					const result = await sets.perform(requestForSub);
+					const {content} = result;
+					resultContent = content;
 				}
-				try {
-					// get data from cache
-					const contentForSub = await this._streamToFunc([...rows], request, this.getHelpers(), this.getHelpers());
-					// clear cache
-					rows.length = 0;
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					let resultContent: any;
-					if (this.getStepBuilders().length === 0) {
-						// no sub step, use content as result
-						resultContent = contentForSub;
-					} else {
-						// create a step sets to run
-						const sets = new PipelineStepSets({
-							...this.buildStepOptions(), name: this.getName(), steps: this.getStepBuilders()
-						});
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const {content: _, $context, ...rest} = request;
-						// pass a cursor end indicator to sub steps
-						const contextForSub = $context.temporaryWith({
-							$typeOrmCursorRound: cursorRound, $typeOrmCursorEnd: end
-						});
-						const requestForSub = {...rest, $context: contextForSub, content: contentForSub};
-						const result = await sets.perform(requestForSub);
-						const {content} = result;
-						resultContent = content;
-					}
-					cursorRound = cursorRound + 1;
-					if (resultContent == null || resultContent == PIPELINE_STEP_RETURN_NULL) {
-						// ignore
-					} else if (Array.isArray(resultContent)) {
-						results.push(...resultContent);
-					} else {
-						results.push(resultContent);
-					}
-				} catch (e) {
-					reject(e);
-				}
-				if (end) {
-					resolve(results);
+				cursorRound = cursorRound + 1;
+				if (resultContent == null || resultContent == PIPELINE_STEP_RETURN_NULL) {
+					// ignore
+				} else if (Array.isArray(resultContent)) {
+					results.push(...resultContent);
+				} else {
+					results.push(resultContent);
 				}
 			};
 			const close = async (readable: ReadStream) => {
@@ -138,10 +125,27 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 				}
 			};
 			const read = async ({resolve, reject}) => {
+				const pipes = [];
+
 				const readable = await runner.stream(sql, params, async () => {
 					// on end
 					await close(readable);
-					await pipe({resolve, reject, end: true});
+					const data = [...rows];
+					rows.length = 0;
+					const last = async () => {
+						try {
+							await pipe({rows: data, end: true});
+							resolve(results);
+						} catch (e) {
+							reject(e);
+						}
+					};
+					if (pipes.length !== 0) {
+						// there is not finished
+						pipes.push(last);
+					} else {
+						await last();
+					}
 				}, async (e: Error) => {
 					// on error
 					await close(readable);
@@ -152,12 +156,32 @@ export class TypeOrmLoadManyBySQLUseCursorPipelineStep<In = PipelineStepPayload,
 						readable.pause();
 					}
 					rows.push(data);
-					await pipe({
-						resolve, reject: async (e: Error) => {
-							await close(readable);
-							reject(e);
-						}, end: false
-					});
+					if (rows.length < fetchSize) {
+						// not end, and size not meet the fresh required
+						// do nothing, wait for next
+					} else {
+						const data = [...rows];
+						rows.length = 0;
+						pipes.push(async () => {
+							try {
+								await pipe({rows: data, end: false});
+							} catch (e) {
+								await close(readable);
+								reject(e);
+								return;
+							}
+							// drop the finished
+							pipes.shift();
+							// check there is more or not, if true, run the first one.
+							if (pipes.length !== 0) {
+								pipes[0]();
+							}
+						});
+						// if the only one, run it immediately
+						if (pipes.length === 1) {
+							await pipes[0]();
+						}
+					}
 					if (this.isPauseStreamEnabled()) {
 						readable.resume();
 					}
