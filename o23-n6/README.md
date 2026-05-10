@@ -94,9 +94,9 @@ $policy.end
 
 > According to [Issue 7067](https://github.com/typeorm/typeorm/issues/7067) of TypeORM, when the database field type is Decimal,
 > it's not possible to specify that it should be parsed as a JavaScript Number type when converting to JSON (even if you can tolerate the
-> precision issue). Therefore, if your data is directly retrieved from the database and the values in the JSON are strings instead of numbers
-> due to the Decimal issue, you can change the value retrieval logic to start with `$.num.`. The printing engine will automatically convert it
-> to a Number and output it to Excel. For example, if it was originally `$amount`, you can specify `$.num.amount`.
+> precision issue). Therefore, if your data is directly retrieved from the database and the values in the JSON are strings instead of
+> numbers due to the Decimal issue, you can change the value retrieval logic to start with `$.num.`. The printing engine will automatically
+> convert it to a Number and output it to Excel. For example, if it was originally `$amount`, you can specify `$.num.amount`.
 
 #### Output
 
@@ -150,6 +150,7 @@ With scenario:
 |-----------------------------------|---------|--------------------------|------------------------------------------------------|
 | `print.excel.temporary.file.keep` | boolean | false                    | Only for debug purpose, never turn on in production. |
 | `print.excel.temporary.dir`       | string  | `.excel-temporary-files` | Temporary file directory.                            |
+| `print.excel.variables.multiple`  | boolean | false                    | Allow multiple variables in single cell.             |
 
 ### Request and Response
 
@@ -180,6 +181,17 @@ Find template and unit test in `/test` folder, syntax for using an Excel templat
 - `$.$` represents use loop array itself,
 - All properties are relative paths, calculated relative to their parent node. Therefore, within a loop, only the values of each element
   can be accessed.
+
+#### Multiple Variables in Single Cell
+
+Set the parameter `print.excel.variables.multiple` to true to allow multiple variable names to be set in a single Excel cell.
+
+- Each variable name must start with `${` and end with `}`. The content inside `${xxx}` follows the same rules as `$xxx`,
+- `$\{` is treated as the plain string `${`. This escape only takes effect before a variable starts with `${`; otherwise, it is considered
+  the three characters `$\{`,
+- `\}` is treated as `}`. This escape only takes effect after a variable starts with `${`; otherwise, it is considered the two characters
+  `\}`,
+- For the standard numeric format syntax starting with `$.num.xxx`, when multiple variables are used, it can be expressed as `${.num.xxx}`.
 
 ### Want TypeOrm Cursor?
 

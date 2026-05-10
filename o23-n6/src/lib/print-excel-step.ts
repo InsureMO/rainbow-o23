@@ -61,9 +61,15 @@ enum ExcelAstVariableValueType {
 	ANY, NUM
 }
 
+interface ExcelAstCellSegment {
+	variable: boolean;
+	value: string;
+	valueType: ExcelAstVariableValueType;
+}
+
 interface ExcelAstVariableCell extends ExcelAstCell {
 	type: ExcelAstCellType.VARIABLE;
-	variable: string;
+	variable: string | Array<ExcelAstCellSegment>;
 	valueType: ExcelAstVariableValueType;
 }
 
@@ -71,6 +77,7 @@ enum ExcelAstRowType {
 	STANDARD, EMPTY_LINE, LOOP_ROWS
 }
 
+// noinspection DuplicatedCode
 interface ExcelAstRow {
 	type: ExcelAstRowType;
 	lineNumber: number;
@@ -128,15 +135,21 @@ interface ExcelBookAst {
 export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStepPayload>
 	extends AbstractTypeormCursorAvailableStep<In, Out, PrintExcelPipelineStepInFragment, PrintExcelPipelineStepOutFragment> {
 	private readonly _keepTempFile: boolean;
+	private readonly _multipleVariables: boolean;
 
 	public constructor(options: PrintExcelPipelineStepOptions<In, Out, PrintExcelPipelineStepInFragment, PrintExcelPipelineStepOutFragment>) {
 		super(options);
 		const config = this.getConfig();
 		this._keepTempFile = config.getBoolean('print.excel.temporary.file.keep', false);
+		this._multipleVariables = config.getBoolean('print.excel.variables.multiple', false);
 	}
 
 	protected shouldKeepTempFile(): boolean {
 		return this._keepTempFile;
+	}
+
+	protected allowMultipleVariables(): boolean {
+		return this._multipleVariables;
 	}
 
 	protected getTemporaryDir(): string {
@@ -229,44 +242,140 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		}
 	}
 
+	private parseCellVariables(value: string): Array<ExcelAstCellSegment> | undefined {
+		const segments: Array<Omit<ExcelAstCellSegment, 'valueType'>> = [];
+
+		let variableStart = false;
+		let chars: Array<string> = [];
+
+		let charIndex = 0;
+		let charsCount = value.length;
+		while (charIndex < charsCount) {
+			const char = value[charIndex];
+
+			switch (char) {
+				case '$': {
+					if (variableStart) {
+						chars.push('$');
+					} else {
+						const nextChar = value[charIndex + 1];
+						if (nextChar === '{') {
+							variableStart = true;
+							if (chars.length !== 0) {
+								// the existing chars are standard, collect and clear cached chars
+								segments.push({variable: false, value: chars.join('')});
+								chars.length = 0;
+							}
+							// hold the variable start chars
+							chars.push('$', '{');
+							charIndex = charIndex + 1;
+						} else if (nextChar === '\\' && value[charIndex + 2] === '{') {
+							// escape char "{", and ignore the escape sign char "\"
+							chars.push('$', '{');
+							charIndex = charIndex + 2;
+						} else {
+							// standard char
+							chars.push('$');
+						}
+					}
+					break;
+				}
+				case '\\': {
+					if (variableStart && value[charIndex + 1] === '}') {
+						// escape char "}", then ignore the escape sign char "\"
+						chars.push('}');
+						charIndex = charIndex + 1;
+					} else {
+						chars.push('\\');
+					}
+					break;
+				}
+				case '}': {
+					if (variableStart) {
+						variableStart = false;
+						segments.push({variable: true, value: chars.join('')});
+						chars.length = 0;
+					} else {
+						chars.push('}');
+					}
+					break;
+				}
+				default: {
+					chars.push(char);
+					break;
+				}
+			}
+
+			charIndex += 1;
+		}
+
+		if (chars.length !== 0) {
+			segments.push({variable: false, value: chars.join('')});
+		}
+
+		if (segments.length === 0) {
+			return (void 0);
+		} else if (segments.some(segment => segment.variable)) {
+			return segments.map(segment => {
+				if (segment.variable) {
+					const value = segment.value;
+					if (value.startsWith(`$\{.num.`)) {
+						return {variable: true, value: value.substring(7), valueType: ExcelAstVariableValueType.NUM};
+					} else {
+						return {variable: true, value: value.substring(2), valueType: ExcelAstVariableValueType.ANY};
+					}
+				} else {
+					return {...segment, valueType: ExcelAstVariableValueType.ANY};
+				}
+			});
+		} else {
+			// no variable
+			return (void 0);
+		}
+	}
+
 	protected parseCell(cell: ExcelJS.Cell): ExcelAstCell {
 		const merge = this.getCellMergeType(cell);
 		const {value} = cell;
 		if (typeof value === 'string') {
 			const trimmed = value.trim();
-			if (trimmed.startsWith('$')) {
-				if (trimmed === '$.$del') {
+			if (trimmed === '$.$del') {
+				return {
+					type: ExcelAstCellType.STANDARD, merge, value, originalCell: this.transformCell(cell, '')
+				} as ExcelAstStdCell;
+			} else if (trimmed === '$.$') {
+				return {
+					type: ExcelAstCellType.VARIABLE, merge, variable: '', originalCell: this.transformCell(cell),
+					valueType: ExcelAstVariableValueType.ANY
+				} as ExcelAstVariableCell;
+			} else if (trimmed.startsWith('$.num.')) {
+				return {
+					type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(6).trim(),
+					valueType: ExcelAstVariableValueType.NUM,
+					originalCell: this.transformCell(cell)
+				} as ExcelAstVariableCell;
+			} else if (this.allowMultipleVariables()) {
+				const parsedVariables = this.parseCellVariables(value);
+				if (parsedVariables != null) {
 					return {
-						type: ExcelAstCellType.STANDARD, merge, value, originalCell: this.transformCell(cell, '')
-					} as ExcelAstStdCell;
-				} else if (trimmed === '$.$') {
-					return {
-						type: ExcelAstCellType.VARIABLE, merge, variable: '', originalCell: this.transformCell(cell),
+						type: ExcelAstCellType.VARIABLE,
+						merge,
+						variable: parsedVariables,
+						originalCell: this.transformCell(cell),
 						valueType: ExcelAstVariableValueType.ANY
 					} as ExcelAstVariableCell;
-				} else if (trimmed.startsWith('$.num.')) {
-					return {
-						type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(6).trim(),
-						valueType: ExcelAstVariableValueType.NUM,
-						originalCell: this.transformCell(cell)
-					} as ExcelAstVariableCell;
-				} else {
-					return {
-						type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(1).trim(),
-						valueType: ExcelAstVariableValueType.ANY,
-						originalCell: this.transformCell(cell)
-					} as ExcelAstVariableCell;
 				}
-			} else {
+			} else if (trimmed.startsWith('$')) {
 				return {
-					type: ExcelAstCellType.STANDARD, merge, value, originalCell: this.transformCell(cell)
-				} as ExcelAstStdCell;
+					type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(1).trim(),
+					valueType: ExcelAstVariableValueType.ANY,
+					originalCell: this.transformCell(cell)
+				} as ExcelAstVariableCell;
 			}
-		} else {
-			return {
-				type: ExcelAstCellType.STANDARD, merge, value, originalCell: this.transformCell(cell)
-			} as ExcelAstStdCell;
 		}
+		return {
+			type: ExcelAstCellType.STANDARD, merge, value, originalCell: this.transformCell(cell)
+		} as ExcelAstStdCell;
 	}
 
 	protected parseEmptyRow(row: ExcelJS.Row, rowIndex: number, ast: ExcelSheetAst) {
@@ -612,29 +721,52 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private variableToValue(data: any, variable: string, valueType: ExcelAstVariableValueType): any {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let value: any = Utils.getValue(data, variable === '' ? '.' : variable);
+		const type = typeof value;
+		if (valueType === ExcelAstVariableValueType.NUM) {
+			return Number(value);
+		} else if (value == null || ['number', 'bigint', 'string'].includes(type)) {
+			// do nothing, let it be
+			return value;
+		} else if (value.toString != null) {
+			return value.toString();
+		} else {
+			return `${value ?? ''}`;
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected printCell(row: ExcelAstStdRow, cell: ExcelAstCell, cellIndex: number, data: any): [ExcelCell, ExcelAstCellMergeType] {
 		if (cell.merge === ExcelAstCellMergeType.SLAVE) {
 			return [{}, cell.merge];
 		} else if (this.isStandardCell(cell)) {
 			return [{...cell.originalCell, note: this.redressCellNote(cell.originalCell.note)}, cell.merge];
 		} else if (this.isVariableCell(cell)) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			let value: any = Utils.getValue(data, cell.variable === '' ? '.' : cell.variable);
-			const type = typeof value;
-			if (cell.valueType === ExcelAstVariableValueType.NUM) {
-				value = Number(value);
-			} else if (value == null || ['number', 'bigint', 'string'].includes(type)) {
-				// do nothing, let it be
+			if (typeof cell.variable === 'string') {
+				const value = this.variableToValue(data, cell.variable, cell.valueType);
+				return [
+					{
+						value,
+						style: cell.originalCell.style,
+						note: this.redressCellNote(cell.originalCell.note)
+					},
+					cell.merge
+				];
 			} else {
-				if (value.toString != null) {
-					value = value.toString();
-				} else {
-					value = `${value ?? ''}`;
-				}
+				let value = cell.variable.map(part => {
+					if (part.variable) {
+						return this.variableToValue(data, part.value, part.valueType);
+					} else {
+						return part.value;
+					}
+				}).join('');
+				return [
+					{value, style: cell.originalCell.style, note: this.redressCellNote(cell.originalCell.note)},
+					cell.merge
+				];
 			}
-			return [
-				{value, style: cell.originalCell.style, note: this.redressCellNote(cell.originalCell.note)},
-				cell.merge];
 		} else {
 			// never occurred
 			throw new UncatchableError(ERR_UNDETECTABLE_ROW, `Undetectable cell found, check line ${row.lineNumber}, column ${cellIndex}.`);

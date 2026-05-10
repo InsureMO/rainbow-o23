@@ -8,6 +8,7 @@ const config = createConfig(logger);
 
 test('Test Print Excel', async () => {
 	process.env.CFG_PRINT_EXCEL_TEMPORARY_FILE_KEEP = 'true';
+	process.env.CFG_PRINT_EXCEL_VARIABLES_MULTIPLE = 'true';
 	const template = fs.readFileSync(path.resolve(__dirname, 'template.xlsx'));
 	const data = {
 		createDate: '2023-12-1',
