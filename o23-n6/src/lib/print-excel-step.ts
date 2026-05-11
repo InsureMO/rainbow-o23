@@ -366,7 +366,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 						valueType: ExcelAstVariableValueType.ANY
 					} as ExcelAstVariableCell;
 				}
-			} else if (trimmed.startsWith('$')) {
+			}
+			// in case of above are not matched,
+			// or even matches allow multiple variables, but still follows the simple variable syntax
+			if (trimmed.startsWith('$')) {
 				return {
 					type: ExcelAstCellType.VARIABLE, merge, variable: trimmed.substring(1).trim(),
 					valueType: ExcelAstVariableValueType.ANY,
@@ -595,28 +598,28 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		rows
 			.reduce((masterCells, [row, merges], rowIndex) => {
 				// noinspection JSUnresolvedReference
-				for (let cellIndex = 1, cellCount = row.cellCount; cellIndex <= cellCount; cellIndex++) {
+				for (let cellIndex = 0, cellCount = row.cellCount; cellIndex < cellCount; cellIndex++) {
 					// noinspection JSUnresolvedReference
-					const cell = row.getCell(cellIndex);
-					const merge = merges[cellIndex - 1];
+					const cell = row.getCell(cellIndex + 1);
+					const merge = merges[cellIndex];
 					if (merge === ExcelAstCellMergeType.MASTER) {
-						masterCells.push([row, cell, rowIndex, cellIndex - 1]);
+						masterCells.push([row, cell, rowIndex, cellIndex]);
 					}
 				}
 				return masterCells;
 			}, [] as Array<[ExcelJS.Row, ExcelJS.Cell, number, number]>)
 			.forEach(([
 				          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-				          _, cell,
-				          firstRowIndex, // starts from 0
-				          firstColumnIndex// starts from 0, given column index is the master cell
+				          _, masterCell,
+				          rowIndexOfMasterCell, // starts from 0
+				          columnIndexOfMasterCell // starts from 0, given column index is the master cell
 			          ]) => {
 				// find end cell horizontal
-				const merges = rows[firstRowIndex][1];
+				const merges = rows[rowIndexOfMasterCell][1];
 				const maxColumnIndex = merges.length - 1;
-				let columnIndex = firstColumnIndex;
+				let columnIndex = columnIndexOfMasterCell;
 				while (columnIndex < maxColumnIndex) {
-					// to next horizontal cell
+					// to next horizontal cell (to right)
 					if (merges[columnIndex + 1] !== ExcelAstCellMergeType.SLAVE) {
 						// right cell is not slave, merge broken
 						break;
@@ -626,40 +629,18 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 				// after search horizontal, now the last column is detected
 				// find end cell vertical
 				const maxRowIndex = rows.length - 1;
-				let rowIndex = firstRowIndex;
+				let rowIndex = rowIndexOfMasterCell;
 				while (rowIndex < maxRowIndex) {
 					const merges = rows[rowIndex + 1][1];
-					if (merges[firstColumnIndex] !== ExcelAstCellMergeType.SLAVE) {
+					if (merges[columnIndexOfMasterCell] !== ExcelAstCellMergeType.SLAVE) {
 						// down cell is not slave, merge broken
 						break;
 					}
-					if (firstColumnIndex <= 1) {
-						// no cell on left, check next row
-						// or only one cell on left, check next row
-						rowIndex = rowIndex + 1;
-					} else if (merges[firstColumnIndex - 1] === ExcelAstCellMergeType.SINGLE) {
-						// previous cell is single, check next row
-						rowIndex = rowIndex + 1;
-					} else if (merges[firstColumnIndex - 1] === ExcelAstCellMergeType.MASTER) {
-						// previous cell is master, merge broken
-						break;
-					} else {
-						let broken = false;
-						for (let cellIndex = firstColumnIndex - 2; cellIndex >= 0; cellIndex--) {
-							if (merges[cellIndex] === ExcelAstCellMergeType.MASTER) {
-								// left cell is master, merge broken
-								broken = true;
-								break;
-							}
-						}
-						if (broken) {
-							break;
-						}
-					}
+					rowIndex = rowIndex + 1;
 				}
 				// noinspection JSUnresolvedReference
 				const lastMergeCell = rows[rowIndex][0].getCell(columnIndex + 1);
-				sheet.mergeCells(`${cell.address}:${lastMergeCell.address}`);
+				sheet.mergeCells(`${masterCell.address}:${lastMergeCell.address}`);
 			});
 		// merged, commit last row
 		lastRow.commit();
