@@ -18,6 +18,7 @@ import {LoopDataIterator} from './loop-data-iterator';
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PrintExcelPipelineStepOptions<In = PipelineStepPayload, Out = PipelineStepPayload, InFragment = In, OutFragment = Out>
 	extends FragmentaryPipelineStepOptions<In, Out, InFragment, OutFragment> {
+	allowMultipleVariables?: boolean;
 }
 
 export interface PrintExcelPipelineStepInFragment {
@@ -141,7 +142,7 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		super(options);
 		const config = this.getConfig();
 		this._keepTempFile = config.getBoolean('print.excel.temporary.file.keep', false);
-		this._multipleVariables = config.getBoolean('print.excel.variables.multiple', false);
+		this._multipleVariables = options.allowMultipleVariables ?? config.getBoolean('print.excel.variables.multiple', false);
 	}
 
 	protected shouldKeepTempFile(): boolean {
@@ -246,10 +247,10 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 		const segments: Array<Omit<ExcelAstCellSegment, 'valueType'>> = [];
 
 		let variableStart = false;
-		let chars: Array<string> = [];
+		const chars: Array<string> = [];
 
 		let charIndex = 0;
-		let charsCount = value.length;
+		const charsCount = value.length;
 		while (charIndex < charsCount) {
 			const char = value[charIndex];
 
@@ -723,7 +724,7 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private variableToValue(data: any, variable: string, valueType: ExcelAstVariableValueType): any {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let value: any = Utils.getValue(data, variable === '' ? '.' : variable);
+		const value: any = Utils.getValue(data, variable === '' ? '.' : variable);
 		const type = typeof value;
 		if (valueType === ExcelAstVariableValueType.NUM) {
 			return Number(value);
@@ -755,7 +756,7 @@ export class PrintExcelPipelineStep<In = PipelineStepPayload, Out = PipelineStep
 					cell.merge
 				];
 			} else {
-				let value = cell.variable.map(part => {
+				const value = cell.variable.map(part => {
 					if (part.variable) {
 						return this.variableToValue(data, part.value, part.valueType);
 					} else {

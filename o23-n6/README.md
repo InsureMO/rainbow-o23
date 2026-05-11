@@ -152,6 +152,12 @@ With scenario:
 | `print.excel.temporary.dir`       | string  | `.excel-temporary-files` | Temporary file directory.                            |
 | `print.excel.variables.multiple`  | boolean | false                    | Allow multiple variables in single cell.             |
 
+### Constructor Parameters
+
+| Name                   | Type    | Default Value | Comments                                                |
+|------------------------|---------|---------------|---------------------------------------------------------|
+| allowMultipleVariables | boolean |               | Override the value of `print.excel.variables.multiple`. |
+
 ### Request and Response
 
 ```typescript
