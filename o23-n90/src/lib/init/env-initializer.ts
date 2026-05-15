@@ -1,9 +1,10 @@
+import {Type} from '@nestjs/common';
 import {createConfig} from '@rainbow-o23/n1';
 import * as dotenv from 'dotenv';
 import {ExtendedBootstrapOptions} from './extended-bootstrap-options';
 
 export class EnvironmentInitializer {
-	public async load(): Promise<ExtendedBootstrapOptions> {
+	public async load<P extends ExtendedBootstrapOptions>(OptionsClass?: Type<P>): Promise<P> {
 		const files = (process.env.CFG_ENV_FILE ?? '.env.common.basic, .env.prod')
 			.split(',')
 			.map(file => file.trim())
@@ -12,6 +13,8 @@ export class EnvironmentInitializer {
 			files.push('.env.common.basic', '.env.prod');
 		}
 		files.reverse().forEach(path => dotenv.config({path}));
-		return new ExtendedBootstrapOptions(createConfig());
+		const Class = OptionsClass ?? ExtendedBootstrapOptions;
+		// @ts-expect-error ignore the type check
+		return new Class(createConfig());
 	}
 }

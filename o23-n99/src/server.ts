@@ -9,6 +9,18 @@ const useSimpleModule = async (options: BootstrapOptions) => {
 		SimpleModule.registerMyself(options);
 	}
 };
+
+// sample of customize logger format
+// class MyBootstrapOptions extends ExtendedBootstrapOptions {
+// 	customizedLoggerFormat(info: Logform.TransformableInfo): Logform.TransformableInfo {
+// 		info.greeting = 'hello world';
+// 		return info;
+// 	}
+// }
+
+// process.env.CFG_LOGGER_COMBINED_LEVEL = 'info';
+// EnhancedLogger.enableLevel('log');
+
 // noinspection JSIgnoredPromiseFromCall
 launchServer({
 	beforeDoPipelineInitialization: async (options: ExtendedBootstrapOptions) => {
@@ -18,4 +30,5 @@ launchServer({
 	beforeDoServerLaunch: async (options: BootstrapOptions) => {
 		await useSimpleModule(options);
 	}
+	// optionClass: MyBootstrapOptions
 });

@@ -74,6 +74,15 @@ export class BootstrapOptions {
 	}
 
 	/**
+	 * override this method to modify the default customized logging format, following nest.js + winston standard.
+	 * this modification happens before the output logger format,
+	 * such as {@link #getLoggerFormat()}, {@linkcode format.json()}
+	 */
+	public customizedLoggerFormat(info: Logform.TransformableInfo): Logform.TransformableInfo {
+		return info;
+	}
+
+	/**
 	 * override this method to provide your own logging format, following nest.js + winston standard
 	 */
 	public getLoggerFormat() {
@@ -121,7 +130,7 @@ export class BootstrapOptions {
 					if (appName.trim().length !== 0) {
 						info.current_app_name = appName;
 					}
-					return info;
+					return this.customizedLoggerFormat(info) ?? info;
 				})();
 				return {
 					transports: [
@@ -138,7 +147,7 @@ export class BootstrapOptions {
 						this._config.getBoolean('logger.file.enabled', false)
 							? new transports.File({
 								filename: this.getEnvAsString('logger.combined.file', 'logs/combined.log'),
-								level: this.getEnvAsString('logger.combined.level', 'log'),
+								level: this.getEnvAsString('logger.combined.level', 'info'),
 								format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
 								zippedArchive: this.getEnvAsBoolean('logger.error.zipped.archive', false),
 								maxFiles: this.getEnvAsNumber('logger.error.max.files'),
@@ -161,7 +170,7 @@ export class BootstrapOptions {
 						this._config.getBoolean('logger.file.rotate.enabled', true)
 							? new transports.DailyRotateFile({
 								filename: this.getEnvAsString('logger.combined.file', 'logs/combined-%DATE%.log'),
-								level: this.getEnvAsString('logger.combined.level', 'log'),
+								level: this.getEnvAsString('logger.combined.level', 'info'),
 								format: format.combine(customized, this.getEnvAsBoolean('logger.combined.json', true) ? format.json() : this.getLoggerFormat()),
 								datePattern: this.getEnvAsString('logger.combined.date.pattern', 'YYYY-MM-DD'),
 								zippedArchive: this.getEnvAsBoolean('logger.combined.zipped.archive', false),

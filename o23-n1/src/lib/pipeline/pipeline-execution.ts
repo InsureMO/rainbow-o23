@@ -1,4 +1,4 @@
-import {Config, createConfig, createLogger, Logger, LoggerUtils} from '../utils';
+import {Config, createConfig, createLogger, EnhancedLogger, Logger, LoggerUtils} from '../utils';
 import {PipelineOptions} from './pipeline';
 import {PipelineStep, PipelineStepData} from './pipeline-step';
 import {PIPELINE_STEP_RETURN_NULL} from './step-helpers-utils';
@@ -45,7 +45,13 @@ export class AbstractPipelineExecution {
 	// noinspection TypeScriptAbstractClassConstructorCanBeMadeProtected
 	public constructor(options?: PipelineOptions) {
 		const {config, logger} = options ?? {};
-		this._logger = logger ?? createLogger();
+		if (logger == null) {
+			this._logger = createLogger();
+		} else if (logger instanceof EnhancedLogger) {
+			this._logger = logger;
+		} else {
+			this._logger = new EnhancedLogger(logger);
+		}
 		this._config = config ?? createConfig(this._logger);
 		this._debugLogEnabled = this._config.getBoolean('pipeline.debug.log.enabled', false);
 		this._performanceLogEnabled = this._debugLogEnabled || this._config.getBoolean('pipeline.performance.log.enabled', false);

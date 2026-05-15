@@ -4,31 +4,31 @@ export type LoggerEnablement = Record<LoggerName, boolean>;
 
 export interface Logger {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	log(message: any, ...optionalParams: any[]): any;
+	log(message: any, ...optionalParams: any[]): void;
 
 	/**
 	 * Write an 'error' level log.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	error(message: any, ...optionalParams: any[]): any;
+	error(message: any, ...optionalParams: any[]): void;
 
 	/**
 	 * Write a 'warn' level log.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	warn(message: any, ...optionalParams: any[]): any;
+	warn(message: any, ...optionalParams: any[]): void;
 
 	/**
 	 * Write a 'debug' level log.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	debug?(message: any, ...optionalParams: any[]): any;
+	debug?(message: any, ...optionalParams: any[]): void;
 
 	/**
 	 * Write a 'verbose' level log.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	verbose?(message: any, ...optionalParams: any[]): any;
+	verbose?(message: any, ...optionalParams: any[]): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +48,7 @@ const buildOutput = (message: any, ...optionalParams: any[]): RedressedOutputPar
 };
 
 export class EnhancedLogger implements Logger {
-	private static ENABLED_LEVELS: Array<LoggerLevel> = ['warn', 'error'];
+	private static ENABLED_LEVELS: Array<LoggerLevel> = ['log', 'warn', 'error'];
 	// noinspection SpellCheckingInspection
 	private static ENABLEMENTS: LoggerEnablement = {};
 	private _logger: Logger;
@@ -137,52 +137,52 @@ export class EnhancedLogger implements Logger {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public debug(message: any, ...optionalParams: any[]): any {
+	public debug(message: any, ...optionalParams: any[]): void {
 		const {key} = buildOutput(message, ...optionalParams);
 		if (key != null && EnhancedLogger.isEnabled(`${key}.debug`)) {
-			return this._logger.debug(message, ...optionalParams);
+			this._logger.debug(message, ...optionalParams);
 		} else if (EnhancedLogger.isLevelEnabled('debug')) {
-			return this._logger.debug(message, ...optionalParams);
+			this._logger.debug(message, ...optionalParams);
 		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public verbose(message: any, ...optionalParams: any[]): any {
+	public verbose(message: any, ...optionalParams: any[]): void {
 		const {key} = buildOutput(message, ...optionalParams);
 		if (key != null && EnhancedLogger.isEnabled(`${key}.verbose`)) {
-			return this._logger.verbose(message, ...optionalParams);
+			this._logger.verbose(message, ...optionalParams);
 		} else if (EnhancedLogger.isLevelEnabled('verbose')) {
-			return this._logger.verbose(message, ...optionalParams);
+			this._logger.verbose(message, ...optionalParams);
 		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public log(message: any, ...optionalParams: any[]): any {
+	public log(message: any, ...optionalParams: any[]): void {
 		const {key} = buildOutput(message, ...optionalParams);
 		if (key != null && EnhancedLogger.isEnabled(`${key}.log`)) {
-			return this._logger.log(message, ...optionalParams);
+			this._logger.log(message, ...optionalParams);
 		} else if (EnhancedLogger.isLevelEnabled('log')) {
-			return this._logger.log(message, ...optionalParams);
+			this._logger.log(message, ...optionalParams);
 		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public warn(message: any, ...optionalParams: any[]): any {
+	public warn(message: any, ...optionalParams: any[]): void {
 		const {key} = buildOutput(message, ...optionalParams);
 		if (key != null && EnhancedLogger.isEnabled(`${key}.warn`)) {
-			return this._logger.warn(message, ...optionalParams);
+			this._logger.warn(message, ...optionalParams);
 		} else if (EnhancedLogger.isLevelEnabled('warn')) {
-			return this._logger.warn(message, ...optionalParams);
+			this._logger.warn(message, ...optionalParams);
 		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public error(message: any, ...optionalParams: any[]): any {
+	public error(message: any, ...optionalParams: any[]): void {
 		const {key} = buildOutput(message, ...optionalParams);
 		if (key != null && EnhancedLogger.isEnabled(`${key}.error`)) {
-			return this._logger.error(message, ...optionalParams);
+			this._logger.error(message, ...optionalParams);
 		} else if (EnhancedLogger.isLevelEnabled('error')) {
-			return this._logger.error(message, ...optionalParams);
+			this._logger.error(message, ...optionalParams);
 		}
 	}
 }
@@ -200,28 +200,28 @@ export class ConsoleLogger implements Logger {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	debug(message: any, ...optionalParams: any[]): any {
-		return console.debug(...this.buildPrefix('debug', message, ...optionalParams));
+	debug(message: any, ...optionalParams: any[]): void {
+		console.debug(...this.buildPrefix('debug', message, ...optionalParams));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	verbose(message: any, ...optionalParams: any[]): any {
-		return console.trace(...this.buildPrefix('verbose', message, ...optionalParams));
+	verbose(message: any, ...optionalParams: any[]): void {
+		console.trace(...this.buildPrefix('verbose', message, ...optionalParams));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	log(message: any, ...optionalParams: any[]): any {
-		return console.log(...this.buildPrefix('log', message, ...optionalParams));
+	log(message: any, ...optionalParams: any[]): void {
+		console.log(...this.buildPrefix('log', message, ...optionalParams));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	warn(message: any, ...optionalParams: any[]): any {
-		return console.warn(...this.buildPrefix('warn', message, ...optionalParams));
+	warn(message: any, ...optionalParams: any[]): void {
+		console.warn(...this.buildPrefix('warn', message, ...optionalParams));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	error(message: any, ...optionalParams: any[]): any {
-		return console.error(...this.buildPrefix('error', message, ...optionalParams));
+	error(message: any, ...optionalParams: any[]): void {
+		console.error(...this.buildPrefix('error', message, ...optionalParams));
 	}
 }
 
