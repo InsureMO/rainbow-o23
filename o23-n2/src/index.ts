@@ -8,6 +8,7 @@ export * from './lib/exception-handling';
 
 export * from './lib/pipeline-controller';
 export * from './lib/app-controller';
+export * from './lib/controller-context-builder';
 export * from './lib/dynamic-module';
 export * from './lib/app-module';
 

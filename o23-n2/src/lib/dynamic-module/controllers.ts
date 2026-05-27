@@ -13,6 +13,7 @@ import {
 import {Request, Response} from 'express';
 import {Readable} from 'stream';
 import {AbstractController} from '../abstract-controller';
+import {ControllerContextBuilder} from '../controller-context-builder';
 import {ERR_REQUEST_NOT_FOUND, ERR_RESPONSE_NOT_FOUND} from '../error-codes';
 import {handleException} from '../exception-handling';
 import {DynamicModuleRequest} from './request';
@@ -126,15 +127,13 @@ export class DynamicModuleController {
 				return args[responseArgIndex] as Response;
 			}
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			protected async authorize(...args: Array<any>): Promise<Undefinable<PipelineRequestAuthorization>> {
+			protected async authorize(request: Request): Promise<Undefinable<PipelineRequestAuthorization>> {
 				if (!this.getConfig().getBoolean('app.auth.enabled', false)) {
 					return (void 0);
 				}
 				// do auth first, if needed
 				const authPipelineCode = this.getConfig().getString('app.auth.pipeline', 'Authenticate');
 				// need authorization, find request
-				const request = this.findRequest(args);
 				const headers = request.headers ?? {};
 				const authorizationToken = headers.authorization;
 				const pipeline = await PipelineRepository.findPipeline(authPipelineCode, this.buildPipelineOptions());
@@ -194,8 +193,8 @@ export class DynamicModuleController {
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			public async invoke(...args: Array<any>): Promise<any> {
-				const authorization = await this.authorize(...args);
+			private async doInvokeInternal(request: Request, ...args: Array<any>): Promise<any> {
+				const authorization = await this.authorize(request);
 				// perform pipeline
 				const pipeline = await PipelineRepository.findPipeline(def.code, this.buildPipelineOptions());
 				if (pipeline == null) {
@@ -260,6 +259,62 @@ export class DynamicModuleController {
 					} catch (e) {
 						handleException(this.getLogger(), e, this.constructor.name);
 					}
+				}
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			private async doInvokeWithLogAspect(request: Request, ...args: Array<any>): Promise<any> {
+				const now = process.hrtime.bigint();
+				try {
+					const log = ControllerContextBuilder.getRequestLogger();
+					if (log != null) {
+						log(this.getLogger(), request);
+					}
+				} catch {
+					/* intentionally ignore request logging errors */
+				}
+				try {
+					const ret = await this.doInvokeInternal(request, ...args);
+					try {
+						const log = ControllerContextBuilder.getResponseLogger();
+						if (log != null) {
+							log(this.getLogger(), process.hrtime.bigint() - now, this.findResponse(args), ret);
+						}
+					} catch {
+						/* intentionally ignore response logging errors */
+					}
+					return ret;
+				} catch (e) {
+					try {
+						const log = ControllerContextBuilder.getResponseLogger();
+						if (log != null) {
+							log(this.getLogger(), process.hrtime.bigint() - now, this.findResponse(args), (void 0), e);
+						}
+					} catch {
+						/* intentionally ignore response logging errors */
+					}
+					throw e;
+				}
+			}
+
+			private async doInvoke(request: Request, ...args: Array<any>): Promise<any> {
+				if (this.getConfig().getBoolean('logger.route.aspect.enabled', false)) {
+					return await this.doInvokeWithLogAspect(request, ...args);
+				} else {
+					return await this.doInvokeInternal(request, ...args);
+				}
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			public async invoke(...args: Array<any>): Promise<any> {
+				const request = this.findRequest(args);
+				if (this.getConfig().getBoolean('logger.mdc.enabled', false)) {
+					const mdc = ControllerContextBuilder.getMDCBuilder()?.(request);
+					return ControllerContextBuilder.getAsyncLocalStorage().run(mdc, async () => {
+						return this.doInvoke(request, ...args);
+					});
+				} else {
+					return this.doInvoke(request, ...args);
 				}
 			}
 		};

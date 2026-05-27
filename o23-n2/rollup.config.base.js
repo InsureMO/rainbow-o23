@@ -24,6 +24,7 @@ export const buildConfig = (lint) => {
 		external(id) {
 			return ["@rainbow-o23/", "@nestjs/", "dayjs/plugin/"].some(scope => id.startsWith(scope))
 				|| [
+					'node:async_hooks',
 					'express', 'stream',
 					"winston", "nest-winston", "winston-daily-rotate-file",
 					"nanoid", "reflect-metadata", "rxjs", "cron",

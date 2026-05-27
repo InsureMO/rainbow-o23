@@ -3,6 +3,7 @@ import {Config, createConfig, Undefinable} from '@rainbow-o23/n1';
 import {WinstonModule} from 'nest-winston';
 import {format, Logform, transports} from 'winston';
 import 'winston-daily-rotate-file';
+import {ControllerContextBuilder} from './controller-context-builder';
 
 export type PlugInModule = Type | DynamicModule | Promise<DynamicModule> | ForwardReference;
 
@@ -112,11 +113,19 @@ export class BootstrapOptions {
 	 * override this method to provide your logging patterns, following nest.js + winston standard
 	 */
 	public createWinstonModule(): DynamicModule {
+		const mdcEnabled = this._config.getBoolean('logger.mdc.enabled', false);
 		return WinstonModule.forRootAsync({
 			useFactory: () => {
 				const appName = this._config.getString('app.name', 'O23-N99');
 				const provider = this._config.getString('app.provider', 'Rainbow Team');
 				const customized: Logform.Format = format((info) => {
+					if (mdcEnabled) {
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						const store: Record<string, any> = ControllerContextBuilder.getAsyncLocalStorage().getStore();
+						if (store != null && typeof store === 'object') {
+							Object.assign(info, store);
+						}
+					}
 					if (info['@timestamp'] == null) {
 						info['@timestamp'] = new Date().toISOString();
 					}
@@ -181,14 +190,16 @@ export class BootstrapOptions {
 						// also want to see logs in our console
 						this._config.getBoolean('logger.console.enabled', false)
 							? new transports.Console({
-								format: format.combine(
-									format.cli(),
-									format.splat(),
-									customized,
-									format.printf((info) => {
-										return `${info['@timestamp']} [${info.context || 'O23'}] ${info.level}: ${info.message}`;
-									})
-								),
+								format: this.getEnvAsBoolean('logger.console.json', false)
+									? format.combine(customized, format.json())
+									: format.combine(
+										format.cli(),
+										format.splat(),
+										customized,
+										format.printf((info) => {
+											return `${info['@timestamp']} [${info.context || 'O23'}] ${info.level}: ${info.message}`;
+										})
+									),
 								level: this.getEnvAsString('logger.console.level', 'debug')
 							})
 							: null
