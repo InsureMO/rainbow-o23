@@ -4,7 +4,6 @@ import {json, urlencoded} from 'express';
 import {WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston';
 import {createAppModule} from './app-module';
 import {BootstrapOptions, createBoostrapOptions} from './bootstrap-options';
-import {ControllerContextBuilder} from './controller-context-builder';
 import {ErrorFilter} from './exception-handling';
 
 // noinspection JSUnusedGlobalSymbols

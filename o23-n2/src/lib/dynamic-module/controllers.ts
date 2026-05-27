@@ -297,6 +297,7 @@ export class DynamicModuleController {
 				}
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			private async doInvoke(request: Request, ...args: Array<any>): Promise<any> {
 				if (this.getConfig().getBoolean('logger.route.aspect.enabled', false)) {
 					return await this.doInvokeWithLogAspect(request, ...args);
