@@ -102,6 +102,7 @@ Support response outputs as following:
 | `app.cors.enabled`                                    | boolean | false                              | Enable cors.                                                                                         |
 | `app.cors.options`                                    | json    |                                    | `CorsOptions` of `@nestjs/common`.                                                                   |
 | `logger.mdc.enabled`                                  | boolean | false                              | Enable MDC. Register the MDCBuilder first if enabled.                                                |
+| `logger.mdc.proxy.enabled`                            | boolean | true                               | Use MDC proxy. Turn disabled to enable ALS(AsyncLocalStorage) MDC.                                   |
 | `logger.route.aspect.enabled`                         | boolean | false                              | Enable aspect logger for dynamic routes. Register the RequestLogger/ResponseLogger first if enabled. |
 | `logger.file.enabled`                                 | boolean | false                              | Enable file log.                                                                                     |
 | `logger.file.rotate.enabled`                          | boolean | true                               | Enable rotate file log.                                                                              |

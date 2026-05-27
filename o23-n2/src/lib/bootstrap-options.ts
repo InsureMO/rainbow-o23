@@ -114,16 +114,33 @@ export class BootstrapOptions {
 	 */
 	public createWinstonModule(): DynamicModule {
 		const mdcEnabled = this._config.getBoolean('logger.mdc.enabled', false);
+		const mdcProxyEnabled = this.getConfig().getBoolean('logger.mdc.proxy.enabled', true);
 		return WinstonModule.forRootAsync({
 			useFactory: () => {
 				const appName = this._config.getString('app.name', 'O23-N99');
 				const provider = this._config.getString('app.provider', 'Rainbow Team');
 				const customized: Logform.Format = format((info) => {
 					if (mdcEnabled) {
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						const store: Record<string, any> = ControllerContextBuilder.getAsyncLocalStorage().getStore();
-						if (store != null && typeof store === 'object') {
-							Object.assign(info, store);
+						if (mdcProxyEnabled) {
+							const mdc = info.context?.['$-m-d-c-$'];
+							if (mdc != null) {
+								Object.assign(info, mdc);
+								delete info.context['$-m-d-c-$'];
+								const originContext = info.context['$-origin-context-$'];
+								if (originContext != null) {
+									if (typeof originContext === 'symbol') {
+										delete info.context;
+									} else {
+										info.context = originContext;
+									}
+								}
+							}
+						} else {
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							const store: Record<string, any> = ControllerContextBuilder.getAsyncLocalStorage().getStore();
+							if (store != null && typeof store === 'object') {
+								Object.assign(info, store);
+							}
 						}
 					}
 					if (info['@timestamp'] == null) {
