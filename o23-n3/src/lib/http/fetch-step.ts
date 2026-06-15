@@ -465,14 +465,16 @@ export class FetchPipelineStep<In = PipelineStepPayload, Out = PipelineStepPaylo
 		} catch (e) {
 			if (e instanceof DOMException || e.name === 'AbortError') {
 				return await this._responseErrorHandleFunc({
-					$url: url, $factor: data, $request: request, $errorCode: HttpAbortErrorCode
+					$url: url, $factor: data, $request: request,
+					$errorCode: HttpAbortErrorCode, $error: e
 				}, $helpers, $helpers);
 			} else if (e instanceof UncatchableError) {
 				// uncatchable error is thrown manually, do not handle it again.
 				throw e;
 			} else {
 				return await this._responseErrorHandleFunc({
-					$url: url, $factor: data, $request: request, $errorCode: HttpUnknownErrorCode
+					$url: url, $factor: data, $request: request,
+					$errorCode: HttpUnknownErrorCode, $error: e
 				}, $helpers, $helpers);
 			}
 		}

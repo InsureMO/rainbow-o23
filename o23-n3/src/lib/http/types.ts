@@ -18,12 +18,13 @@ export type HttpErrorCode =
 	| HttpServerErrorCode
 	| HttpCustomizedErrorCode;
 
-export interface HttpErrorHandleOptions<In, InFragment> {
+export interface HttpErrorHandleOptions<In, InFragment, E extends Error = Error> {
 	$errorCode: HttpErrorCode;
+	$error?: E;
 	$url: string;
 	$response?: Response;
 	$factor: InFragment;
 	$request: PipelineStepData<In>;
 }
 
-export type HttpHandleError<In, InFragment, OutFragment> = ($options: HttpErrorHandleOptions<In, InFragment>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> | never;
+export type HttpHandleError<In, InFragment, OutFragment, E extends Error = Error> = ($options: HttpErrorHandleOptions<In, InFragment, E>, $helpers: PipelineStepHelpers, $: PipelineStepHelpers) => Promise<OutFragment> | never;
