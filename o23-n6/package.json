@@ -29,7 +29,7 @@
 		"nanoid": "3.3.8"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.9",
+		"@babel/core": "^7.29.6",
 		"@babel/preset-env": "^7.23.9",
 		"@babel/preset-typescript": "^7.23.3",
 		"@rainbow-o23/n2": "1.0.67",

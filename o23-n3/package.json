@@ -27,7 +27,7 @@
 		"typescript": "5.5.4"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.9",
+		"@babel/core": "^7.29.6",
 		"@babel/preset-env": "^7.23.9",
 		"@babel/preset-typescript": "^7.23.3",
 		"@oneidentity/zstd-js": "^1.0.3",
